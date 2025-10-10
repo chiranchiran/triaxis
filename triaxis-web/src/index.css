@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  height: auto;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  display: block;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+a {
+  text-decoration: none;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}

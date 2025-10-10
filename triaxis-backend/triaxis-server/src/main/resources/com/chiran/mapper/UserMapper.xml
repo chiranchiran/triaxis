@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserMapper">
+    <select id="selectUserStats" resultType="com.chiran.vo.UserStatsVO">
+        SELECT points_balance as pointsBalance,
+               resource_count as resourceCount,
+               download_count as downloadCount,
+               like_count     as likeCount
+        FROM users
+        WHERE id = #{userId}
+          AND deleted = 0
+    </select>
+
+    <update id="updateUserPoints">
+        UPDATE users
+        SET points_balance = points_balance + #{points},
+        total_points_earned = total_points_earned + CASE WHEN #{points} > 0 THEN #{points} ELSE 0 END,
+        total_points_spent = total_points_spent + CASE WHEN #{points} &gt; 0 THEN ABS(#{points}) ELSE 0 END,
+        updated_at = NOW()
+        WHERE id = #{userId} AND deleted = 0
+    </update>
+
+</mapper>

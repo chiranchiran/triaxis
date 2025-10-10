@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserFavoriteMapper">
+
+    <select id="selectUserFolders" resultType="com.chiran.vo.UserFavoriteFolderVO">
+        SELECT
+            id, name, description, favorite_type as favoriteType,
+            is_public as isPublic, item_count as itemCount, created_at as createdAt
+        FROM user_favorites
+        WHERE user_id = #{userId}
+        ORDER BY sort_order, created_at
+    </select>
+
+    <update id="updateFolderItemCount">
+        UPDATE user_favorites
+        SET item_count = (
+            SELECT COUNT(*) FROM favorite_items WHERE favorite_id = #{folderId}
+        ),
+            updated_at = NOW()
+        WHERE id = #{folderId}
+    </update>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.FavoriteItemMapper">
+
+    <select id="selectFavoriteResources" resultType="com.chiran.vo.ResourceVO">
+        SELECT r.*
+        FROM favorite_items fi
+                 INNER JOIN resources r ON fi.item_id = r.id
+                 INNER JOIN user_favorites uf ON fi.favorite_id = uf.id
+        WHERE uf.user_id = #{userId}
+          AND fi.item_type = #{favoriteType}
+          AND r.deleted = 0
+        ORDER BY fi.created_at DESC
+    </select>
+
+    <select id="selectFavoriteCourses" resultType="com.chiran.vo.CourseVO">
+        SELECT c.*
+        FROM favorite_items fi
+                 INNER JOIN courses c ON fi.item_id = c.id
+                 INNER JOIN user_favorites uf ON fi.favorite_id = uf.id
+        WHERE uf.user_id = #{userId}
+          AND fi.item_type = #{favoriteType}
+          AND c.deleted = 0
+        ORDER BY fi.created_at DESC
+    </select>
+
+    <select id="checkFavoriteExists" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM favorite_items fi
+                 INNER JOIN user_favorites uf ON fi.favorite_id = uf.id
+        WHERE uf.user_id = #{userId}
+          AND fi.item_type = #{itemType}
+          AND fi.item_id = #{itemId}
+    </select>
+</mapper>

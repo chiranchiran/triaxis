@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.ResourceTypesMapper">
+    <select id="getSubjectLists" resultType="com.chiran.vo.CategoryVO">
+        select id,name
+        from professional_fields
+        where is_active=true
+        order by sort_order
+    </select>
+    <select id="getToolLists" resultType="com.chiran.vo.CategoryVO">
+        select id,name
+        from software_tools
+        where is_active=true
+        order by sort_order
+    </select>
+    <select id="getRightLists" resultType="com.chiran.vo.CategoryVO">
+        select id,name
+        from resource_rights
+        where is_active=true
+        order by sort_order
+    </select>
+    <select id="getCategoryFirstLists" resultType="com.chiran.vo.CategoryVO">
+        select id, name
+        from resource_categories
+        where is_active = true
+          and level = 1
+        order by sort_order
+    </select>
+    <select id="getCategorySecondLists" resultType="com.chiran.vo.CategoryVO">
+        select id, name
+        from resource_categories
+        where is_active = true
+          and level = 2
+          and parent_id = #{parentId}
+        and specialized_field In (#{subjectId},NULL)
+        order by sort_order
+    </select>
+</mapper>

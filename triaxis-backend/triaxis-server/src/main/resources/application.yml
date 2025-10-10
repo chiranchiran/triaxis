@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: triaxis-server
+  # MySQL配置
+  datasource:
+    url: jdbc:mysql://192.168.218.128:3306/triaxis
+    username: root
+    password: 654321
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10  # 最大连接数
+      minimum-idle: 5        # 最小空闲连接
+      idle-timeout: 300000   # 空闲连接超时时间（5分钟）
+      connection-timeout: 20000  # 连接超时时间（20秒）
+  # Redis配置
+  data:
+    redis:
+      host: 192.168.218.128
+      port: 6379
+      password: 654321
+      database: 0
+      timeout: 2000
+      lettuce:
+        pool:
+          max-active: 8    # 最大连接数
+          max-idle: 8      # 最大空闲连接
+          min-idle: 2      # 最小空闲连接
+          max-wait: -1     # 最大等待时间（-1表示无限制）
+
+# 日志配置
+logging:
+  level:
+    root: INFO  # 全局级别
+    com.chiran: DEBUG
+
+    org.springframework.jdbc.support.JdbcTransactionManager: DEBUG # 开启事务日志
+    #    org.springframework.jdbc: DEBUG        # 开启Mysql详细日志
+    org.springframework.data.redis: DEBUG # 开启redis日志
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+
+
+# MyBatis 配置
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 指定日志输出控制台
+    map-underscore-to-camel-case: true                    # 开启驼峰命名映射
+
+# MyBatis-plus 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 指定日志输出控制台
+    map-underscore-to-camel-case: true                    # 开启驼峰命名映射
+  global-config:
+    banner: false                                          # 关闭图标
+    db-config:
+      id-type: assign_id
+      logic-delete-field: deleted
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+
+#jwt配置
+jwt:
+  issuer: "triaxis-server"
+  access-token:
+    header: "Authorization"
+    expiration: 900000  # 过期时间15分钟
+    privatePath: "E:/study/my_works/triaxis/config/secret/access-private.key"
+    publicPath: "E:/study/my_works/triaxis/config/secret/access-public.key"
+  refresh-token:
+    header: "Refresh-Token"
+    expiration: 604800000  # 过期时间7天
+    secretPath: "E:/study/my_works/triaxis/config/secret/refresh-secret.key"
+  captcha:
+    expiration: 300000  # 过期时间5分钟
+    send-interval: 60000 # 发送间隔1分钟
+  prefix: "Bearer"
+  redis:
+    enable: true
+    access: "access_token:"
+    refresh: "refresh_token:"
+    captcha:
+      code: "captcha:code:"
+      interval: "captcha:interval:"
+
+
+

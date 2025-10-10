@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.ResourceMapper">
+    <resultMap id="ResourceVOMap" type="com.chiran.vo.ResourceVO">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="file_path" property="filePath"/>
+        <result column="file_size" property="fileSize"/>
+        <result column="thumbnail_path" property="thumbnailPath"/>
+        <result column="file_extension" property="fileExtension"/>
+        <result column="right_id" property="rightId"/>
+        <result column="field_id" property="fieldId"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="price_points" property="pricePoints"/>
+        <result column="download_count" property="downloadCount"/>
+        <result column="view_count" property="viewCount"/>
+        <result column="average_rating" property="averageRating"/>
+        <result column="uploader_id" property="uploaderId"/>
+        <result column="status" property="status"/>
+        <result column="is_featured" property="isFeatured"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <collection property="toolIds" ofType="java.lang.Integer">
+            <result column="tool_ids"/>
+        </collection>
+    </resultMap>
+
+    <select id="searchResources" resultMap="ResourceVOMap">
+        SELECT
+        r.*,
+        GROUP_CONCAT(rs.software_id) as tool_ids
+        FROM resources r
+        LEFT JOIN resource_software rs ON r.id = rs.resource_id
+        WHERE r.deleted = 0
+        AND r.status = 3  <!-- 只查询已发布的资源 -->
+
+        <!-- 单个条件查询 -->
+        <if test="dto.rightId != null">
+            AND r.right_id = #{dto.rightId}
+        </if>
+        <if test="dto.subjectId != null">
+            AND r.field_id = #{dto.subjectId}
+        </if>
+
+        <!-- 多类型查询 - toolId -->
+        <if test="dto.toolId != null and dto.toolId.size() > 0">
+            AND r.id IN (
+            SELECT DISTINCT resource_id
+            FROM resource_software
+            WHERE software_id IN
+            <foreach collection="dto.toolId" item="tool" open="(" close=")" separator=",">
+                #{tool}
+            </foreach>
+            )
+        </if>
+
+        <!-- 多类型查询 - categoryId -->
+        <if test="dto.categoryId != null and dto.categoryId.size() > 0">
+            AND r.category_id IN
+            <foreach collection="dto.categoryId" item="category" open="(" close=")" separator=",">
+                #{category}
+            </foreach>
+        </if>
+
+        <!-- 模糊搜索 -->
+        <if test="dto.search != null and dto.search != ''">
+            AND (r.title LIKE CONCAT('%', #{dto.search}, '%')
+            OR r.description LIKE CONCAT('%', #{dto.search}, '%'))
+        </if>
+
+        GROUP BY r.id
+
+        <!-- 排序 -->
+        <choose>
+            <when test="dto.orderBy == 0">
+                ORDER BY r.created_at DESC
+            </when>
+            <when test="dto.orderBy == 1">
+                ORDER BY (SELECT COUNT(*) FROM favorite_items WHERE item_id = r.id) DESC
+            </when>
+            <when test="dto.orderBy == 2">
+                ORDER BY r.download_count DESC
+            </when>
+            <when test="dto.orderBy == 3">
+                ORDER BY (SELECT COUNT(*) FROM favorite_items WHERE item_id = r.id) DESC
+            </when>
+            <when test="dto.orderBy == 4">
+                <!-- 综合排序：可以结合多个因素，这里简单示例 -->
+                ORDER BY (r.download_count * 0.3 + r.view_count * 0.2 + r.average_rating * 50) DESC
+            </when>
+            <otherwise>
+                ORDER BY r.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

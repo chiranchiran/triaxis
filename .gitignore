@@ -1,0 +1,121 @@
+# =============================================
+# triaxis-web 前端项目忽略规则
+# =============================================
+
+# 日志文件
+triaxis-web/logs
+triaxis-web/*.log
+triaxis-web/npm-debug.log*
+triaxis-web/yarn-debug.log*
+triaxis-web/yarn-error.log*
+triaxis-web/pnpm-debug.log*
+triaxis-web/lerna-debug.log*
+
+# 依赖与构建产物
+triaxis-web/node_modules
+triaxis-web/dist
+triaxis-web/dist-ssr
+triaxis-web/*.local
+
+# Editor 目录和文件
+triaxis-web/.vscode/*
+!triaxis-web/.vscode/extensions.json
+triaxis-web/.idea
+triaxis-web/.DS_Store
+triaxis-web/*.suo
+triaxis-web/*.ntvs*
+triaxis-web/*.njsproj
+triaxis-web/*.sln
+triaxis-web/*.sw?
+
+# =============================================
+# triaxis-backend 父工程忽略规则
+# =============================================
+
+# 父工程构建输出
+target/
+
+# IDE 配置
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+
+# 其他构建工具
+build/
+out/
+bin/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =============================================
+# 后端子模块通用忽略规则 (triaxis-common, triaxis-pojo, triaxis-server)
+# =============================================
+
+# 所有子模块的构建输出
+triaxis-*/target/
+triaxis-*/build/
+
+# 子模块的 IDE 配置
+triaxis-*/.idea/
+triaxis-*/*.iws
+triaxis-*/*.iml
+triaxis-*/*.ipr
+triaxis-*/.vscode/
+
+# 子模块的其他构建文件
+triaxis-*/out/
+triaxis-*/bin/
+
+# 子模块的 IDE 特定文件
+triaxis-*/.apt_generated
+triaxis-*/.classpath
+triaxis-*/.factorypath
+triaxis-*/.project
+triaxis-*/.settings
+triaxis-*/.springBeans
+triaxis-*/.sts4-cache
+
+# NetBeans 相关
+triaxis-*/nbproject/private/
+triaxis-*/nbbuild/
+triaxis-*/dist/
+triaxis-*/nbdist/
+triaxis-*/.nb-gradle/
+
+# =============================================
+# 必须保留的文件（显式声明）
+# =============================================
+
+# 父工程保留 Maven Wrapper 和帮助文件
+!mvnw
+!mvnw.cmd
+!.mvn/
+!HELP.md
+!README.md
+
+# 保留所有 pom.xml 文件
+!**/pom.xml
+
+# 保留所有源码目录
+!**/src/main/java/
+!**/src/main/resources/
+!**/src/test/java/
+!**/src/test/resources/
+
+# 前端需要保留的重要文件
+!triaxis-web/package.json
+!triaxis-web/package-lock.json
+!triaxis-web/yarn.lock
+!triaxis-web/*.config.js
+!triaxis-web/*.config.ts
+!triaxis-web/vite.config.*
+!triaxis-web/vue.config.*
+!triaxis-web/tsconfig.json
+!triaxis-web/index.html
+!triaxis-web/public/
+!triaxis-web/src/

@@ -1,0 +1,12 @@
+:where(.css-dev-only-do-not-override-1nfvks7).ant-dropdown .ant-dropdown-menu,
+:where(.css-dev-only-do-not-override-1nfvks7).ant-dropdown-menu-submenu .ant-dropdown-menu {
+  padding: 10px;
+  list-style-type: none;
+  background-color: #ffffff !important;
+  background-clip: padding-box;
+  border-radius: 15px;
+  font-size: medium !important;
+  color: #787878 !important;
+  outline: none;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
