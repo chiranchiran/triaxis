@@ -21,6 +21,7 @@ import {
   FileOutlined
 } from '@ant-design/icons';
 import './index.less'
+import { useNavigate } from 'react-router-dom';
 
 const { Search } = Input;
 
@@ -336,7 +337,7 @@ const Resource = () => {
       </button>
     );
   };
-
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 顶部搜索区域 - 渐变到白色 */}
@@ -368,7 +369,7 @@ const Resource = () => {
       </div>
 
       {/* 筛选条件区域 */}
-      <div className="check max-w-7xl mx-auto px-4 py-8">
+      <div className="check max-w-7xl mx-auto">
         <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
           {/* 第一行：资源权限和专业领域 */}
           <div className="mb-6">
@@ -489,6 +490,8 @@ const Resource = () => {
                 {resources.map(resource => (
                   <Col key={resource.id} xs={24} sm={12} lg={8} xl={6}>
                     <Card
+                      onClick={() => navigate(`/resources/${resource.id}`)}
+
                       className="resource-card h-full border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
                       styles={{
                         body: {

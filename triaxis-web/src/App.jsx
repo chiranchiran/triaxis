@@ -10,6 +10,7 @@ import SiteFooter from './components/SiteFooter/index.jsx'
 import { useTheme } from './hooks/useTheme.js'
 import { useLocation } from 'react-router-dom'
 import { logger } from './utils/logger.js'
+import { ReactFlowProvider } from 'reactflow'
 
 function App() {
   const { mutate } = useAutoLogin()
@@ -52,7 +53,9 @@ function App() {
       <div className="min-h-screen bg-main text-main">
         <Header onThemeToggle={toggleTheme} currentTheme={currentTheme} />
         <main className="relative pt-20">
-          <Element />
+          <ReactFlowProvider>
+            <Element />
+          </ReactFlowProvider>
           <Sidebar />
         </main>
         <SiteFooter />

@@ -19,6 +19,7 @@ import {
   EyeOutlined,
   ClockCircleOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const { Search } = Input;
 
@@ -138,6 +139,7 @@ const Course = () => {
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
+  const navigate = useNavigate()
 
   // 当专业领域变化时，更新课程分类
   useEffect(() => {
@@ -384,6 +386,7 @@ const Course = () => {
                 {courses.map(course => (
                   <Col key={course.id} xs={24} sm={12} lg={8} xl={6}>
                     <Card
+                      onClick={() => navigate(`/courses/${course.id}`)}
                       className="course-card h-full border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
                       styles={{
                         body: {

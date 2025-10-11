@@ -13,6 +13,12 @@ import Community from "../pages/Community/index.jsx"
 import CommunityDetail from "../pages/CommunityDetail/index.jsx"
 import Register from "../pages/Register/index.jsx"
 import UserCenter from "../pages/UserCenter/index.jsx"
+import FeedbackDisplay from "../pages/Feedback/index.jsx"
+import ResourceDetail from "../pages/ResourceDetail/index.jsx"
+import CourseDetail from "../pages/CourseDetail/index.jsx"
+import UploadResource from "../pages/Upload/index.jsx"
+import CreatePost from "../pages/CreatPost/index.jsx"
+import PostDetail from "../pages/PostDetail/index.jsx"
 
 //路由守卫组件
 function Protect({ children }) {
@@ -46,8 +52,16 @@ function Element() {
       element: <Resource />
     },
     {
+      path: '/resources/:id',
+      element: <ResourceDetail />
+    },
+    {
       path: '/courses',
       element: <Course />
+    },
+    {
+      path: '/courses/:id',
+      element: <CourseDetail />
     },
     {
       path: '/about',
@@ -56,6 +70,10 @@ function Element() {
     {
       path: '/login',
       element: <Login />
+    },
+    {
+      path: '/upload',
+      element: <UploadResource />
     },
     {
       path: '/register',
@@ -74,8 +92,20 @@ function Element() {
       element: <CommunityDetail />
     },
     {
+      path: '/community/posts/:id',
+      element: <PostDetail />
+    },
+    {
+      path: '/community/create',
+      element: <CreatePost />
+    },
+    {
       path: '/user/userinfo',
       element: <UserCenter />
+    },
+    {
+      path: '/user/feedback',
+      element: <FeedbackDisplay />
     },
     // {
     //   element: <Protect><Main /></Protect>,

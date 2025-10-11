@@ -185,6 +185,7 @@ const Header = ({ onThemeToggle, currentTheme }) => {
           {/* 右侧操作区 */}
           <div className="flex items-center space-x-3">
             <Button
+              onClick={() => navigate('/upload')}
               type="text"
               icon={<UploadOutlined />}
               className="bg-primary text-white border-primary transition-colors"

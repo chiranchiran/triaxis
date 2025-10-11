@@ -2,8 +2,10 @@
 import React from 'react';
 import { Tooltip, message } from 'antd';
 import { VerticalAlignTopOutlined, VerticalAlignBottomOutlined, CustomerServiceOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = () => {
+  const navigate = useNavigate()
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -13,7 +15,7 @@ const Sidebar = () => {
   };
 
   const handleFeedback = () => {
-    message.info('感谢您的反馈！我们将尽快处理。');
+    navigate('/user/feedback')
   };
 
   return (

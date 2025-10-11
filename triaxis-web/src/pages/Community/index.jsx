@@ -379,6 +379,7 @@ const Community = () => {
             <Button
               type="primary"
               size="large"
+              onClick={() => navigate('/community/create')}
               className="bg-blue-500 hover:bg-blue-600 border-blue-500 h-14 px-6 mt-1 ml-8"
               icon={<PlusOutlined />}
             >
@@ -503,6 +504,7 @@ const Community = () => {
                       {filteredBountyPosts.slice(0, 4).map(post => (
                         <Card
                           key={post.id}
+                          onClick={() => navigate(`/community/posts/${post.id}`)}
                           className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
                           styles={{
                             body: {
@@ -525,12 +527,13 @@ const Community = () => {
                             </div>
 
                             {/* 标题 */}
-                            <h3 style={{ fontWeight: 550 }} className="text-sm font-medium text-gray-900 line-clamp-1">
+
+                            <h3 style={{ fontWeight: 550, fontSize: 16 }} className="text-md font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
                               {post.title}
                             </h3>
 
                             {/* 问题描述 */}
-                            <p className="text-gray-600 text-xs line-clamp-2 leading-4">
+                            <p className="text-gray-600 text-sm line-clamp-2 leading-4">
                               {post.description}
                             </p>
 
@@ -605,12 +608,13 @@ const Community = () => {
                       {searchResults.normalPosts.slice(0, 3).map(post => (
                         <div
                           key={post.id}
+                          onClick={() => navigate(`/community/posts/${post.id}`)}
                           className="p-4 bg-gray-50 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200 border border-gray-100"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center space-x-2 mb-2">
-                                <Tag className={`text-xs !bg-black !text-white ${getTopicColorClass(post.topicColor)}`}>
+                                <Tag className={`text-xs !bg-black !text-white !border-black`}>
                                   {post.topicName}
                                 </Tag>
                                 {post.tags.includes('精华') && (
@@ -618,9 +622,9 @@ const Community = () => {
                                 )}
                               </div>
 
-                              <h3 className="text-lg font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
+                              <h4 style={{ fontWeight: 550 }} className="text-md font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
                                 {post.title}
-                              </h3>
+                              </h4>
 
                               <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                                 {post.content}
@@ -758,12 +762,14 @@ const Community = () => {
                 {posts.slice(0, 5).map(post => (
                   <div
                     key={post.id}
+
+                    onClick={() => navigate(`/community/posts/${post.id}`)}
                     className="p-6 border border-gray-100 rounded-lg hover:shadow-md transition-all duration-200 hover:border-gray-200"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-2">
-                          <Tag className={`text-xs !bg-black !text-white ${getTopicColorClass(post.topicColor)}`}>
+                          <Tag className={`text-xs !bg-black !text-white !border-black ${getTopicColorClass(post.topicColor)}`}>
                             {post.topicName}
                           </Tag>
                           {post.tags.includes('精华') && (

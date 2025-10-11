@@ -3,12 +3,13 @@ import React from 'react';
 import { Button } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import UrbanPlanningKnowledgeGraph from './KnowledgeGraph';
 
 const HeroSection = () => {
   const navigate = useNavigate();
   return (
-    <section className="min-h-[50rem] flex items-center bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-900 dark:to-blue-900">
-      <div className="container max-w-10xl mx-auto w-full h-96  ">
+    <section className="min-h-[41rem] flex items-center bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-900 dark:to-blue-900">
+      <div className="container max-w-7xl mx-auto w-full h-96">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-24 items-center">
           {/* 左侧文字内容 */}
           <div className="space-y-8">
@@ -43,18 +44,14 @@ const HeroSection = () => {
           {/* 右侧知识图谱展示 */}
           <div className="relative">
             <div className="max-w-[80rem] max-h-[45rem] aspect-video bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-              <div className="h-[41rem] bg-gradient-to-br from-blue-100 to-green-100 dark:from-blue-900 dark:to-green-900 rounded-xl flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="text-2xl font-bold text-gray-800 dark:text-white mb-3">
-                    知识图谱
-                  </div>
-                  <div className="text-gray-600 dark:text-gray-300">
-                    可视化交互探索
-                  </div>
+              <div className="h-[33rem] bg-gray-50 dark:from-blue-900 dark:to-green-900 rounded-xl flex items-center justify-center">
+                <div className="w-full h-full">
+                  <UrbanPlanningKnowledgeGraph />
                 </div>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
