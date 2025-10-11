@@ -1,11 +1,10 @@
 import { Descriptions } from "antd"
 import { loginFailure, loginSuccess, logout } from "../../store/slices/authSlice"
 
-const onSuccess = (data, dispatch, navigate) => {
+const onLoginSuccess = (data, dispatch, navigate) => {
   dispatch(loginSuccess(data))
-  navigate('/')
 }
-const onError = (error, dispatch) => {
+const onLoginError = (error, dispatch) => {
   dispatch(loginFailure())
 }
 const onAutoSuccess = (data, dispatch, navigate) => {
@@ -13,7 +12,6 @@ const onAutoSuccess = (data, dispatch, navigate) => {
 }
 const onAutoError = (error, dispatch, navigate) => {
   dispatch(logout())
-  navigate('/login')
 }
 const onCaptcha = (data, dispatch, navigate) => {
   config.captcha.success.description = data
@@ -21,19 +19,31 @@ const onCaptcha = (data, dispatch, navigate) => {
 const onRegister = (data, dispatch, navigate) => {
   navigate('/login')
 }
+const onLogout = (error, dispatch, navigate) => {
+  dispatch(logout())
+}
 const config = {
   login: {
     success: {
       showMessage: true,
       message: "登录成功",
       description: "欢迎使用Triaxis~",
-      handler: onSuccess,
+      handler: onLoginSuccess,
 
     },
     error: {
       showMessage: false,
       message: "登录失败！",
-      handler: onError
+      handler: onLoginError
+    }
+  }, logout: {
+    success: {
+      showMessage: false,
+      handler: onLogout
+    },
+    error: {
+      showMessage: false,
+      handler: onLogout
     }
   },
   auto: {

@@ -1,6 +1,6 @@
 
 import Element from './routes'
-import { ConfigProvider, theme as antdTheme } from 'antd'
+import { ConfigProvider, theme as antdTheme, theme } from 'antd'
 import React, { useCallback, useEffect } from 'react'
 import Header from './components/Header/index.jsx'
 import { getUserData, removeAllData } from './utils/localStorage'
@@ -13,6 +13,7 @@ import { logger } from './utils/logger.js'
 import { ReactFlowProvider } from 'reactflow'
 
 function App() {
+  const { defaultAlgorithm, darkAlgorithm, compactAlgorithm } = theme;
   const { mutate } = useAutoLogin()
   const { currentTheme, toggleTheme } = useTheme();
   const location = useLocation();
@@ -35,12 +36,14 @@ function App() {
 
   // 只在组件挂载时检查自动登录
   useEffect(() => {
+
     checkAutoLogin()
   }, [checkAutoLogin])
 
   return (
     <ConfigProvider
       theme={{
+        algorithm: [compactAlgorithm],
         token: {
           colorPrimary: 'var(--primary)',
           colorText: 'var(--text)',
@@ -50,9 +53,9 @@ function App() {
         },
       }}
     >
-      <div className="min-h-screen bg-main text-main">
+      <div className="min-h-screen bg-main">
         <Header onThemeToggle={toggleTheme} currentTheme={currentTheme} />
-        <main className="relative pt-20">
+        <main className="pt-20">
           <ReactFlowProvider>
             <Element />
           </ReactFlowProvider>

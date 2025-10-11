@@ -1,7 +1,7 @@
 import service from "../../utils/api/service"
 import { getLoginData } from "../../utils/localStorage"
 
-//@chiran注册
+//账户注册
 export const registerByCount = (data) => {
   return service.post('/register/count', data)
 }
@@ -9,7 +9,6 @@ export const registerByCount = (data) => {
 export const registerByMobile = (data) => {
   return service.post('/register/phone', data)
 }
-
 //不同登录方式的接口
 //账号登录
 export const loginCount = (data) => {
@@ -21,19 +20,17 @@ export const loginMobile = (data) => {
 }
 //自动登录
 export const validate = () => {
-  const { refreshToken } = getLoginData()
-  return service.get('/login/validate',
-    {
-      headers: {
-        'Refresh-Token': refreshToken
-      }
-    })
+  return refreshLogin('/login/validate')
 }
 
 //refreshToken获得accessToken
 export const refresh = () => {
+  return refreshLogin('/login/refresh')
+}
+
+const refreshLogin = (path) => {
   const { refreshToken } = getLoginData()
-  return service.get('/login/refresh',
+  return service.get(path,
     {
       headers: {
         'Refresh-Token': refreshToken

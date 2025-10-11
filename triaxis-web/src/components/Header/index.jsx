@@ -1,33 +1,23 @@
 import React, { useState } from 'react';
 import { Input, Button, Tooltip, Dropdown, Avatar, Menu, Divider, Badge } from 'antd';
 import {
-  SearchOutlined,
-  CrownOutlined,
-  GlobalOutlined,
-  UserOutlined,
-  MoonOutlined,
-  SunOutlined,
-  SettingOutlined,
-  BellOutlined,
-  UploadOutlined,
-  FolderOutlined,
-  BookOutlined,
-  StarOutlined,
-  LogoutOutlined
+  SearchOutlined, CrownOutlined, GlobalOutlined, UserOutlined, MoonOutlined, SunOutlined, SettingOutlined, BellOutlined, UploadOutlined, FolderOutlined, BookOutlined, StarOutlined, LogoutOutlined
 } from '@ant-design/icons';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import './index.less'
-
-const { Search } = Input;
+import { useLogout } from '../../hooks/api/auth';
+import Logo from '../Logo';
 
 const Header = ({ onThemeToggle, currentTheme }) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { Search } = Input;
+  const navigate = useNavigate()
+  const { mutate: doLogout } = useLogout()
   const { username, isAuthenticated, role } = useSelector(state => state.auth);
 
   const unreadMessageCount = 3;
 
+  //导航栏选项，普通用户role为0，管理员role为1，会显示管理的选项
   const navs = role !== 0 ? [
     { name: '首页', path: '/' },
     { name: '资源', path: '/resources' },
@@ -41,49 +31,47 @@ const Header = ({ onThemeToggle, currentTheme }) => {
     { name: '社区', path: '/community' },
     { name: '关于', path: '/about' },
     { name: '管理', path: '/admin' }
-  ];
+  ]
 
-  // 处理下拉菜单点击事件
+  // 处理下拉菜单点击事件，转跳不同的页面
   const handleMenuClick = ({ key }) => {
     switch (key) {
-      case 'profile':
-        navigate('/user/userinfo');
+      case 'userinfo':
+        navigate('/user/userinfo')
         break;
       case 'setting':
-        navigate('/user/setting');
+        navigate('/user/setting')
         break;
       case 'message':
-        navigate('/user/message');
+        navigate('/user/message')
         break;
       case 'upload':
-        navigate('/user/upload');
+        navigate('/user/upload')
         break;
       case 'resource':
-        navigate('/user/resources');
+        navigate('/user/resources')
         break;
       case 'course':
-        navigate('/user/courses');
+        navigate('/user/courses')
         break;
       case 'vip':
-        navigate('/user/vip');
+        navigate('/user/vip')
         break;
       case 'points':
-        navigate('/user/points');
+        navigate('/user/points')
         break;
       case 'logout':
-        // 这里需要调用你的退出登录 action
-        // dispatch(logout());
-        navigate('/login');
+        doLogout()
         break;
       default:
         break;
     }
-  };
+  }
 
-  // 定义下拉菜单项
+  // 用户下拉菜单项
   const menuItems = [
     {
-      key: 'profile',
+      key: 'userinfo',
       icon: <UserOutlined />,
       label: '个人中心',
     },
@@ -143,28 +131,28 @@ const Header = ({ onThemeToggle, currentTheme }) => {
     },
   ];
 
+
+
+
   return (
-    <header className="header fixed top-0 w-full z-50 bg-white border-b border-main shadow-card">
+    <header className="header fixed top-0 w-full z-99 bg-card border-b border-main shadow-card">
       <div className="max-w-10xl w-full px-6">
         <div className="flex overflow-y-hidden items-center justify-between h-20">
           {/* Logo 和导航 */}
-          <div className="flex items-center md:space-x-4 lg:spaca-x-20">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                <img src="/logo.png" alt="Triaxis" className="w-10 h-10" />
-              </div>
-              <span className="text-2xl font-bold text-main">Triaxis</span>
-            </div>
-            <nav className="md:flex">
+          <div className="flex items-center md:space-x-6 lg:spaca-x-20">
+            <Logo size="default" />
+            <nav className="nav-top md:flex">
               {navs.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
-                  className={({ isActive }) =>
-                    isActive
-                      ? 'bg-black-light text-white py-7 px-5 hover:bg-gray hover:text-white text-title'
-                      : 'text-title font-medium py-7 px-5 transition-all duration-300 hover:!bg-gray-200 hover:!text-black text-tittle hover:!text-tittle'
-                  }
+                  className={({ isActive }) => [
+                    "py-7 px-5 transition-all duration-300 text-title",
+                    // 活跃状态样式
+                    isActive ? "bg-dark text-light " :
+                      // 非活跃状态样式
+                      "text-main"
+                  ].join(' ')}
                 >
                   {item.name}
                 </NavLink>
