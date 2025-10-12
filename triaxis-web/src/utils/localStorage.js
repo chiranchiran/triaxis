@@ -2,14 +2,19 @@
  * 本地存储
  * accessToken
  * refreshToken
- * id
- * uername
- * role
- * rememberMe
- * autoLoginExpire
- * isAuthenticated
- * avatar
+ * usrinfo
+    * id
+    * uername
+    * role
+    * rememberMe
+    * autoLoginExpire
+    * isAuthenticated
+    * avatar
+ * preference
+    * language
+    * theme
 */
+//自动登录默认30天
 export const defaultAutoLogin = 30 * 24 * 60 * 60 * 1000
 //设置、删除、获取登录数据
 export const setLoginData = (accessToken, refreshToken) => {
@@ -83,4 +88,22 @@ export const removeAllData = () => {
 }
 export const getAllData = () => {
   return { ...getLoginData(), ...getUserData() } || {}
+}
+
+//设置、查询、删除用户偏好数据
+export const setPreferenceData = (data) => {
+  const preference = getPreferenceData()
+  if (data && 'language' in data) {
+    preference.language = data.language;
+  }
+  if (data && 'theme' in data) {
+    preference.theme = data.theme;
+  }
+  localStorage.setItem('preference', JSON.stringify(preference))
+}
+export const removePreferenceData = () => {
+  localStorage.removeItem("preference")
+}
+export const getPreferenceData = () => {
+  return JSON.parse(localStorage.getItem("preference")) || { language: 'Chinese', theme: 'light' }
 }

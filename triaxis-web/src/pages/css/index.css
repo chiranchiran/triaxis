@@ -1,7 +1,18 @@
-:where(.css-dev-only-do-not-override-1nfvks7).ant-tag,
-:where(.css-dev-only-do-not-override-1nfvks7).ant-tag a,
-:where(.css-dev-only-do-not-override-1nfvks7).ant-tag a:hover {
-  color: #292929;
-  background: #d6d6d4;
-  border-color: #51504f;
+.container .left {
+  margin-bottom: 0;
+}
+.container .left .text-button {
+  width: 3rem !important;
+}
+.news {
+  position: relative;
+}
+.news .news-more {
+  position: absolute;
+  right: 1rem;
+  top: 2rem;
+}
+.react-flow__edge-textbg {
+  fill: rgba(255, 255, 255, 0);
+  border-radius: 50% !important;
 }

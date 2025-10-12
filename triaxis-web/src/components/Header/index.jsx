@@ -8,10 +8,13 @@ import { useSelector } from 'react-redux';
 import './index.less'
 import { useLogout } from '../../hooks/api/auth';
 import Logo from '../Logo';
+import { usePrefernce } from '../../hooks/usePreference';
+import MyButton from '../MyButton';
 
-const Header = ({ onThemeToggle, currentTheme }) => {
+const Header = () => {
   const { Search } = Input;
   const navigate = useNavigate()
+  const { isDark, isEnglish, changeLanguage, changeTheme } = usePrefernce()
   const { mutate: doLogout } = useLogout()
   const { username, isAuthenticated, role } = useSelector(state => state.auth);
 
@@ -132,15 +135,13 @@ const Header = ({ onThemeToggle, currentTheme }) => {
   ];
 
 
-
-
   return (
     <header className="header fixed top-0 w-full z-99 bg-card border-b border-main shadow-card">
       <div className="max-w-10xl w-full px-6">
         <div className="flex overflow-y-hidden items-center justify-between h-20">
           {/* Logo 和导航 */}
           <div className="flex items-center md:space-x-6 lg:spaca-x-20">
-            <Logo size="default" />
+            <Logo size="default" isNav={true} />
             <nav className="nav-top md:flex">
               {navs.map((item) => (
                 <NavLink
@@ -172,56 +173,49 @@ const Header = ({ onThemeToggle, currentTheme }) => {
 
           {/* 右侧操作区 */}
           <div className="flex items-center space-x-3">
-            <Button
-              onClick={() => navigate('/upload')}
-              type="text"
+            <MyButton
+              type="blue"
               icon={<UploadOutlined />}
-              className="bg-primary text-white border-primary transition-colors"
-            >
-              上传
-            </Button>
-
-            <Button
-              type="text"
+              styles="text-main"
+              onClick={() => navigate("/upload")}
+            >上传</MyButton>
+            <MyButton
+              type="orange"
               icon={<CrownOutlined />}
-              className="bg-orange text-main border-orange transition-colors"
-            >
-              会员
-            </Button>
+              styles="text-main"
+              onClick={() => navigate('/user/vip')}
+            >    会员</MyButton>
 
-            <Tooltip title="语言切换">
+            <Tooltip title={isEnglish ? '切换中文' : '切换英文'}>
               <Button
                 type="text"
+                size="large"
+                onClick={changeLanguage}
                 icon={<GlobalOutlined />}
-                className="text-muted hover:text-primary transition-colors"
+                className="change text-muted transition-colors"
               />
             </Tooltip>
 
-            <Tooltip title={currentTheme === 'light' ? '暗色模式' : '亮色模式'}>
+            <Tooltip title={isDark ? '切换亮色模式' : '切换暗色模式'}>
               <Button
                 type="text"
-                icon={currentTheme === 'light' ? <MoonOutlined /> : <SunOutlined />}
-                onClick={onThemeToggle}
-                className="text-muted hover:text-primary transition-colors"
+                size="large"
+                icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+                onClick={changeTheme}
+                className="text-muted transition-colors"
               />
             </Tooltip>
 
             {!isAuthenticated ? (
               <div className="flex space-x-3">
-                <Button
-                  type="text"
-                  className="bg-gray border-main text-main transition-colors"
+                <MyButton
+                  type="gray"
                   onClick={() => navigate("/register")}
-                >
-                  注册
-                </Button>
-                <Button
-                  type="text"
-                  className="bg-gray border-main text-main transition-colors"
+                >注册</MyButton>
+                <MyButton
+                  type="gray"
                   onClick={() => navigate("/login")}
-                >
-                  登录
-                </Button>
+                >登录</MyButton>
               </div>
             ) : (
               <Dropdown

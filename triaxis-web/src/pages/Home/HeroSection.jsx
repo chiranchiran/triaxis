@@ -4,54 +4,49 @@ import { Button } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import UrbanPlanningKnowledgeGraph from './KnowledgeGraph';
+import Logo from '../../components/Logo';
+import MyButton from '../../components/MyButton';
 
 const HeroSection = () => {
   const navigate = useNavigate();
   return (
-    <section className="min-h-[41rem] flex items-center bg-gradient-to-br from-blue-50 to-green-50 dark:from-gray-900 dark:to-blue-900">
-      <div className="container max-w-7xl mx-auto w-full h-96">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-24 items-center">
-          {/* 左侧文字内容 */}
-          <div className="space-y-8">
-            <div className="left space-y-6">
-              <img src="/logo.png" alt="Triaxis" className="w-20 h-20" />
-              <span className="text-logo text-6xl font-bold text-gray-900 dark:text-white leading-tight"> 三轴线</span>
-              <p className="text-description text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-                服务于各高校的城乡规划专业知识平台，汇聚最新资源、专业课程和行业动态。
-              </p>
-            </div>
+    <section className="min-h-[41rem] items-center bg-light py-8 px-15">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-24 items-center max-w-8xl mx-auto">
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                type="primary"
-                size="large"
-                onClick={() => navigate('/courses')}
-                className="h-12 w-32 px-8 text-lg bg-black border-primary hover:bg-blue-600"
-              >
-                课程学习
-              </Button>
-              <Button
-                size="large"
-                onClick={() => navigate('/resources')}
-                className="h-12 w-40 px-8 text-lg border-gray-300 text-gray-700 dark:text-gray-300 dark:border-gray-600"
-                icon={<ArrowRightOutlined />}
-              >
-                查找资源
-              </Button>
-            </div>
+        {/* 左侧文字内容 */}
+        <div className="space-y-8">
+          <div className="left space-y-3">
+            <Logo size="xl" title="三轴线" />
+            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              服务于各高校的城乡规划专业知识平台，汇聚最新资源、专业课程和行业动态。
+            </p>
           </div>
 
-          {/* 右侧知识图谱展示 */}
-          <div className="relative">
-            <div className="max-w-[80rem] max-h-[45rem] aspect-video bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
-              <div className="h-[33rem] bg-gray-50 dark:from-blue-900 dark:to-green-900 rounded-xl flex items-center justify-center">
-                <div className="w-full h-full">
-                  <UrbanPlanningKnowledgeGraph />
-                </div>
-              </div>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+            <MyButton
+              size='middle'
+              onClick={() => navigate('/courses')}
+              type="black"
+            >
+              课程学习
+            </MyButton>
+            <MyButton
+              size='large'
+              onClick={() => navigate('/resources')}
+              type="white"
+              icon={<ArrowRightOutlined />}
+            >
+              查找资源
+            </MyButton>
           </div>
+        </div>
 
+        {/* 右侧知识图谱展示 */}
+
+        <div className="max-w-[80rem] max-h-[45rem] aspect-video bg-card rounded-2xl p-8 shadow-xl border border-main">
+          <div className="h-[33rem] bg-main rounded-xl">
+            <UrbanPlanningKnowledgeGraph />
+          </div>
         </div>
       </div>
     </section>

@@ -20,17 +20,13 @@ export const loginMobile = (data) => {
 }
 //自动登录
 export const validate = () => {
-  return refreshLogin('/login/validate')
+  return service.get('/login/validate')
 }
 
 //refreshToken获得accessToken
 export const refresh = () => {
-  return refreshLogin('/login/refresh')
-}
-
-const refreshLogin = (path) => {
   const { refreshToken } = getLoginData()
-  return service.get(path,
+  return service.get('/login/refresh',
     {
       headers: {
         'Refresh-Token': refreshToken

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { defaultAutoLogin, getLoginData, getUserData, removeAllData, removeLoginData, setAllData, setAuthenticated, setAutoLoginData, setLoginData, setUserData } from "../../utils/localStorage";
 import { logger } from "../../utils/logger";
+import { refresh } from "../../api/modules/auth";
 /**redux管理数据
  * id
  * uername
@@ -19,7 +20,7 @@ export const refreshToken = createAsyncThunk('auth/refresh',
         logger.warn("没有refreshToken")
         return rejectWithValue('没有刷新令牌')
       }
-      const res = await refresh(refreshToken)
+      const res = await refresh()
       return res.data
     } catch (error) {
       return rejectWithValue(error.message || '登录失败')
