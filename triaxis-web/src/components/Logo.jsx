@@ -7,7 +7,7 @@ export default function Logo({ size, title, onClick, isNav = false }) {
       case 'small':
         return [8, 'text-xl'];
       case 'large':
-        return [15, 'text-3xl'];
+        return [12, 'text-3xl'];
       case 'xl':
         return [20, "text-6xl"];
       default: // 默认尺寸

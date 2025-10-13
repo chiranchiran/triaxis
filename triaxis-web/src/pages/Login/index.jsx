@@ -16,18 +16,19 @@ import {
   ProFormText,
   setAlpha,
 } from '@ant-design/pro-components';
-import { Space, Tabs, theme, } from 'antd';
+import { Divider, Space, Tabs, theme, } from 'antd';
 import { useState } from 'react';
-import './index.less'
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
 import { useCaptcha, useLoginByCount, useLoginByMobile } from '../../hooks/api/auth';
 import { getUserData } from '../../utils/localStorage';
 import { useDispatch } from 'react-redux';
 import { setAutoLogin } from '../../store/slices/authSlice';
+import Logo from '../../components/Logo';
+import { Link } from 'react-router-dom';
+import LoginBase from '../../components/LoginBase';
 
 const Login = () => {
-  const { token } = theme.useToken()
   const [form] = useForm()
   const { mutate: getCaptcha, isSuccess: isCaptcha, data } = useCaptcha()
   const { mutate: countLogin, isSuccess: isCount } = useLoginByCount()
@@ -35,15 +36,6 @@ const Login = () => {
   const dispatch = useDispatch()
   //登录方式0：账号密码，1：手机号，
   const [loginType, setLoginType] = useState(0);
-  //其他登录方式css
-  const iconStyles = {
-    marginInlineStart: '5px',
-    color: setAlpha(token.colorTextBase, 0.2),
-    fontSize: '24px',
-    verticalAlign: 'middle',
-    cursor: 'pointer',
-  };
-
   //tab栏切换清空
   const changeTab = (activeKey) => {
     setLoginType(activeKey)
@@ -123,170 +115,147 @@ const Login = () => {
   //忘记密码
   //其他登录功能
   return (
-    <div className="background">
-      <ProConfigProvider hashed={false}>
-        <div className="container max-w-105" style={{ backgroundColor: token.colorBgContainer }}>
-          <LoginForm
-            logo="../../../logo.png"
-            form={form}
-            title="Triaxis"
-            subTitle="城乡规划专业交流平台"
-            onFinish={onFinish}
-          >
-            <Tabs
-              className='tabs'
-              centered
-              activeKey={loginType}
-              onChange={changeTab}
-              items={[
+    <LoginBase>
+      <LoginForm
+        size="middle"
+        form={form}
+        onFinish={onFinish}
+      >
+        <Tabs
+          centered
+          activeKey={loginType}
+          onChange={changeTab}
+          items={[
+            {
+              key: 0,
+              label: '账号登录',
+            },
+            {
+              key: 1,
+              label: '手机号登录',
+            }
+          ]}
+        />
+        {loginType === 0 && (
+          <>
+            <ProFormText
+              name="username"
+              fieldProps={{
+                size: 'large',
+                prefix: <UserOutlined className={'prefixIcon'} />,
+                autoComplete: "username"
+              }}
+              placeholder={'用户名'}
+              validateFirst={true}
+              rules={[
                 {
-                  key: 0,
-                  label: '账号登录',
+                  required: true,
+                  message: '请输入用户名!',
+                }, {
+                  min: 6,
+                  message: "不能少于6位"
+                }, {
+                  max: 16,
+                  message: "不能超过16位"
                 },
                 {
-                  key: 1,
-                  label: '手机号登录',
+                  pattern: /^\w{6,16}$/,
+                  message: '必须是6-16位小写字母、大写字母、数字或下划线'
                 }
               ]}
             />
-            {loginType === 0 && (
-              <>
-                <ProFormText
-                  name="username"
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <UserOutlined className={'prefixIcon'} />,
-                    autoComplete: "username"
-                  }}
-                  placeholder={'用户名'}
-                  validateFirst={true}
-                  rules={[
-                    {
-                      required: true,
-                      message: '请输入用户名!',
-                    }, {
-                      min: 6,
-                      message: "不能少于6位"
-                    }, {
-                      max: 16,
-                      message: "不能超过16位"
-                    },
-                    {
-                      pattern: /^\w{6,16}$/,
-                      message: '必须是6-16位小写字母、大写字母、数字或下划线'
-                    }
-                  ]}
-                />
-                <ProFormText.Password
-                  name="password"
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <LockOutlined className={'prefixIcon'} />,
-                    autoComplete: "current-password"
-                  }}
-                  placeholder={'密码'}
-                  validateFirst={true}
-                  rules={[
-                    {
-                      required: true,
-                      message: '请输入密码！',
-                    }, {
-                      min: 6,
-                      message: "不能少于6位"
-                    }, {
-                      max: 16,
-                      message: "不能超过20位"
-                    },
-                    {
-                      pattern: /^\w{6,16}$/,
-                      message: '必须是6-16位小写字母、大写字母、数字或下划线'
-                    }
-                  ]}
-                />
-              </>
-            )}
-            {loginType === 1 && (
-              <>
-                <ProFormText
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <MobileOutlined className={'prefixIcon'} />,
-                    autoComplete: "tel"
-                  }}
-                  name="phone"
-                  placeholder={'手机号'}
-                  validateFirst={true}
-                  rules={[
-                    {
-                      required: true,
-                      message: '请输入手机号！',
-                    },
-                    {
-                      pattern: /^1\d{10}$/,
-                      message: '手机号格式错误！',
-                    },
-                  ]}
-                />
-                <ProFormCaptcha
-                  fieldProps={{
-                    size: 'large',
-                    prefix: <LockOutlined className={'prefixIcon'} />,
-                  }}
-                  captchaProps={{
-                    size: 'large',
-                  }}
-                  placeholder={'请输入验证码'}
-                  captchaTextRender={(timing, count) => {
-                    if (timing) {
-                      return `${count}秒后重新获取`;
-                    }
-                    return '获取验证码';
-                  }}
-                  name="captcha"
-                  validateFirst={true}
-                  rules={[
-                    {
-                      required: true,
-                      message: '请输入验证码！',
-                    }, {
-                      pattern: /^\d{6}$/,
-                      message: "不超过6位！"
-                    }
-                  ]}
-                  onGetCaptcha={onCaptcha}
-                />
-              </>
-            )}
-            <div
-              style={{
-                marginBlockEnd: 24,
+            <ProFormText.Password
+              name="password"
+              fieldProps={{
+                size: 'large',
+                prefix: <LockOutlined className={'prefixIcon'} />,
+                autoComplete: "current-password"
               }}
-            >
-              <ProFormCheckbox noStyle name="autoLogin">
-                自动登录
-              </ProFormCheckbox>
-              <a
-                style={{
-                  float: 'right',
-                  color: "rgb(119, 212, 154)"
-                }}
-              >
-                忘记密码
-              </a>
-            </div>
-          </LoginForm>
-          <div className="otherLogin">
-            <div className="otherLogin">————— 其他登录方式 —————</div>
-            <Space >
-              <WechatFilled style={iconStyles} />
-              <AppleFilled style={iconStyles} />
-              <AlipayCircleOutlined style={iconStyles} />
-              <FacebookFilled style={iconStyles} />
-            </Space>
-          </div>
+              placeholder={'密码'}
+              validateFirst={true}
+              rules={[
+                {
+                  required: true,
+                  message: '请输入密码！',
+                }, {
+                  min: 6,
+                  message: "不能少于6位"
+                }, {
+                  max: 16,
+                  message: "不能超过20位"
+                },
+                {
+                  pattern: /^\w{6,16}$/,
+                  message: '必须是6-16位小写字母、大写字母、数字或下划线'
+                }
+              ]}
+            />
+          </>
+        )}
+        {loginType === 1 && (
+          <>
+            <ProFormText
+              fieldProps={{
+                size: 'large',
+                prefix: <MobileOutlined className={'prefixIcon'} />,
+                autoComplete: "tel"
+              }}
+              name="phone"
+              placeholder={'手机号'}
+              validateFirst={true}
+              rules={[
+                {
+                  required: true,
+                  message: '请输入手机号！',
+                },
+                {
+                  pattern: /^1\d{10}$/,
+                  message: '手机号格式错误！',
+                },
+              ]}
+            />
+            <ProFormCaptcha
+              fieldProps={{
+                size: 'large',
+                prefix: <LockOutlined className={'prefixIcon'} />,
+              }}
+              captchaProps={{
+                size: 'large',
+              }}
+              placeholder={'请输入验证码'}
+              captchaTextRender={(timing, count) => {
+                if (timing) {
+                  return `${count}秒后重新获取`;
+                }
+                return '获取验证码';
+              }}
+              name="captcha"
+              validateFirst={true}
+              rules={[
+                {
+                  required: true,
+                  message: '请输入验证码！',
+                }, {
+                  pattern: /^\d{6}$/,
+                  message: "不超过6位！"
+                }
+              ]}
+              onGetCaptcha={onCaptcha}
+            />
+          </>
+        )}
+        <div
+          style={{
+            marginBlockEnd: 24,
+          }}
+        >
+          <ProFormCheckbox noStyle name="autoLogin" >
+            <p className='text-sm text-main'>自动登录</p>
+          </ProFormCheckbox>
+          <Link to='' className='float-right text-sm text-green'>忘记密码</Link>
         </div>
-      </ProConfigProvider>
-    </div>
+      </LoginForm>
+    </LoginBase>
   );
 };
 export default Login;

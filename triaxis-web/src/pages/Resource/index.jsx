@@ -22,7 +22,7 @@ import {
 } from '@ant-design/icons';
 import './index.less'
 import { useNavigate } from 'react-router-dom';
-
+import { RadioGroup, Radio, Space } from '@douyinfe/semi-ui';
 const { Search } = Input;
 
 // 模拟数据
@@ -171,6 +171,13 @@ const Resource = () => {
   const [secondaryCategories, setSecondaryCategories] = useState([]);
   const [likedResources, setLikedResources] = useState(new Set());
   const [favoritedResources, setFavoritedResources] = useState(new Set());
+
+
+  //获取分类
+  useEffect(() => {
+
+  }, [])
+
 
   // 获取资源列表
   const fetchResources = useCallback(async () => {
@@ -337,16 +344,34 @@ const Resource = () => {
       </button>
     );
   };
+
+  //分类的行
+  const TypeSelect = ({ title, arr, type, isMultiple = false }) => {
+    return (
+      <div className="flex items-center mb-6">
+        <span className="text-sm font-medium text-main mr-4">{title}：</span>
+        <div className="flex flex-wrap gap-2">
+          {arr.map(item => (
+            <FilterButton
+              key={item.id}
+              item={item}
+              type={type}
+              isSelected={isMultiple ? selectedFilters[type].includes(item.id) : selectedFilters[type] === item.id}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
   const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 顶部搜索区域 - 渐变到白色 */}
-      <div className="bg-gradient-to-b from-sky-100 to-white pt-15 pb-35">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <div className="bg-gradient-to-white pt-15 pb-35">
+        <div className="find max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-main mb-4">
             发现优质设计资源
           </h1>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-main mb-8">
             海量专业资源，助力你的设计创作
           </p>
           <Search
@@ -370,111 +395,36 @@ const Resource = () => {
 
       {/* 筛选条件区域 */}
       <div className="check max-w-7xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
+        <div className="bg-card rounded-xl shadow-sm p-6 mb-8 border border-main">
           {/* 第一行：资源权限和专业领域 */}
-          <div className="mb-6">
-            <div className="flex items-center mb-3">
-              <span className="text-sm font-medium text-gray-700 mr-4">资源权限：</span>
-              <div className="flex flex-wrap gap-2">
-                {RESOURCE_RIGHTS.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="rightId"
-                    isSelected={selectedFilters.rightId === item.id}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 mr-4">专业领域：</span>
-              <div className="flex flex-wrap gap-2">
-                {PROFESSIONAL_FIELDS.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="subjectId"
-                    isSelected={selectedFilters.subjectId === item.id}
-                  />
-                ))}
-              </div>
-            </div>
+          <div className="flex gap-40">
+            <TypeSelect title="资源权限" arr={RESOURCE_RIGHTS} type="rightId" />
+            <TypeSelect title="专业领域" arr={PROFESSIONAL_FIELDS} type="subjectId" />
           </div>
-
-          {/* 第二行：软件工具 */}
-          <div className="mb-6">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 mr-4">适用软件：</span>
-              <div className="flex flex-wrap gap-2">
-                {SOFTWARE_TOOLS.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="toolIds"
-                    isSelected={selectedFilters.toolIds?.includes(item.id)}
-                    isMultiple={true}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 第三行：一级分类 */}
-          <div className="mb-6">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 mr-4">资源类型：</span>
-              <div className="flex flex-wrap gap-2">
-                {PRIMARY_CATEGORIES.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="primaryCategory"
-                    isSelected={selectedFilters.primaryCategory === item.id}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 第四行：二级分类 */}
-          {secondaryCategories.length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center">
-                <span className="text-sm font-medium text-gray-700 mr-4">二级分类：</span>
-                <div className="flex flex-wrap gap-2">
-                  {secondaryCategories.map(item => (
-                    <FilterButton
-                      key={item.id}
-                      item={item}
-                      type="secondaryCategoryIds"
-                      isSelected={selectedFilters.secondaryCategoryIds?.includes(item.id)}
-                      isMultiple={true}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          <TypeSelect title="适用软件" arr={SOFTWARE_TOOLS} type="toolIds" isMultiple={true} />
+          <TypeSelect title="资源类型" arr={PRIMARY_CATEGORIES} type="primaryCategory" />
+          <TypeSelect title="二级分类" arr={secondaryCategories} type="secondaryCategoryIds" isMultiple={true} />
         </div>
 
         {/* 排序选项和结果统计 */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-center gap-10 mb-8">
+          <div className="text-md text-main">
             共 <span className="font-bold text-blue-500">{total}</span> 个结果
           </div>
           <div className="flex items-center space-x-2">
-            {SORT_OPTIONS.map(item => (
-              <button
-                key={item.id}
-                onClick={() => handleSortChange(item.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${searchParams.orderBy === item.id
-                  ? 'bg-orange-100 text-orange-700 border border-orange-300'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
-                  }`}
-              >
-                {item.name}
-              </button>
-            ))}
+            <Space vertical spacing='loose' align='start'>
+              <RadioGroup type='button' buttonSize='large' defaultValue={1} aria-label="单选组合示例" name="demo-radio-large">
+                {SORT_OPTIONS.map((item, index) => (
+                  <Radio
+                    key={item.id}
+                    onClick={() => handleSortChange(item.id)}
+                    value={index}
+                  >
+                    {item.name}</Radio>
+                ))}
+              </RadioGroup>
+            </Space>
+
           </div>
         </div>
 

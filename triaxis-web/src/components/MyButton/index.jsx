@@ -13,12 +13,12 @@ export default function MyButton({ size = 'small', onClick, type, children, icon
   }
   const getType = (type) => {
     switch (type) {
-      case 'black': return 'bg-dark text-light'
-      case 'blue': return 'bg-primary text-main'
-      case 'green': return 'bg-green text-main'
-      case 'orange': return 'bg-orange text-main'
-      case 'gray': return 'bg-gray border-main text-main'
-      case 'white': return 'bg-card text-main border-dark'
+      case 'black': return 'bg-dark text-light text-base'
+      case 'blue': return 'bg-primary text-main text-base'
+      case 'green': return 'bg-green text-main text-base'
+      case 'orange': return 'bg-orange text-main text-base'
+      case 'gray': return 'bg-gray border-main text-main text-base'
+      case 'white': return 'bg-card text-main border-dark text-base'
     }
   }
 

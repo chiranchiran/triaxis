@@ -10,7 +10,7 @@ import MyButton from '../../components/MyButton';
 const HeroSection = () => {
   const navigate = useNavigate();
   return (
-    <section className="min-h-[41rem] items-center bg-light py-8 px-15">
+    <section className="min-h-[41rem] items-center bg-light py-8 px-15 flex flex-col justify-center">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-24 items-center max-w-8xl mx-auto">
 
         {/* 左侧文字内容 */}

@@ -66,7 +66,7 @@ const SiteFooter = () => {
                   <NavLink
                     key={linkIndex}
                     to={link.url}
-                    className={({ isActive }) => isActive ? "text-secondary hover:text-primary transition-all duration-300 block" : "text-secondary hover:text-primary transition-all duration-300 block"}
+                    className={({ isActive }) => isActive ? "text-secondary transition-all duration-300 block" : "text-secondary transition-all duration-300 block"}
                   >
                     {link.name}
                   </NavLink>

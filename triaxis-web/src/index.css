@@ -5,15 +5,18 @@ html[data-theme='light'] {
   /* 小清新主色系 */
   --primary: #9dc6f1;
   --primary-50: rgba(157, 198, 241, 0.4);
-  --primary-light: #d9e8ff;
-  --primary-dark: #7bb2f5;
+  --primary-light: #eaf0fa;
+  --primary-dark: #6aa9f7;
+  --primary-border: #94bdee;
 
   --accent-green: #aedbc9;
   --accent-green-50: rgba(168, 236, 209, 0.4);
-  --accent-green-light: #d1fae5;
+  --accent-green-light: #e0f4e59f;
+  --accent-orange-border: #ecc29c;
+  --accent-orange-dark: #d46b08;
   --accent-orange: #f7e59d;
   --accent-orange-50: rgba(247, 229, 157, 0.4);
-  --accent-orange-light: #fef3c7;
+  --accent-orange-light: #fff7e6;
 
   --bg: #f9fafb;
   --bg-light: #eff7fe;
@@ -27,6 +30,7 @@ html[data-theme='light'] {
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
   --text-light: #ffffff;
+  --text-green: rgb(119, 212, 154);
   --border: #e2e8f0;
   --border-light: #f1f5f9;
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
@@ -149,7 +153,7 @@ html[data-theme='dark'] {
 }
 
 .text-green {
-  color: var(--accent-green);
+  color: var(--text-green);
 }
 
 .text-orange {
@@ -163,18 +167,23 @@ html[data-theme='dark'] {
 
 .border-main {
   border-color: var(--border);
+
 }
 
 .border-dark {
   border-color: var(--bg-dark);
 }
 
+.border-divider {
+  border-block-start: var(--text-muted) !important;
+}
+
 .border-light {
   border-color: var(--border-light);
 }
 
-.border-blue {
-  border-color: var(--blue);
+.border-primary-dark {
+  border-color: var(--primary-dark);
 }
 
 .shadow-card {
@@ -185,8 +194,17 @@ html[data-theme='dark'] {
   box-shadow: var(--shadow-lg);
 }
 
+.tag-orange {
+  color: var(--accent-orange-dark);
+  background: var(--accent-orange-light);
+  border-color: var(--accent-orange-border);
+}
 
-
+.tag-blue {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border-color: var(--primary-border);
+}
 
 
 
@@ -210,23 +228,10 @@ html[data-theme='dark'] {
   transform: translateX(4px);
 }
 
-/* 布局工具类 */
-.container-wide {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.section-spacing {
-  padding: 4rem 0;
-}
-
-/* 基础页面样式 */
-body {
-  color: var(--text);
-  background: var(--bg);
-  transition: all 0.3s ease;
-  min-width: 960px;
+/* 渐变蓝背景 */
+.bg-gradient-to-white {
+  background-image: linear-gradient(to bottom, var(--primary-50), var(--bg-elevated));
+  background-size: 100% 100%;
 }
 
 html,
@@ -234,19 +239,22 @@ body,
 #root {
   height: auto;
   min-height: 100%;
+  color: var(--text);
+  background: var(--bg);
+  transition: all 0.3s ease;
+  min-width: 960px;
 }
 
-body {
-  margin: 0;
-  display: block;
-  background: var(--color-bg);
-  color: var(--color-text);
-}
 
 a {
   text-decoration: none;
 }
 
+a:hover {
+  color: var(--primary-dark);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
 
 
 button,
@@ -258,4 +266,38 @@ input {
 .hover-lift:hover {
   transform: translateY(-2px);
   transition: all 0.3s ease;
+}
+
+/* 给 Input 添加强制抗锯齿样式 */
+input,
+button {
+  /* 1. 触发 GPU 加速，优化边缘渲染 */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  /* 部分浏览器需配合 transform 生效 */
+
+  /* 2. 修复背景溢出导致的边缘割裂 */
+  background-clip: padding-box;
+  /* 确保背景只在 padding 区域内渲染，不溢出到边框 */
+
+  /* 4. 可选：添加极细透明轮廓，修复部分浏览器的边缘计算错误 */
+  outline: 1px solid transparent;
+}
+
+/* 在全局样式文件（如 global.css / index.less）中添加 */
+/* 覆盖 Semi 根节点的字体 */
+.semi-root {
+  /* 完全对齐 Ant Design 的字体配置 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Heiti SC",
+    "SimSun", sans-serif !important;
+}
+
+/* 单独针对输入框、按钮等组件加强覆盖（可选） */
+.semi-input,
+.semi-button,
+.semi-typography {
+  font-family: inherit !important;
+  /* 继承根节点字体 */
 }

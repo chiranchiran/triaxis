@@ -2,6 +2,11 @@ header {
   .nav-top {
     a:not([aria-current]):hover {
       background-color: var(--bg-hover) !important;
+      color: inherit;
+    }
+
+    a[aria-current]:hover {
+      color: var(--text-light);
     }
   }
 

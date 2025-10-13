@@ -50,12 +50,13 @@ function App() {
           colorTextSecondary: 'var(--text-secondary)',
           colorBgBase: 'var(--bg)',
           colorBgContainer: 'var(--bg)',
+          contentFontSize: '16px'
         },
       }}
     >
       <div className="min-h-screen bg-main">
         <Header />
-        <main className="pt-20">
+        <main className="pt-20 relative">
           <ReactFlowProvider>
             <Element />
           </ReactFlowProvider>
