@@ -16,13 +16,61 @@
   overflow: hidden;
 }
 
-.css-dev-only-do-not-override-1nfvks7.ant-card-bordered {
-  border: 1px solid rgb(200, 198, 198) !important;
-}
-
 .check {
   position: relative;
   top: -7rem;
+
+  .css-dev-only-do-not-override-1xfktuh.ant-card .ant-card-body {
+    padding: 5px 14px 14px !important;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .semi-radio-addon-buttonRadio-checked {
+    font-weight: 600 !important;
+    background: var(--accent-orange-light) !important;
+    color: var(--accent-orange-dark) !important;
+  }
+
+  .semi-radio-addon-buttonRadio {
+    font-weight: 400;
+  }
+
+  .css-dev-only-do-not-override-1xfktuh.ant-ribbon .ant-ribbon-text {
+    color: inherit;
+    background: inherit;
+  }
+
+  .css-dev-only-do-not-override-1xfktuh.ant-ribbon.ant-ribbon-placement-end {
+    inset-inline-end: -12px;
+    border-end-end-radius: 0;
+  }
+
+  .ant-ribbon {
+    top: 12px;
+    width: 4.5rem;
+    text-align: center;
+    padding: 4px 15px;
+  }
+
+  /* 调整丝带文字样式 */
+  .ant-ribbon-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .ant-ribbon-corner {
+    width: 12px;
+    -background-clip: text;
+    height: 12px;
+    background: transparent;
+    border: 6px solid;
+    border-color: inherit;
+    filter: brightness(0.8);
+  }
+
+  .large-ribbon .ant-ribbon {
+    width: 150px;
+  }
 
 }
 
@@ -42,14 +90,4 @@
     padding: 0px 15px;
     border-radius: 15px;
   }
-}
-
-.semi-radio-addon-buttonRadio-checked {
-  font-weight: 600 !important;
-  background: var(--accent-orange-light) !important;
-  color: var(--accent-orange-dark) !important;
-}
-
-.semi-radio-addon-buttonRadio {
-  font-weight: 400;
 }

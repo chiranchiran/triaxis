@@ -32,7 +32,7 @@ export default function Logo({ size, title, onClick, isNav = false }) {
     isNav ? (
       <NavLink
         to='/'
-        className="flex items-center space-x-3"
+        className="logo flex items-center space-x-3"
       >
         {content}
       </NavLink>

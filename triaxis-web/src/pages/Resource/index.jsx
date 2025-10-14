@@ -1,28 +1,17 @@
 // Resource.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Card,
-  Input,
-  Button,
-  Row,
-  Col,
-  Tag,
-  Pagination,
-  Empty,
-  Spin
+  Badge, Card, Input, Button, Row, Col, Tag, Pagination, Empty, Spin
 } from 'antd';
 import {
-  SearchOutlined,
-  DownloadOutlined,
-  HeartOutlined,
-  StarOutlined,
-  ClockCircleOutlined,
-  PlayCircleOutlined,
-  FileOutlined
+  SearchOutlined, DownloadOutlined, HeartOutlined, StarOutlined, ClockCircleOutlined, PlayCircleOutlined, FileOutlined
 } from '@ant-design/icons';
 import './index.less'
 import { useNavigate } from 'react-router-dom';
 import { RadioGroup, Radio, Space } from '@douyinfe/semi-ui';
+import FilterButton from '../../components/FilterButton'
+import MyButton from '../../components/MyButton';
+import MyPagination from '../../components/MyPagination';
 const { Search } = Input;
 
 // 模拟数据
@@ -194,7 +183,8 @@ const Resource = () => {
           fileExtension: index % 3 === 0 ? '.pdf' : (index % 3 === 1 ? '.zip' : '.dwg'),
           downloadCount: Math.floor(Math.random() * 1000),
           likeCount: Math.floor(Math.random() * 500),
-          favoriteCount: Math.floor(Math.random() * 300)
+          favoriteCount: Math.floor(Math.random() * 300),
+          uploadTime: "2022.02.02"
         }));
 
         setResources(mockResources);
@@ -300,11 +290,11 @@ const Resource = () => {
   // 获取价格标签
   const getPriceTag = (pricePoints) => {
     if (pricePoints === 0) {
-      return <Tag color="green" className="text-xs px-2 py-1">免费</Tag>;
+      return ['免费', 'ribbon-green']
     } else if (pricePoints === -1) {
-      return <Tag color="gold" className="text-xs px-2 py-1">VIP专享</Tag>;
+      return ['VIP专享', 'ribbon-orange']
     } else {
-      return <Tag color="blue" className="text-xs px-2 py-1">{pricePoints}积分</Tag>;
+      return [`${pricePoints}积分`, 'ribbon-blue']
     }
   };
 
@@ -326,25 +316,6 @@ const Resource = () => {
     return <Tag color={typeInfo.color} className="text-xs px-2 py-1">{typeInfo.text}</Tag>;
   };
 
-  // 筛选按钮组件
-  const FilterButton = ({ item, type, isSelected, isMultiple = false }) => {
-    const handleClick = () => {
-      handleFilterChange(type, item.id);
-    };
-
-    return (
-      <button
-        onClick={handleClick}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isSelected
-          ? 'bg-gray-200 text-gray-800 border border-gray-300'
-          : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
-          }`}
-      >
-        {item.name}
-      </button>
-    );
-  };
-
   //分类的行
   const TypeSelect = ({ title, arr, type, isMultiple = false }) => {
     return (
@@ -353,6 +324,7 @@ const Resource = () => {
         <div className="flex flex-wrap gap-2">
           {arr.map(item => (
             <FilterButton
+              onClick={() => handleFilterChange(type, item.id)}
               key={item.id}
               item={item}
               type={type}
@@ -366,6 +338,7 @@ const Resource = () => {
   const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* 顶部搜索框 */}
       <div className="bg-gradient-to-white pt-15 pb-35">
         <div className="find max-w-4xl mx-auto text-center">
           <h1 className="text-4xl font-bold text-main mb-4">
@@ -393,8 +366,8 @@ const Resource = () => {
         </div>
       </div>
 
-      {/* 筛选条件区域 */}
       <div className="check max-w-7xl mx-auto">
+        {/* 筛选条件区域 */}
         <div className="bg-card rounded-xl shadow-sm p-6 mb-8 border border-main">
           {/* 第一行：资源权限和专业领域 */}
           <div className="flex gap-40">
@@ -407,7 +380,7 @@ const Resource = () => {
         </div>
 
         {/* 排序选项和结果统计 */}
-        <div className="flex items-center justify-center gap-10 mb-8">
+        <div className="flex items-center justify-center gap-10 mb-10">
           <div className="text-md text-main">
             共 <span className="font-bold text-blue-500">{total}</span> 个结果
           </div>
@@ -439,70 +412,60 @@ const Resource = () => {
               <Row gutter={[24, 24]}>
                 {resources.map(resource => (
                   <Col key={resource.id} xs={24} sm={12} lg={8} xl={6}>
-                    <Card
-                      onClick={() => navigate(`/resources/${resource.id}`)}
-
-                      className="resource-card h-full border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
-                      styles={{
-                        body: {
-                          padding: '16px'
-                        }
-                      }}
-                      cover={
-                        <div className="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                          {resource.thumbnailPath ? (
-                            <img
-                              alt={resource.title}
-                              src={resource.thumbnailPath}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400">
-                              <div className="text-center">
+                    <Badge.Ribbon text={`${getPriceTag(resource.pricePoints)[0]}`} className={`${getPriceTag(resource.pricePoints)[1]}`} size="large">
+                      <Card
+                        className="resource-card border-main overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 bg-card"
+                        cover={
+                          <div
+                            className="relative h-42 bg-gray-light overflow-hidden"
+                            onClick={() => navigate(`/resources/${resource.id}`)}
+                          >
+                            {resource.thumbnailPath ? (
+                              <img
+                                alt="预览图加载失败"
+                                title={resource.title}
+                                src={resource.thumbnailPath}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-main text-center">
                                 <div className="text-4xl mb-2">📁</div>
-                                <div className="text-sm">暂无预览</div>
+                                <div className="text-sm">暂无预览图</div>
                               </div>
-                            </div>
-                          )}
-                          {/* 标签放在左上角 */}
-                          <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                            {getPriceTag(resource.pricePoints)}
-                            {getFileTypeTag(resource.fileExtension)}
-                          </div>
-                          {/* 点赞量显示在图片右上角 - 使用浅粉色背景 */}
-                          <div className="absolute top-3 right-3 bg-like text-pink-600 text-xs px-2 py-1 rounded-full flex items-center">
-                            <HeartOutlined className="mr-1" />
-                            {resource.likeCount}
-                          </div>
-                          {/* 资源名称放在缩略图内部底部居中 */}
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                            <h3 className="text-white font-medium text-sm text-center line-clamp-1">
-                              {resource.title}
-                            </h3>
-                          </div>
-                        </div>
-                      }
-                    >
-                      <div className="space-y-3">
-                        {/* 描述 */}
-                        <p className="text-gray-600 text-sm line-clamp-2 leading-5">
-                          {resource.description}
-                        </p>
-                        {/* 课程信息 - 发布时间和时长 */}
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span className="flex items-center">
-                            <ClockCircleOutlined className="mr-1" />
-                            2022.03.23
-                          </span>
-                          <span className="flex items-center">
-                            <FileOutlined className="mr-1" />
-                            4MB
-                          </span>
-                        </div>
+                            )}
 
-                        {/* 统计信息 */}
-                        <div className="flex items-center justify-between text-md text-gray-500 border-t border-gray-100">
-                          <div className="flex items-center space-x-4">
+                            <div className="absolute top-3 left-3 bg-like text-sm px-2 py-1 rounded-lg flex items-center">
+                              <HeartOutlined className="mr-1" />
+                              {resource.likeCount || 0}
+                            </div>
+
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-dark p-3">
+                              <h3 className="text-white font-medium text-sm text-center line-clamp-1">
+                                {resource.title}
+                              </h3>
+                            </div>
+                          </div>
+                        }
+                      >
+                        <div className="space-y-2">
+                          {/* 描述 */}
+                          <p className="text-gray-600 text-sm line-clamp-2 leading-5">
+                            {resource.description}
+                          </p>
+                          {/* 资源信息 - 发布时间和时长 */}
+                          <div className="flex items-center justify-between text-xs text-secondary">
+                            <span className="flex items-center">
+                              <ClockCircleOutlined className="mr-1" />
+                              {resource.uploadTime}
+                            </span>
+                            <span className="flex items-center">
+                              <FileOutlined className="mr-1" />
+                              ({resource.fileExtension}) 4MB
+                            </span>
+                          </div>
+
+                          {/* 统计信息 */}
+                          <div className="mb-0 flex items-center justify-start text-md text-secondary border-t border-light space-x-4">
                             <span className="flex items-center">
                               <DownloadOutlined className="mr-1" />
                               {resource.downloadCount || 0}
@@ -512,45 +475,44 @@ const Resource = () => {
                               {resource.favoriteCount || 0}
                             </span>
                           </div>
-                        </div>
 
-                        {/* 操作按钮 */}
-                        <div className="flex space-x-2">
-                          <Button
-                            type="primary"
-                            size="md"
-                            className="flex-1 bg-black hover:bg-gray-800 border-black"
-                            icon={<DownloadOutlined />}
-                          >
-                            下载
-                          </Button>
-                          <Button
-                            size="md"
-                            icon={<StarOutlined />}
-                            className={`border-gray-300 ${favoritedResources.has(resource.id)
-                              ? 'text-yellow-500 bg-yellow-50 border-yellow-200'
-                              : 'text-gray-500 hover:text-yellow-500'
-                              }`}
-                            onClick={() => handleFavorite(resource.id)}
-                          />
-                          <Button
-                            size="md"
-                            icon={<HeartOutlined />}
-                            className={`border-gray-300 ${likedResources.has(resource.id)
-                              ? 'text-pink-500 bg-pink-50 border-pink-200'
-                              : 'text-gray-500 hover:text-pink-500'
-                              }`}
-                            onClick={() => handleLike(resource.id)}
-                          />
+                          {/* 操作按钮 */}
+                          <div className="flex space-x-2 mt-1">
+                            <MyButton
+                              type="black"
+                              size="long"
+                              className="flex-1"
+                              icon={<DownloadOutlined />}
+                            >
+                              下载
+                            </MyButton>
+                            <MyButton
+                              type={favoritedResources.has(resource.id) ? "black" : "white"}
+                              size="long"
+                              icon={<StarOutlined />}
+                              onClick={() => handleFavorite(resource.id)}
+                            >
+                            </MyButton>
+                            <MyButton
+                              type={likedResources.has(resource.id) ? "black" : "white"}
+
+                              size="long"
+                              icon={<HeartOutlined />}
+                              onClick={() => handleLike(resource.id)}
+                            >
+                            </MyButton>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </Badge.Ribbon>
+
                   </Col>
                 ))}
               </Row>
 
               {/* 分页 - 全部用中文 */}
               <div className="flex justify-center mt-8 pt-6 border-t border-gray-100">
+                <MyPagination />
                 <Pagination
                   current={searchParams.page}
                   pageSize={searchParams.pageSize}

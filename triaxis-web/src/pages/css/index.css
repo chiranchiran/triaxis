@@ -1,44 +1,8 @@
-.resource-card:hover {
-  transform: translateY(-2px);
-}
-.line-clamp-1 {
-  display: -webkit-box;
-  line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.line-clamp-2 {
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.css-dev-only-do-not-override-1nfvks7.ant-card-bordered {
-  border: 1px solid #c8c6c6 !important;
-}
-.check {
+.news {
   position: relative;
-  top: -7rem;
 }
-.find .css-dev-only-do-not-override-1xfktuh.ant-input-lg {
-  padding: 12px 20px;
-  font-size: 16px;
-  height: 3rem;
-  line-height: 1.57142857;
-  border-radius: 15px 0 0 15px;
-}
-.find .css-dev-only-do-not-override-1xfktuh.ant-input-search-large .ant-input-affix-wrapper,
-.find .css-dev-only-do-not-override-1xfktuh.ant-input-search-large .ant-input-search-button {
-  height: 3rem;
-  font-size: 16px;
-  padding: 0px 15px;
-  border-radius: 15px;
-}
-.semi-radio-addon-buttonRadio-checked {
-  font-weight: 600 !important;
-  background: var(--accent-orange-light) !important;
-  color: var(--accent-orange-dark) !important;
-}
-.semi-radio-addon-buttonRadio {
-  font-weight: 400;
+.news .news-more {
+  position: absolute;
+  right: 1rem;
+  top: 2rem;
 }

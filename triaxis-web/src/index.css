@@ -5,23 +5,28 @@ html[data-theme='light'] {
   /* 小清新主色系 */
   --primary: #9dc6f1;
   --primary-50: rgba(157, 198, 241, 0.4);
-  --primary-light: #eaf0fa;
-  --primary-dark: #6aa9f7;
-  --primary-border: #94bdee;
+  --primary-light: #e6f4ff;
+  --primary-dark: #0958d9;
+  --primary-border: #91caff;
 
+  --accent-green-ribbon: #c0ead9;
+  --accent-green-border: #b7eb8f;
+  --accent-green-dark: #389e0d;
   --accent-green: #aedbc9;
   --accent-green-50: rgba(168, 236, 209, 0.4);
   --accent-green-light: #e0f4e59f;
-  --accent-orange-border: #ecc29c;
-  --accent-orange-dark: #d46b08;
+  --accent-orange-border: #f7c575;
+  --accent-orange-dark: #d36b09;
+  --accent-orange-ribbon: #f8c187;
   --accent-orange: #f7e59d;
   --accent-orange-50: rgba(247, 229, 157, 0.4);
-  --accent-orange-light: #fff7e6;
+  --accent-orange-light: #fcf3df;
 
   --bg: #f9fafb;
   --bg-light: #eff7fe;
   --bg-elevated: #ffffff;
   --bg-gray: #e5e7eb;
+  --bg-gray-light: #f5f6f7;
   --bg-dark: #2b2b2b;
   --bg-hover: #d0d1d4;
 
@@ -38,7 +43,7 @@ html[data-theme='light'] {
   --black: #292727;
   --blue: #4298f4;
 
-  --bg-like: #fbd5d5;
+  --bg-like: #f6dede;
   --text-like: #da5c5c;
 }
 
@@ -72,6 +77,11 @@ html[data-theme='dark'] {
 .bg-gray {
   background-color: var(--bg-gray);
 }
+
+.bg-gray-light {
+  background-color: var(--bg-gray-light);
+}
+
 
 .bg-card {
   background-color: var(--bg-elevated);
@@ -195,7 +205,7 @@ html[data-theme='dark'] {
 }
 
 .tag-orange {
-  color: var(--accent-orange-dark);
+  color: var(--accent-orange-dark) !important;
   background: var(--accent-orange-light);
   border-color: var(--accent-orange-border);
 }
@@ -204,6 +214,30 @@ html[data-theme='dark'] {
   color: var(--primary-dark);
   background: var(--primary-light);
   border-color: var(--primary-border);
+}
+
+.tag-green {
+  color: var(--accent-green-dark) !important;
+  background: var(--accent-green-light);
+  border-color: var(--accent-green-border);
+}
+
+.ribbon-orange {
+  color: var(--bg-elevated);
+  border-color: var(--accent-orange-ribbon);
+  background: var(--accent-orange-ribbon) !important;
+}
+
+.ribbon-green {
+  color: var(--bg-elevated);
+  border-color: var(--accent-green-ribbon);
+  background: var(--accent-green-ribbon) !important;
+}
+
+.ribbon-blue {
+  color: var(--bg-elevated);
+  border-color: var(--primary);
+  background: var(--primary) !important;
 }
 
 
@@ -234,6 +268,12 @@ html[data-theme='dark'] {
   background-size: 100% 100%;
 }
 
+/* 遮罩层的黑色渐变 */
+.bg-gradient-to-dark {
+  background-image: linear-gradient(to bottom, var(--bg-gray-light), var(--bg-dark));
+  background-size: 100% 100%;
+}
+
 html,
 body,
 #root {
@@ -250,7 +290,7 @@ a {
   text-decoration: none;
 }
 
-a:hover {
+a:not(.logo):hover {
   color: var(--primary-dark);
   transform: translateY(-2px);
   transition: all 0.3s ease;
