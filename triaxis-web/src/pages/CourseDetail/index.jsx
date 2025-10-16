@@ -449,308 +449,306 @@ const CourseDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <Row gutter={[32, 32]}>
-          {/* 左侧课程信息 */}
-          <Col xs={24} lg={16}>
-            <CustomCard className="mb-6">
-              <CustomCardContent>
-                <div className="space-y-6">
-                  {/* 标题和基本信息 */}
-                  <div>
-                    <div className="flex flex-wrap items-start justify-between mb-4">
-                      <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-                          {course.title}
-                        </h1>
-                        <p className="text-lg text-gray-600 mb-3">
-                          {course.subtitle}
-                        </p>
-                      </div>
-                      <div className="flex space-x-2 flex-shrink-0">
-                        {getPriceTag(course.pricePoints)}
-                        {getDifficultyTag(course.difficultyLevel)}
-                      </div>
+    <div className="max-w-7xl mx-auto">
+      <Row gutter={[32, 32]}>
+        {/* 左侧课程信息 */}
+        <Col xs={24} lg={16}>
+          <CustomCard className="mb-6">
+            <CustomCardContent>
+              <div className="space-y-6">
+                {/* 标题和基本信息 */}
+                <div>
+                  <div className="flex flex-wrap items-start justify-between mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                        {course.title}
+                      </h1>
+                      <p className="text-lg text-gray-600 mb-3">
+                        {course.subtitle}
+                      </p>
                     </div>
-
-                    <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border border-blue-100">
-                      {course.description}
-                    </p>
-                  </div>
-
-                  {/* 课程封面和视频 */}
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <div className="relative h-80 bg-white rounded-lg overflow-hidden border border-gray-300">
-                      <img
-                        src={course.coverImage}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                        <Button
-                          type="primary"
-                          size="large"
-                          icon={<PlayCircleOutlined />}
-                          className="bg-white/20 hover:bg-white/30 border-white text-white backdrop-blur-sm"
-                        >
-                          预览课程
-                        </Button>
-                      </div>
-                      <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
-                        课程封面
-                      </div>
+                    <div className="flex space-x-2 flex-shrink-0">
+                      {getPriceTag(course.pricePoints)}
+                      {getDifficultyTag(course.difficultyLevel)}
                     </div>
                   </div>
 
-                  {/* 课程详情 - 使用Markdown渲染 */}
-                  <CustomCard>
-                    <CustomCardTitle>课程详情</CustomCardTitle>
-                    <CustomCardContent>
-                      <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed">
-                        <ReactMarkdown
-                          options={{
-                            overrides: {
-                              h2: { component: 'h3', props: { className: 'text-xl font-semibold text-gray-800 mt-6 mb-3' } },
-                              h3: { component: 'h4', props: { className: 'text-lg font-semibold text-gray-800 mt-4 mb-2' } },
-                              ul: { props: { className: 'list-disc list-inside space-y-1' } },
-                              li: { props: { className: 'text-gray-700' } },
-                              p: { props: { className: 'text-gray-700 mb-3' } }
-                            }
-                          }}
-                        >
-                          {course.detailedDescription}
-                        </ReactMarkdown>
-                      </div>
-                    </CustomCardContent>
-                  </CustomCard>
-
-                  {/* 课程目录 */}
-                  <CustomCard>
-                    <CustomCardTitle>课程目录</CustomCardTitle>
-                    <CustomCardContent>
-                      <div className="space-y-4">
-                        {course.chapters.map((chapter, index) => renderChapterItem(chapter, index))}
-                      </div>
-                    </CustomCardContent>
-                  </CustomCard>
-
-                  {/* 标签 */}
-                  <CustomCard>
-                    <CustomCardTitle>课程标签</CustomCardTitle>
-                    <CustomCardContent>
-                      <div className="flex flex-wrap gap-2">
-                        {course.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className={`inline-flex items-center px-3 py-1.5 rounded text-sm font-medium border ${getTagColor(index)}`}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </CustomCardContent>
-                  </CustomCard>
+                  <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    {course.description}
+                  </p>
                 </div>
-              </CustomCardContent>
-            </CustomCard>
 
-            {/* 评价区域 */}
-            <CustomCard>
-              <CustomCardTitle>
-                <div className="flex items-center">
-                  <span className="text-xl font-semibold text-gray-800">学员评价</span>
-                  <span className="ml-3 text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
-                    {reviews.length} 条评价
-                  </span>
-                </div>
-              </CustomCardTitle>
-              <CustomCardContent>
-                <div className="space-y-1">
-                  {reviews.map(review => renderReviewItem(review))}
-                </div>
-              </CustomCardContent>
-            </CustomCard>
-          </Col>
-
-          {/* 右侧操作和信息面板 */}
-          <Col xs={24} lg={8}>
-            {/* 操作卡片 */}
-            <CustomCard className="top-6 mb-6 z-1">
-              <CustomCardContent>
-                <div className="space-y-4">
-                  {/* 讲师信息 */}
-                  <div className="flex items-center space-x-10 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <Avatar
-                      size={48}
-                      src={course.instructor.avatar}
-                      icon={<UserOutlined />}
-                      className="border border-gray-300"
+                {/* 课程封面和视频 */}
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="relative h-80 bg-white rounded-lg overflow-hidden border border-gray-300">
+                    <img
+                      src={course.coverImage}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
                     />
-                    <div className="flex-1 min-w-0 pl-4">
-                      <div className="font-medium text-gray-800 truncate">
-                        {course.instructor.name}
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {course.instructor.title}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {course.instructor.experience} • {course.instructor.organization}
-                      </div>
-                    </div>
-                  </div>
-
-                  <Divider className="my-4 border-gray-200" />
-
-                  {/* 统计信息 */}
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
-                      <div className="text-xl font-bold text-gray-800">
-                        {course.studentCount}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">观看量</div>
-                    </div>
-                    <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
-                      <div className="text-xl font-bold text-gray-800">
-                        {course.averageRating}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">评分</div>
-                    </div>
-                    <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
-                      <div className="text-xl font-bold text-gray-800">
-                        {getDurationText(course.totalDuration)}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">时长</div>
-                    </div>
-                    <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
-                      <div className="text-xl font-bold text-gray-800">
-                        {course.reviewCount}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">评价</div>
-                    </div>
-                  </div>
-
-                  <Divider className="my-4 border-gray-200" />
-
-                  {/* 课程信息 */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="text-gray-600">课程时长:</span>
-                      <span className="font-medium text-gray-800">{getDurationText(course.totalDuration)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="text-gray-600">难度级别:</span>
-                      <span className="font-medium text-gray-800">{difficultyConfig[course.difficultyLevel].text}</span>
-                    </div>
-                    <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="text-gray-600">更新时间:</span>
-                      <span className="font-medium text-gray-800">{course.updateDate}</span>
-                    </div>
-                    <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
-                      <span className="text-gray-600">课程分类:</span>
-                      <span className="font-medium text-gray-800">{course.category}</span>
-                    </div>
-                  </div>
-
-                  <Divider className="my-4 border-gray-200" />
-
-                  {/* 操作按钮 */}
-                  <div className="space-y-3">
-                    <Button
-                      type="primary"
-                      size="large"
-                      icon={<PlayCircleOutlined />}
-                      className="w-full bg-gray-800 hover:bg-gray-700 border-gray-800 h-12 text-base font-medium"
-                      onClick={handleStartLearning}
-                    >
-                      开始学习
-                    </Button>
-
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                       <Button
+                        type="primary"
                         size="large"
-                        icon={favorited ? <StarFilled className="text-amber-500" /> : <StarOutlined />}
-                        className={`h-12 border font-medium ${favorited
-                          ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100'
-                          : 'text-gray-600 bg-white border-gray-300 hover:bg-amber-50 hover:text-amber-500 hover:border-amber-200'
-                          } transition-all`}
-                        onClick={handleFavorite}
+                        icon={<PlayCircleOutlined />}
+                        className="bg-white/20 hover:bg-white/30 border-white text-white backdrop-blur-sm"
                       >
-                        {favorited ? '已收藏' : '收藏'}
-                      </Button>
-                      <Button
-                        size="large"
-                        icon={liked ? <HeartFilled className="text-rose-500" /> : <HeartOutlined />}
-                        className={`h-12 border font-medium ${liked
-                          ? 'text-rose-600 bg-rose-50 border-rose-200 hover:bg-rose-100'
-                          : 'text-gray-600 bg-white border-gray-300 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200'
-                          } transition-all`}
-                        onClick={handleLike}
-                      >
-                        {liked ? '已点赞' : '点赞'}
+                        预览课程
                       </Button>
                     </div>
-
-                    <Button
-                      size="large"
-                      icon={<ShareAltOutlined />}
-                      className="w-full h-12 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 font-medium transition-all"
-                    >
-                      分享课程
-                    </Button>
+                    <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
+                      课程封面
+                    </div>
                   </div>
                 </div>
-              </CustomCardContent>
-            </CustomCard>
 
-            {/* 提交评价卡片 */}
-            <CustomCard>
-              <CustomCardTitle>发表评价</CustomCardTitle>
-              <CustomCardContent>
-                <Form
-                  form={reviewForm}
-                  onFinish={handleReviewSubmit}
-                  layout="vertical"
+                {/* 课程详情 - 使用Markdown渲染 */}
+                <CustomCard>
+                  <CustomCardTitle>课程详情</CustomCardTitle>
+                  <CustomCardContent>
+                    <div className="prose prose-gray max-w-none text-gray-700 leading-relaxed">
+                      <ReactMarkdown
+                        options={{
+                          overrides: {
+                            h2: { component: 'h3', props: { className: 'text-xl font-semibold text-gray-800 mt-6 mb-3' } },
+                            h3: { component: 'h4', props: { className: 'text-lg font-semibold text-gray-800 mt-4 mb-2' } },
+                            ul: { props: { className: 'list-disc list-inside space-y-1' } },
+                            li: { props: { className: 'text-gray-700' } },
+                            p: { props: { className: 'text-gray-700 mb-3' } }
+                          }
+                        }}
+                      >
+                        {course.detailedDescription}
+                      </ReactMarkdown>
+                    </div>
+                  </CustomCardContent>
+                </CustomCard>
+
+                {/* 课程目录 */}
+                <CustomCard>
+                  <CustomCardTitle>课程目录</CustomCardTitle>
+                  <CustomCardContent>
+                    <div className="space-y-4">
+                      {course.chapters.map((chapter, index) => renderChapterItem(chapter, index))}
+                    </div>
+                  </CustomCardContent>
+                </CustomCard>
+
+                {/* 标签 */}
+                <CustomCard>
+                  <CustomCardTitle>课程标签</CustomCardTitle>
+                  <CustomCardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {course.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className={`inline-flex items-center px-3 py-1.5 rounded text-sm font-medium border ${getTagColor(index)}`}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </CustomCardContent>
+                </CustomCard>
+              </div>
+            </CustomCardContent>
+          </CustomCard>
+
+          {/* 评价区域 */}
+          <CustomCard>
+            <CustomCardTitle>
+              <div className="flex items-center">
+                <span className="text-xl font-semibold text-gray-800">学员评价</span>
+                <span className="ml-3 text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded">
+                  {reviews.length} 条评价
+                </span>
+              </div>
+            </CustomCardTitle>
+            <CustomCardContent>
+              <div className="space-y-1">
+                {reviews.map(review => renderReviewItem(review))}
+              </div>
+            </CustomCardContent>
+          </CustomCard>
+        </Col>
+
+        {/* 右侧操作和信息面板 */}
+        <Col xs={24} lg={8}>
+          {/* 操作卡片 */}
+          <CustomCard className="top-6 mb-6 z-1">
+            <CustomCardContent>
+              <div className="space-y-4">
+                {/* 讲师信息 */}
+                <div className="flex items-center space-x-10 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <Avatar
+                    size={48}
+                    src={course.instructor.avatar}
+                    icon={<UserOutlined />}
+                    className="border border-gray-300"
+                  />
+                  <div className="flex-1 min-w-0 pl-4">
+                    <div className="font-medium text-gray-800 truncate">
+                      {course.instructor.name}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {course.instructor.title}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {course.instructor.experience} • {course.instructor.organization}
+                    </div>
+                  </div>
+                </div>
+
+                <Divider className="my-4 border-gray-200" />
+
+                {/* 统计信息 */}
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
+                    <div className="text-xl font-bold text-gray-800">
+                      {course.studentCount}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">观看量</div>
+                  </div>
+                  <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
+                    <div className="text-xl font-bold text-gray-800">
+                      {course.averageRating}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">评分</div>
+                  </div>
+                  <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
+                    <div className="text-xl font-bold text-gray-800">
+                      {getDurationText(course.totalDuration)}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">时长</div>
+                  </div>
+                  <div className="text-center p-2 bg-gray-100 rounded border border-gray-200">
+                    <div className="text-xl font-bold text-gray-800">
+                      {course.reviewCount}
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">评价</div>
+                  </div>
+                </div>
+
+                <Divider className="my-4 border-gray-200" />
+
+                {/* 课程信息 */}
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="text-gray-600">课程时长:</span>
+                    <span className="font-medium text-gray-800">{getDurationText(course.totalDuration)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="text-gray-600">难度级别:</span>
+                    <span className="font-medium text-gray-800">{difficultyConfig[course.difficultyLevel].text}</span>
+                  </div>
+                  <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="text-gray-600">更新时间:</span>
+                    <span className="font-medium text-gray-800">{course.updateDate}</span>
+                  </div>
+                  <div className="flex justify-between text-sm p-2 bg-gray-50 rounded border border-gray-200">
+                    <span className="text-gray-600">课程分类:</span>
+                    <span className="font-medium text-gray-800">{course.category}</span>
+                  </div>
+                </div>
+
+                <Divider className="my-4 border-gray-200" />
+
+                {/* 操作按钮 */}
+                <div className="space-y-3">
+                  <Button
+                    type="primary"
+                    size="large"
+                    icon={<PlayCircleOutlined />}
+                    className="w-full bg-gray-800 hover:bg-gray-700 border-gray-800 h-12 text-base font-medium"
+                    onClick={handleStartLearning}
+                  >
+                    开始学习
+                  </Button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      size="large"
+                      icon={favorited ? <StarFilled className="text-amber-500" /> : <StarOutlined />}
+                      className={`h-12 border font-medium ${favorited
+                        ? 'text-amber-600 bg-amber-50 border-amber-200 hover:bg-amber-100'
+                        : 'text-gray-600 bg-white border-gray-300 hover:bg-amber-50 hover:text-amber-500 hover:border-amber-200'
+                        } transition-all`}
+                      onClick={handleFavorite}
+                    >
+                      {favorited ? '已收藏' : '收藏'}
+                    </Button>
+                    <Button
+                      size="large"
+                      icon={liked ? <HeartFilled className="text-rose-500" /> : <HeartOutlined />}
+                      className={`h-12 border font-medium ${liked
+                        ? 'text-rose-600 bg-rose-50 border-rose-200 hover:bg-rose-100'
+                        : 'text-gray-600 bg-white border-gray-300 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200'
+                        } transition-all`}
+                      onClick={handleLike}
+                    >
+                      {liked ? '已点赞' : '点赞'}
+                    </Button>
+                  </div>
+
+                  <Button
+                    size="large"
+                    icon={<ShareAltOutlined />}
+                    className="w-full h-12 bg-white border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 font-medium transition-all"
+                  >
+                    分享课程
+                  </Button>
+                </div>
+              </div>
+            </CustomCardContent>
+          </CustomCard>
+
+          {/* 提交评价卡片 */}
+          <CustomCard>
+            <CustomCardTitle>发表评价</CustomCardTitle>
+            <CustomCardContent>
+              <Form
+                form={reviewForm}
+                onFinish={handleReviewSubmit}
+                layout="vertical"
+              >
+                <Form.Item
+                  name="rating"
+                  label="评分"
+                  rules={[{ required: true, message: '请选择评分' }]}
                 >
-                  <Form.Item
-                    name="rating"
-                    label="评分"
-                    rules={[{ required: true, message: '请选择评分' }]}
-                  >
-                    <Rate className="text-lg text-amber-500" />
-                  </Form.Item>
+                  <Rate className="text-lg text-amber-500" />
+                </Form.Item>
 
-                  <Form.Item
-                    name="content"
-                    label="评价内容"
-                    rules={[
-                      { required: true, message: '请输入评价内容' },
-                      { min: 10, message: '评价内容至少10个字符' }
-                    ]}
-                  >
-                    <TextArea
-                      rows={4}
-                      placeholder="请分享您的学习体验和课程建议..."
-                      className="resize-none border border-gray-300 hover:border-gray-400 focus:border-gray-500 rounded transition-colors"
-                    />
-                  </Form.Item>
+                <Form.Item
+                  name="content"
+                  label="评价内容"
+                  rules={[
+                    { required: true, message: '请输入评价内容' },
+                    { min: 10, message: '评价内容至少10个字符' }
+                  ]}
+                >
+                  <TextArea
+                    rows={4}
+                    placeholder="请分享您的学习体验和课程建议..."
+                    className="resize-none border border-gray-300 hover:border-gray-400 focus:border-gray-500 rounded transition-colors"
+                  />
+                </Form.Item>
 
-                  <Form.Item>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      loading={submitting}
-                      className="w-full bg-gray-800 hover:bg-gray-700 border-gray-800 h-10 font-medium"
-                    >
-                      {submitting ? '提交中...' : '提交评价'}
-                    </Button>
-                  </Form.Item>
-                </Form>
-              </CustomCardContent>
-            </CustomCard>
-          </Col>
-        </Row>
-      </div>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={submitting}
+                    className="w-full bg-gray-800 hover:bg-gray-700 border-gray-800 h-10 font-medium"
+                  >
+                    {submitting ? '提交中...' : '提交评价'}
+                  </Button>
+                </Form.Item>
+              </Form>
+            </CustomCardContent>
+          </CustomCard>
+        </Col>
+      </Row>
     </div>
   );
 };
