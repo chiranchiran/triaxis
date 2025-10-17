@@ -10,7 +10,7 @@ const CustomCard = ({ children, className = '', ...props }) => (
 );
 
 const DetailCard = ({ title, children, className = '', ...props }) => (
-  <CustomCard className={`${className} hover:shadow-sm shadow-sm`}>
+  <CustomCard className={`hover:shadow-sm shadow-sm ${className}`}>
     <div className={`px-6 pb-4 border-b border-main text-xl text-center font-semibold text-main`}>
       {title}
     </div>

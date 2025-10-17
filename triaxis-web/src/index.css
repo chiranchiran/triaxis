@@ -48,6 +48,7 @@ html[data-theme='light'] {
   --text-like: #da5c5c;
   --bg-score: #f3ede0;
   --text-score: #af9b02;
+  --text-rate: #fadb14;
 }
 
 html[data-theme='dark'] {
@@ -180,6 +181,10 @@ html[data-theme='dark'] {
 
 .text-light {
   color: var(--text-light);
+}
+
+.text-rate {
+  color: var(--text-rate);
 }
 
 

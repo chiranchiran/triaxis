@@ -2,7 +2,7 @@ import React from 'react'
 import './index.less'
 import { Button } from 'antd';
 
-export default function MyButton({ size = 'small', onClick, type, children, icon, className }) {
+export default function MyButton({ size = 'small', loading = false, onClick, type, children, icon, className }) {
 
   const getCurrentSize = (size) => {
     switch (size) {
@@ -33,7 +33,7 @@ export default function MyButton({ size = 'small', onClick, type, children, icon
       icon={icon}
       className={`${current} my-button transition-all transition-colors ${className}`}
     >
-      {children}
+      {loading ? `正在${children}` : children}
     </Button>
   )
 }
