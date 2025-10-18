@@ -72,8 +72,8 @@ jwt:
     expiration: 604800000  # 过期时间7天
     secretPath: "E:/study/my_works/triaxis/config/secret/refresh-secret.key"
   captcha:
-    expiration: 300000  # 过期时间5分钟
-    send-interval: 60000 # 发送间隔1分钟
+    expiration: 5  # 过期时间5分钟
+    send-interval: 60 # 发送间隔1分钟
   prefix: "Bearer"
   redis:
     enable: true

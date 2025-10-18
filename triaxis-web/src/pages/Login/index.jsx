@@ -20,7 +20,7 @@ import { Divider, Space, Tabs, theme, } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
-import { useCaptcha, useLoginByCount, useLoginByMobile } from '../../hooks/api/auth';
+import { useCaptcha, useLoginByCount, useLoginByMobile } from '../../hooks/api/login';
 import { getUserData } from '../../utils/localStorage';
 import { useDispatch } from 'react-redux';
 import { setAutoLogin } from '../../store/slices/authSlice';
@@ -30,58 +30,16 @@ import LoginBase from '../../components/LoginBase';
 
 const Login = () => {
   const [form] = useForm()
-  const { mutate: getCaptcha, isSuccess: isCaptcha, data } = useCaptcha()
+  const { mutate: getCaptcha, isError: isCaptcha, data } = useCaptcha()
   const { mutate: countLogin, isSuccess: isCount } = useLoginByCount()
   const { mutate: phoneLogin, isSuccess: isPhone } = useLoginByMobile()
+  //倒计时
+  const [count, setCount] = useState(60);
+  const [isTiming, setIsTiming] = useState(false)
   const dispatch = useDispatch()
   //登录方式0：账号密码，1：手机号，
   const [loginType, setLoginType] = useState(0);
-  //tab栏切换清空
-  const changeTab = (activeKey) => {
-    setLoginType(activeKey)
-    form.resetFields()
-  }
 
-  //获取验证码
-  const onCaptcha = async () => {
-    logger.debug("获取验证码")
-    try {
-      const { phone } = await form.validateFields(['phone'])
-      getCaptcha({ phone })
-      if (isCaptcha) logger.debug("手机号校验通过，phone=", data);
-      return true
-    } catch (e) {
-      const errorMessage =
-        e?.errorFields?.[0]?.errors?.[0] ||
-        e?.message ||
-        '获取验证码失败'
-      logger.debug("错误详情:", errorMessage);
-      throw new Error(errorMessage);
-    }
-  }
-  //保存自动登录
-  const setAutologinState = (autoLogin) => {
-    // 存储自动登录相关数据
-    if (autoLogin) {
-      dispatch(setAutoLogin({ rememberMe: autoLogin }))
-    } else {
-      // 清除自动登录数据
-      dispatch(setAutoLogin({ rememberMe: null, autoLoginExpire: -1 }))
-    }
-  }
-
-  // 监听登录状态变化
-  useEffect(() => {
-    if (isPhone || isCount) {
-      const autoLogin = form.getFieldValue('autoLogin')
-      setAutologinState(autoLogin)
-      logger.debug("登录成功", {
-        isPhone,
-        isCount,
-        autoLogin
-      })
-    }
-  }, [isPhone, isCount])
   //自动登录失败后只填入用户名
   useEffect(() => {
     const { rememberMe, autoLoginExpire, username } = getUserData()
@@ -95,6 +53,78 @@ const Login = () => {
       }
     }
   }, [form]);
+  // 倒计时定时器
+  useEffect(() => {
+    let timer;
+    if (isTiming) {
+      timer = setInterval(() => {
+        setCount(prev => {
+          if (prev <= 1) {
+            // 倒计时结束，重置状态
+            clearInterval(timer);
+            setIsTiming(false);
+            return 60;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    // 组件卸载或isTiming变化时清除定时器
+    return () => clearInterval(timer);
+  }, [isTiming]);
+  // 监听登录状态变化
+  useEffect(() => {
+    if (isPhone || isCount) {
+      const autoLogin = form.getFieldValue('autoLogin')
+      setAutologinState(autoLogin)
+      logger.debug("登录成功", {
+        isPhone,
+        isCount,
+        autoLogin
+      })
+    } else {
+      setIsTiming(false);
+      setCount(60);
+    }
+  }, [isPhone, isCount])
+
+  //tab栏切换清空
+  const changeTab = (activeKey) => {
+    setLoginType(activeKey)
+    form.resetFields()
+  }
+  // 验证码按钮文本渲染
+  const captchaTextRender = () => {
+    if (isTiming) {
+      return `${count}秒后重新获取`;
+    }
+    return '获取验证码';
+  };
+
+  //获取验证码
+  const onCaptcha = async () => {
+    const { phone } = await form.validateFields(['phone'])
+    setCount(60);
+    setIsTiming(true);
+    getCaptcha({ phone }, {
+      onError: () => {
+        setIsTiming(false)
+        setCount(60);
+      }
+    })
+  }
+  //保存自动登录
+  const setAutologinState = (autoLogin) => {
+    // 存储自动登录相关数据
+    if (autoLogin) {
+      dispatch(setAutoLogin({ rememberMe: autoLogin }))
+    } else {
+      // 清除自动登录数据
+      dispatch(setAutoLogin({ rememberMe: null, autoLoginExpire: -1 }))
+    }
+  }
+
+
 
   //提交表单
   const onFinish = (values) => {
@@ -147,6 +177,10 @@ const Login = () => {
               }}
               placeholder={'用户名'}
               validateFirst={true}
+              onChange={() => {
+                setIsTiming(false)
+                setCount(60)
+              }}
               rules={[
                 {
                   required: true,
@@ -221,14 +255,11 @@ const Login = () => {
               }}
               captchaProps={{
                 size: 'large',
+                style: { width: '7rem' },
+                disabled: isTiming
               }}
               placeholder={'请输入验证码'}
-              captchaTextRender={(timing, count) => {
-                if (timing) {
-                  return `${count}秒后重新获取`;
-                }
-                return '获取验证码';
-              }}
+              captchaTextRender={captchaTextRender}
               name="captcha"
               validateFirst={true}
               rules={[

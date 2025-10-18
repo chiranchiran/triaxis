@@ -1,12 +1,9 @@
 package com.chiran.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -26,19 +23,18 @@ public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @TableId(value = "id", type = IdType.AUTO)
+    /**
+     * 主键ID
+     */
+    @TableId(type = IdType.AUTO)
     private Integer id;
 
     /**
      * 用户名
      */
-    @TableField("username")
+    @TableField(value = "username")
     private String username;
-    /**
-     * 用户名
-     */
-    @TableField("role")
-    private Integer role;
+
     /**
      * 邮箱（可选）
      */
@@ -84,8 +80,8 @@ public class User implements Serializable {
     /**
      * 头像URL
      */
-    @TableField("avatar_url")
-    private String avatarUrl;
+    @TableField("avatar")
+    private String avatar;
 
     /**
      * 个人简介
@@ -94,16 +90,10 @@ public class User implements Serializable {
     private String bio;
 
     /**
-     * 0-未知，1-男，2-女
+     * 性别：0-未知，1-男，2-女
      */
     @TableField("gender")
     private Integer gender;
-
-    /**
-     * 出生日期
-     */
-    @TableField("birth_date")
-    private Date birthDate;
 
     /**
      * 学校
@@ -124,40 +114,40 @@ public class User implements Serializable {
     private String grade;
 
     /**
-     * 专业领域
+     * 专业领域（关联专业领域表）
      */
-    @TableField("professional_field_id")
-    private Integer professionalFieldId;
+    @TableField("subject_id")
+    private Integer subjectId;
 
     /**
      * 会员等级：0-普通用户，1-VIP，2-SVIP
      */
-    @TableField("membership_level")
-    private Integer membershipLevel;
+    @TableField("vip_level")
+    private Integer vipLevel;
 
     /**
      * 会员到期时间
      */
-    @TableField("membership_expires_at")
-    private Date membershipExpiresAt;
+    @TableField("vip_time")
+    private LocalDateTime vipTime;
 
     /**
      * 积分余额
      */
-    @TableField("points_balance")
-    private Integer pointsBalance;
+    @TableField("points")
+    private Integer points;
 
     /**
      * 累计获得积分
      */
-    @TableField("total_points_earned")
-    private Integer totalPointsEarned;
+    @TableField("points_get")
+    private Integer pointsGet;
 
     /**
      * 累计消耗积分
      */
-    @TableField("total_points_spent")
-    private Integer totalPointsSpent;
+    @TableField("points_spent")
+    private Integer pointsSpent;
 
     /**
      * 上传资源数
@@ -166,10 +156,16 @@ public class User implements Serializable {
     private Integer resourceCount;
 
     /**
-     * 下载资源数
+     * 发布帖子数量
      */
-    @TableField("download_count")
-    private Integer downloadCount;
+    @TableField("post_count")
+    private Integer postCount;
+
+    /**
+     * 上传课程数
+     */
+    @TableField("course_count")
+    private Integer courseCount;
 
     /**
      * 获赞数
@@ -178,14 +174,15 @@ public class User implements Serializable {
     private Integer likeCount;
 
     /**
-     * 是否激活
+     * 账户状态：0-禁用，1-正常使用
      */
-    @TableField("is_active")
-    private Boolean isActive;
+    @TableField("status")
+    private Integer status;
 
     /**
-     * 软删除，1是删除，0未删除
+     * 软删除：1-已删除，0-未删除
      */
+    @TableLogic // MyBatis-Plus 逻辑删除注解
     @TableField("deleted")
     private Integer deleted;
 
@@ -193,7 +190,7 @@ public class User implements Serializable {
      * 最后登录时间
      */
     @TableField("last_login_at")
-    private Date lastLoginAt;
+    private LocalDateTime lastLoginAt;
 
     /**
      * 最后登录IP
@@ -201,9 +198,21 @@ public class User implements Serializable {
     @TableField("last_login_ip")
     private String lastLoginIp;
 
-    @TableField("created_at")
-    private Date createdAt;
+    /**
+     * 创建时间
+     */
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 
-    @TableField("updated_at")
-    private Date updatedAt;
+    /**
+     * 更新时间
+     */
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /**
+     * 角色：0-普通用户，1-管理员
+     */
+    @TableField("role")
+    private Integer role;
 }

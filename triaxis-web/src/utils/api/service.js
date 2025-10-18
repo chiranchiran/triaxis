@@ -16,16 +16,17 @@ const service = axios.create({
 //请求拦截器添加token
 service.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken')
-    logger.info("token", token)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    const { accessToken } = getLoginData()
+    logger.info("token", accessToken)
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
     }
     logger.debug('请求拦截诶器请求配置', {
       url: config.url,
       method: config.method,
       params: config.params,
-      data: config.data
+      data: config.data,
+      headers: config.headers
     });
     return config
   },

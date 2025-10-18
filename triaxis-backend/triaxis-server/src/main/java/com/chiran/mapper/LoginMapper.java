@@ -9,5 +9,5 @@ public interface LoginMapper {
     UserInfoVO loginPhone(String phone);
     UserInfoVO loginCount(String username);
 
-    UserInfoVO loginAuto(int id);
+    UserInfoVO loginAuto(Integer id);
 }

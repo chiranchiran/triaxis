@@ -1,11 +1,52 @@
-button.my-button:not(.bg-dark):hover {
-  color: var(--text) !important;
-  background-color: var(--bg-hover) !important;
+.background {
+  position: fixed;
+  height: 100vh;
+  background: url(../../assets/login4.png) no-repeat fixed center / cover;
 }
-button.my-button.w-40 {
-  gap: 1rem !important;
+.background .container {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
-button.my-button.bg-dark:hover {
-  color: var(--text-light) !important;
-  background: var(--bg-dark) !important;
+.background .container a:hover {
+  color: var(--text-green);
+}
+.background .container .ant-pro-form-login-container {
+  padding-block-end: 0.6rem;
+}
+.background .container .ant-pro-form-login-desc {
+  margin-block-end: 20px;
+}
+.background .container .ant-tabs-top > .ant-tabs-nav::before,
+.background .container .ant-tabs-bottom > .ant-tabs-nav::before,
+.background .container .ant-tabs-top > div > .ant-tabs-nav::before,
+.background .container .ant-tabs-bottom > div > .ant-tabs-nav::before {
+  border-bottom: 0;
+}
+.background .container .ant-form-item {
+  margin-top: 0.4rem;
+}
+.background .container .ant-tabs-tab-btn {
+  font-size: 0.875rem;
+  text-align: center;
+}
+.background .container .ant-tabs .ant-tabs-tab + .ant-tabs-tab {
+  margin: 0 0 0 1.3rem;
+}
+.background .container .ant-space-gap-col-small {
+  column-gap: 16px;
+}
+.background .container .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
+  width: 8rem !important;
+  background-color: var(--text-green);
+}
+.background .container .ant-tabs-tab-active {
+  background-color: var(--accent-green-light);
+}
+.background .container .ant-tabs .ant-tabs-tab {
+  padding: 12px 1.2rem;
+}
+.background .container .otherLogin svg:hover {
+  color: var(--bg-dark);
 }

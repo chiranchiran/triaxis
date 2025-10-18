@@ -18,8 +18,8 @@
 export const defaultAutoLogin = 30 * 24 * 60 * 60 * 1000
 //设置、删除、获取登录数据
 export const setLoginData = (accessToken, refreshToken) => {
-  if (accessToken) localStorage.setItem("accessToken", JSON.stringify(accessToken))
-  if (refreshToken) localStorage.setItem("refreshToken", JSON.stringify(refreshToken))
+  if (accessToken) localStorage.setItem("accessToken", accessToken)
+  if (refreshToken) localStorage.setItem("refreshToken", refreshToken)
 }
 export const removeLoginData = () => {
   localStorage.removeItem("accessToken")
@@ -27,8 +27,8 @@ export const removeLoginData = () => {
 }
 export const getLoginData = () => {
   return {
-    accessToken: JSON.parse(localStorage.getItem("accessToken")),
-    refreshToken: JSON.parse(localStorage.getItem("refreshToken"))
+    accessToken: localStorage.getItem("accessToken"),
+    refreshToken: localStorage.getItem("refreshToken")
   } || {}
 }
 
@@ -105,5 +105,10 @@ export const removePreferenceData = () => {
   localStorage.removeItem("preference")
 }
 export const getPreferenceData = () => {
-  return JSON.parse(localStorage.getItem("preference")) || { language: 'Chinese', theme: 'light' }
+  let result = JSON.parse(localStorage.getItem("preference"))
+  if (!result) {
+    result = { language: 'Chinese', theme: 'light' }
+    localStorage.setItem('preference', JSON.stringify(result))
+  }
+  return result
 }

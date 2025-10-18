@@ -1,11 +1,13 @@
 package com.chiran.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chiran.dto.ResourceDTO;
 import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.entity.ResourceSoftware;
 import com.chiran.entity.Resource;
+import com.chiran.entity.User;
 import com.chiran.exception.BusinessException;
 import com.chiran.mapper.*;
 import com.chiran.result.PageResult;
@@ -158,7 +160,6 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         if (ids == null || ids.isEmpty()) {
             return true;
         }
-
         // 批量软删除
         return this.lambdaUpdate()
                 .set(Resource::getDeleted, 1)

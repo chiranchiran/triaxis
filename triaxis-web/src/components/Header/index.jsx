@@ -6,7 +6,7 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import './index.less'
-import { useLogout } from '../../hooks/api/auth';
+import { useLogout } from '../../hooks/api/login';
 import Logo from '../Logo';
 import { usePrefernce } from '../../hooks/usePreference';
 import MyButton from '../MyButton';

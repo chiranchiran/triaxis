@@ -2,17 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.chiran.mapper.LoginMapper">
     <select id="loginPhone" resultType="com.chiran.vo.UserInfoVO">
-        select id,username,role,avatar_url,membership_level,points_balance,is_active,password
+        select id,username,role,avatar,vip_level,points,status,password
         from users
         where phone = #{phone}
     </select>
     <select id="loginCount" resultType="com.chiran.vo.UserInfoVO">
-        select id,username,role,avatar_url,membership_level,points_balance,is_active,password
+        select id,username,role,avatar,vip_level,points,status,password
         from users
         where username = #{username}
     </select>
     <select id="loginAuto" resultType="com.chiran.vo.UserInfoVO">
-        select id,username,role,avatar_url,membership_level,points_balance,is_active,password
+        select id,username,role,avatar,vip_level,points,status,password
         from users
         where id = #{id}
     </select>

@@ -4,7 +4,7 @@ import { ConfigProvider, theme as antdTheme, theme } from 'antd'
 import React, { useCallback, useEffect } from 'react'
 import Header from './components/Header/index.jsx'
 import { getUserData, removeAllData } from './utils/localStorage'
-import { useAutoLogin } from './hooks/api/auth'
+import { useAutoLogin } from './hooks/api/login.js'
 import Sidebar from './components/SideBar/index.jsx'
 import SiteFooter from './components/SiteFooter/index.jsx'
 import { useLocation } from 'react-router-dom'
@@ -18,7 +18,8 @@ function App() {
   //每次刷新页面滚到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [location.pathname])
+
   //检查是否自动登录
   const checkAutoLogin = useCallback(() => {
     const { rememberMe, autoLoginExpire } = getUserData()

@@ -9,6 +9,7 @@ import com.chiran.service.LoginService;
 import com.chiran.utils.CaptchaUtil;
 import com.chiran.vo.UserInfoVO;
 import com.chiran.vo.UserLoginVO;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -57,9 +58,9 @@ public class LoginController {
      * 自动登录
      */
     @GetMapping("/validate")
-    public Result<UserLoginVO> loginAuto(@RequestHeader("Refresh-Token") String token) {
+    public Result<UserLoginVO> loginAuto(@RequestHeader("Authorization") String token) {
         log.info("用户自动登录");
-        int id = Integer.parseInt(jwtUtil.refreshTokens(token));
+        Integer id = Integer.parseInt(jwtUtil.getSubjectFromAccessTokenHeader(token));
         UserInfoVO userInfo = loginService.loginAuto(id);
         return loginSuccess(userInfo);
     }
@@ -78,7 +79,6 @@ public class LoginController {
     //任何登录方式登陆成功发放jwt令牌
     private Result<UserLoginVO> loginSuccess(UserInfoVO userInfo) {
         //登录成功后，生成jwt令牌
-        userInfo.setPassword("");
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", userInfo.getUsername());
         claims.put("role", userInfo.getRole());
@@ -95,9 +95,9 @@ public class LoginController {
      * 获取验证码
      */
     @PostMapping("/captcha")
-    public Result<String>  sendCode(@RequestBody UserGetCaptchaDTO userGetCaptchaDTO) {
+    public Result<String> sendCode(@RequestBody UserGetCaptchaDTO userGetCaptchaDTO) {
         String phone = userGetCaptchaDTO.getPhone();
-        log.debug("获取验证码，手机号是{}",phone);
+        log.debug("获取验证码，手机号是{}", phone);
         String captcha = CaptchaUtil.getInt(6);
         jwtUtil.saveCaptcha(phone, captcha);
         return Result.success(captcha);

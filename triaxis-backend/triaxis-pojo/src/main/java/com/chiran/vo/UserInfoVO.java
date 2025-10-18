@@ -21,19 +21,19 @@ public class UserInfoVO implements Serializable {
     /**
      * 角色
      */
-    private Byte role;
+    private Integer role;
     /**
      * 头像URL
      */
-    private String avatarUrl;
+    private String avatar;
     /**
      * 会员等级：0-普通用户，1-VIP，2-SVIP
      */
-    private Byte membershipLevel;
+    private Integer vipLevel;
     /**
      * 积分余额
      */
-    private Integer pointsBalance;
-    private Boolean isActive;
+    private Integer points;
+    private Integer Status;
     private String password;
 }

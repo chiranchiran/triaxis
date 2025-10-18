@@ -45,32 +45,15 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
         // 登出
-        if(request.getRequestURI().contains("/api/user/logout")) {
+        if (request.getRequestURI().contains("/api/user/logout")) {
             log.debug("登出请求放行");
             return true;
         }
 
         // 从请求头获取 accessToken
         String accessToken = request.getHeader(jwtProperties.getAccessToken().getHeader());
-        String token = jwtUtil.getTokenFromHeader(accessToken);
-        if (accessToken == null) {
-            log.debug("没有accessToken，拦截请求");
-            throw new JwtException("没有accessToken");
-        }
-        if (token == null || token.equals(accessToken)) {
-            log.debug("accessToken格式不正确，拦截请求，拦截到的格式为：{}", accessToken);
-            throw new JwtException("accessToken格式不正确");
-        }
-
-        if (!jwtUtil.validateAccessToken(token)) {
-            log.debug("accessToken校验未通过，拦截请求");
-            throw new JwtException("accessToken校验未通过");
-        }
-        String userId = jwtUtil.getSubjectFromAccessToken(token);
-        Integer role = (Integer) jwtUtil.parseAccessToken(token).get("role");
-        request.setAttribute("userId", jwtUtil);
-        request.setAttribute("role", role);
-        log.debug("accessToken校验通过，解析用户id为{}，角色为{}", userId, role);
+        jwtUtil.getSubjectFromAccessTokenHeader(accessToken);
+        log.debug("accessToken校验通过");
         return true;
     }
 

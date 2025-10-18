@@ -3,6 +3,7 @@ import { loginFailure, loginSuccess, logout } from "../../store/slices/authSlice
 
 const onLoginSuccess = (data, dispatch, navigate) => {
   dispatch(loginSuccess(data))
+  navigate('/')
 }
 const onLoginError = (error, dispatch) => {
   dispatch(loginFailure())

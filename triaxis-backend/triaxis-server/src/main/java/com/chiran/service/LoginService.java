@@ -10,5 +10,5 @@ public interface LoginService {
 
     UserInfoVO loginCount(UserLoginCountDTO userLoginCountDTO);
 
-    UserInfoVO loginAuto(int id);
+    UserInfoVO loginAuto(Integer id);
 }

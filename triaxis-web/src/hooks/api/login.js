@@ -1,6 +1,6 @@
-import { getCaptcha, loginCount, loginMobile, registerByCount, registerByMobile, validate } from "../../api/modules/auth"
+import { getCaptcha, loginCount, loginMobile, validate } from "../../api/modules/login"
 import { logout } from "../../api/modules/user"
-import { getLoginData, getUserData } from "../../utils/localStorage"
+import { getLoginData } from "../../utils/localStorage"
 import { useApi } from "../common/useApi"
 
 //登出
@@ -55,28 +55,6 @@ export const useCaptcha = (params, options = {}) => {
   return useApi(getCaptcha, {
     module: 'auth',
     apiName: 'captcha',
-    params,
-    isMutation: true,
-    ...options
-  })
-}
-
-//账户注册
-export const useRegisterByCount = (params, options = {}) => {
-  return useApi(registerByCount, {
-    module: 'auth',
-    apiName: 'register',
-    params,
-    isMutation: true,
-    ...options
-  })
-}
-
-//手机号注册
-export const useRegisterByMobile = (params, options = {}) => {
-  return useApi(registerByMobile, {
-    module: 'auth',
-    apiName: 'register',
     params,
     isMutation: true,
     ...options

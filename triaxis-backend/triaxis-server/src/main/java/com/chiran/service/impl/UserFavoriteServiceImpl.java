@@ -16,7 +16,6 @@ import com.chiran.result.PageResult;
 import com.chiran.service.CourseService;
 import com.chiran.service.ResourceService;
 import com.chiran.service.UserFavoriteService;
-import com.chiran.service.UserService;
 import com.chiran.vo.*;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;

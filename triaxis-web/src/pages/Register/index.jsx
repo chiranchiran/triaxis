@@ -14,55 +14,82 @@ import { Tabs } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
-import { useCaptcha, useRegisterByCount, useRegisterByMobile } from '../../hooks/api/auth';
+import { useCaptcha } from '../../hooks/api/login';
+import { useRegisterByCount, useRegisterByMobile } from '../../hooks/api/register';
 import { useMessage } from "../../hooks/common/useMessage"
 import LoginBase from '../../components/LoginBase';
 import { Link } from 'react-router-dom';
 
-export default function Register() {
+function Register() {
   const [form] = useForm()
-  const { mutate: getCaptcha, isSuccess: isCaptcha } = useCaptcha()
+  const { mutate: getCaptcha, isError: isCaptcha, data } = useCaptcha()
   const { mutate: countRegister, isSuccess: isCount } = useRegisterByCount()
   const { mutate: phoneRegister, isSuccess: isPhone } = useRegisterByMobile()
+  //倒计时
+  const [count, setCount] = useState(60);
+  const [isTiming, setIsTiming] = useState(false)
   const messageApi = useMessage()
 
   //注册方式0：账号密码，1：手机号，
   const [registerType, setRegisterType] = useState(0);
 
+  // 倒计时定时器
+  useEffect(() => {
+    let timer;
+    if (isTiming) {
+      timer = setInterval(() => {
+        setCount(prev => {
+          if (prev <= 1) {
+            // 倒计时结束，重置状态
+            clearInterval(timer);
+            setIsTiming(false);
+            return 60;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    // 组件卸载或isTiming变化时清除定时器
+    return () => clearInterval(timer);
+  }, [isTiming])
+
+  // 监听登录状态变化
+  useEffect(() => {
+    if (isPhone || isCount) {
+      logger.debug("注册成功", {
+        isPhone,
+        isCount
+      })
+    } else {
+      setIsTiming(false);
+      setCount(60);
+    }
+  }, [isPhone, isCount])
 
   //tab栏切换清空
   const changeTab = (activeKey) => {
     setRegisterType(activeKey)
     form.resetFields()
   }
+  // 验证码按钮文本渲染
+  const captchaTextRender = () => {
+    if (isTiming) {
+      return `${count}秒后重新获取`;
+    }
+    return '获取验证码';
+  };
 
   //获取验证码
   const onCaptcha = async () => {
-    logger.debug("获取验证码")
-    try {
-      const { phone } = await form.validateFields(['phone'])
-      getCaptcha({ phone })
-      return true
-    } catch (e) {
-      const errorMessage =
-        e?.errorFields?.[0]?.errors?.[0] ||
-        e?.message ||
-        '获取验证码失败'
-      logger.debug("错误详情:", errorMessage);
-      throw new Error(errorMessage);
-    }
-  }
-
-  //保存用户协议同意状态
-  const setAgreementState = (agreement) => {
-    // 可以存储用户协议同意状态
-    if (agreement) {
-      // dispatch(setUserAgreement({ agreed: true }))
-      logger.debug("用户已同意协议")
-    } else {
-      // dispatch(setUserAgreement({ agreed: false }))
-      logger.debug("用户未同意协议")
-    }
+    const { phone } = await form.validateFields(['phone'])
+    setCount(60);
+    setIsTiming(true);
+    getCaptcha({ phone }, {
+      onError: () => {
+        setIsTiming(false)
+        setCount(60);
+      }
+    })
   }
 
   //提交表单
@@ -109,19 +136,6 @@ export default function Register() {
       phoneRegister({ phone, captcha, password })
     }
   }
-
-  //监听注册状态变化
-  useEffect(() => {
-    if (isCount) {
-      logger.debug("账号注册完成")
-    }
-  }, [isCount])
-
-  useEffect(() => {
-    if (isPhone) {
-      logger.debug("手机号注册完成")
-    }
-  }, [isPhone])
 
   return (
     <LoginBase>
@@ -294,14 +308,11 @@ export default function Register() {
               }}
               captchaProps={{
                 size: 'large',
+                style: { width: '7rem' },
+                disabled: isTiming
               }}
               placeholder={'请输入验证码'}
-              captchaTextRender={(timing, count) => {
-                if (timing) {
-                  return `${count}秒后重新获取`;
-                }
-                return '获取验证码';
-              }}
+              captchaTextRender={captchaTextRender}
               name="captcha"
               validateFirst={true}
               rules={[
@@ -334,3 +345,4 @@ export default function Register() {
 
   );
 };
+export default Register
