@@ -7,8 +7,8 @@ import { handlePromiseError } from "../../utils/error/errorHandler"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 export const useApi = (apiFunc, {
-  module,
-  apiName,
+  queryKey = [],
+  config,
   enabled = true,
   onSuccess: apiOnSuccess,
   onError: apiOnError,
@@ -20,8 +20,8 @@ export const useApi = (apiFunc, {
   const notification = useNotification()
   const navigate = useNavigate();
   const dispatch = useDispatch()
-  const successConfig = getApiConfig(module, apiName, 'success')
-  const errorConfig = getApiConfig(module, apiName, 'error')
+  const successConfig = getApiConfig(config, 'success')
+  const errorConfig = getApiConfig(config, 'error')
 
   //默认成功处理
   const defaultOnSuccess = (data) => {
@@ -42,57 +42,13 @@ export const useApi = (apiFunc, {
       }
     }
     //刷新缓存
-    handleCacheUpdate(module, apiName, data);
+    queryClient.invalidateQueries({ queryKey });
   }
-  const handleCacheUpdate = (module, operation, data) => {
-    /**queryKey的形式
-     * user: {
-        list: (params) => ['users', 'list', params],
-        detail: (id) => ['users', 'detail', id]}
-     */
-    const byModule = (module, operation, params = null) => {
-      const baseKey = [module, operation];
-      return params ? [...baseKey, params] : baseKey;
-    }
-    const cacheUpdateStrategies = {
-      // 定义不同操作对应的缓存更新策略
-      'create': () => {
-        queryClient.invalidateQueries({
-          queryKey: byModule(module, 'list')
-        });
-      },
-      'update': () => {
-        const id = data?.id;
-        if (id) {
-          queryClient.invalidateQueries({
-            queryKey: byModule(module, 'detail', id)
-          });
-        }
-        queryClient.invalidateQueries({
-          queryKey: byModule(module, 'list')
-        });
-      },
-      'delete': () => {
-        const id = data?.id;
-        queryClient.invalidateQueries({
-          queryKey: byModule(module, 'list')
-        });
-        queryClient.removeQueries({
-          queryKey: byModule(module, 'detail', id)
-        })
 
-      }
-    };
-    Object.keys(cacheUpdateStrategies).forEach(key => {
-      if (operation.includes(key)) {
-        cacheUpdateStrategies[key]();
-      }
-    });
-  };
   //默认错误处理
   const defaultOnError = (error) => {
     //根据拦截器返回的自定义error分别处理
-    handlePromiseError(error, notification, messageApi, navigate)
+    if (!errorConfig.noDetail) handlePromiseError(error, notification, messageApi, navigate)
     //配置文件handler
     const handler = errorConfig.handler
     if (handler && typeof handler === 'function') {
@@ -143,7 +99,7 @@ export const useApi = (apiFunc, {
       onError: handleError
     })
     : useQuery({
-      queryKey: [module, apiName, params],
+      queryKey,
       queryFn: () => apiFunc(params),
       enabled,
       onSuccess: handleSuccess,

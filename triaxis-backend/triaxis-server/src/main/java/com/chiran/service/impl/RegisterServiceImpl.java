@@ -12,6 +12,7 @@ import com.chiran.utils.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -23,11 +24,14 @@ public class RegisterServiceImpl extends ServiceImpl<UserMapper, User>  implemen
     private UserMapper userMapper;
     @Autowired
     JwtUtil jwtUtil;
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public void registerPhone(UserRegisterPhoneDTO userRegisterPhoneDTO) {
         String phone = userRegisterPhoneDTO.getPhone();
         String captcha = userRegisterPhoneDTO.getCaptcha();
+        String password = userRegisterPhoneDTO.getPassword();
         // 查询用户是否存在（通过手机号）
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getPhone, phone);
@@ -44,6 +48,7 @@ public class RegisterServiceImpl extends ServiceImpl<UserMapper, User>  implemen
             log.info("手机号{}验证码无效", phone);
             throw ExceptionUtil.create(12006);
         }
+        userRegisterPhoneDTO.setPassword(passwordEncoder.encode(password));
         User newUser = new User();
         BeanUtils.copyProperties(userRegisterPhoneDTO, newUser);
         newUser.setUsername(phone);
@@ -64,7 +69,7 @@ public class RegisterServiceImpl extends ServiceImpl<UserMapper, User>  implemen
             log.info("用户已经存在");
             throw ExceptionUtil.create(12002);
         }
-        userLoginCountDTO.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        userLoginCountDTO.setPassword(passwordEncoder.encode(password));
         User newUser = new User();
         BeanUtils.copyProperties(userLoginCountDTO, newUser);
         userMapper.insert(newUser);

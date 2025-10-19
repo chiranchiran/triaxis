@@ -12,7 +12,7 @@ import { refresh } from "../../api/modules/login";
  * isAuthenticated
  */
 //refreshToken获得最新的accessToekn
-export const refreshToken = createAsyncThunk('auth/refresh',
+export const refreshTokens = createAsyncThunk('auth/refresh',
   async (_, { rejectWithValue }) => {
     try {
       const { refreshToken } = getLoginData()
@@ -21,7 +21,7 @@ export const refreshToken = createAsyncThunk('auth/refresh',
         return rejectWithValue('没有刷新令牌')
       }
       const res = await refresh()
-      return res.data
+      return res
     } catch (error) {
       return rejectWithValue(error.message || '登录失败')
     }
@@ -84,13 +84,13 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       //refresh开始
-      .addCase(refreshToken.pending, (state) => {
+      .addCase(refreshTokens.pending, (state) => {
         logger.debug("refresh开始，更新redux中auth的状态")
         state.isAuthenticated = false
         setAuthenticated(false)
       })
       //refresh成功
-      .addCase(refreshToken.fulfilled, (state, action) => {
+      .addCase(refreshTokens.fulfilled, (state, action) => {
         logger.debug("refresh成功，更新redux中auth的状态", action.payload)
         state.username = action.payload.userInfo?.username || ""
         state.id = action.payload.userInfo?.id || null
@@ -101,7 +101,7 @@ const authSlice = createSlice({
         setAllData(action.payload)
       })
       //refresh失败
-      .addCase(refreshToken.rejected, (state) => {
+      .addCase(refreshTokens.rejected, (state) => {
         logger.debug("refresh失败，更新redux中auth的状态")
         state.username = ''
         state.id = null

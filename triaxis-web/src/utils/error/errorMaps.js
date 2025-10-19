@@ -42,7 +42,7 @@ export const BUSINESS_ERROR_MAP = {
   12003: { type: 'USER_ERROR', level: 'error', message: '该手机号已注册，请直接登录' },
   12004: { type: 'USER_ERROR', level: 'error', message: '验证码错误，请重新输入' },
   12005: { type: 'USER_ERROR', level: 'error', message: '账户已被锁定，请联系管理员' },
-  12006: { type: 'USER_ERROR', level: 'error', message: '验证码已过期，请重新获取' },
+  12006: { type: 'USER_ERROR', level: 'error', message: '验证码不存在已过期，请重新获取' },
   12007: { type: 'USER_ERROR', level: 'error', message: '验证码发送过于频繁，请1分钟后再试' },
   // 数据验证 (13000-13999)
   13000: { type: 'VALIDATION_ERROR', level: 'error', message: '请输入有效的邮箱地址' },

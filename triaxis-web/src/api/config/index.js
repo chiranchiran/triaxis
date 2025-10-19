@@ -7,14 +7,20 @@ export const apiConfigs = {
 
 }
 
-export const getApiConfig = (module, apiName, type = 'error') => {
-  if (!apiConfigs[module] || !apiConfigs[module][apiName]) {
+export const getApiConfig = (config, type = 'error') => {
+  if (!config || !config[type]) {
     //默认配置只显示成功和失败,并且只有成功默认显示
     return {
-      showMessage: type === 'success',
-      messge: type === 'success' ? "成功" : '失败',
-      handler: null
+      success: {
+        showMessage: false,
+        message: "成功",
+      },
+      error: {
+        noDetail: false,
+        showMessage: false,
+        message: "失败！",
+      }
     }
   }
-  return apiConfigs[module][apiName][type]
+  return config[type]
 }

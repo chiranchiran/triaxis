@@ -57,9 +57,12 @@ public class LoginController {
     /**
      * 自动登录
      */
-    @GetMapping("/validate")
-    public Result<UserLoginVO> loginAuto(@RequestHeader("Authorization") String token) {
+    @PostMapping("/validate")
+    public Result<UserLoginVO> loginAuto(@RequestHeader(value = "Authorization", required = false) String token) {
         log.info("用户自动登录");
+        if(token == null){
+            throw new JwtException("没有accessToken");
+        }
         Integer id = Integer.parseInt(jwtUtil.getSubjectFromAccessTokenHeader(token));
         UserInfoVO userInfo = loginService.loginAuto(id);
         return loginSuccess(userInfo);
@@ -68,7 +71,7 @@ public class LoginController {
     /**
      * 刷新得到双token
      */
-    @GetMapping("/refresh")
+    @PostMapping("/refresh")
     public Result<UserLoginVO> refresh(@RequestHeader("Refresh-Token") String token) {
         log.info("用户刷新refresh");
         int id = Integer.parseInt(jwtUtil.refreshTokens(token));

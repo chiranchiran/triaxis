@@ -1,6 +1,6 @@
 import axios from "axios";
 import { store } from "../../store";
-import { logout, refreshToken } from "../../store/slices/authSlice";
+import { logout, refreshTokens } from "../../store/slices/authSlice";
 import { logger } from "../logger";
 import { ErrorFactory } from "../error/errorType";
 import { getLoginData } from "../localStorage";
@@ -17,17 +17,10 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     const { accessToken } = getLoginData()
-    logger.info("token", accessToken)
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`
     }
-    logger.debug('请求拦截诶器请求配置', {
-      url: config.url,
-      method: config.method,
-      params: config.params,
-      data: config.data,
-      headers: config.headers
-    });
+    logger.debug('请求拦截诶器请求配置', config);
     return config
   },
   (error) => {
@@ -184,13 +177,14 @@ const handleAuthError = async (config, errorInfo) => {
   //检查是否有refreshToken
   const { refreshToken } = getLoginData()
   if (!refreshToken) {
+    logger.warn("refreshtoken不存在，无法刷新token")
     return Promise.reject(ErrorFactory.business({ code: 11001 }))
   }
 
   config._retry = true
   try {
     if (!refreshing) {
-      refreshing = store.dispatch(refreshToken()).unwrap()
+      refreshing = store.dispatch(refreshTokens()).unwrap()
       logger.warn('开始刷新token');
     }
     await refreshing

@@ -3,19 +3,19 @@
 <mapper namespace="com.chiran.mapper.ResourceTypesMapper">
     <select id="getSubjectLists" resultType="com.chiran.vo.CategoryVO">
         select id,name
-        from professional_fields
+        from subjects
         where is_active=true
         order by sort_order
     </select>
     <select id="getToolLists" resultType="com.chiran.vo.CategoryVO">
         select id,name
-        from software_tools
+        from softwares
         where is_active=true
         order by sort_order
     </select>
     <select id="getRightLists" resultType="com.chiran.vo.CategoryVO">
         select id,name
-        from resource_rights
+        from rights
         where is_active=true
         order by sort_order
     </select>
@@ -32,7 +32,7 @@
         where is_active = true
           and level = 2
           and parent_id = #{parentId}
-        and specialized_field In (#{subjectId},NULL)
+        and subject_id In (#{subjectId},NULL)
         order by sort_order
     </select>
 </mapper>

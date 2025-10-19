@@ -78,16 +78,16 @@ const CourseContainer = ({ isCourse = false, title, description, placeholder, lo
         <div className="flex flex-col justify-start gap-6 bg-card rounded-xl shadow-sm p-6 mb-8 border border-main">
           {/* 第一行：资源权限和专业领域 */}
           <div className="flex justify-between gap-6 flex-wrap">
-            <TypeSelect title="资源权限" arr={types.rights} type="rightId" />
-            <TypeSelect title="专业领域" arr={types.subjects} type="subjectId" />
+            <TypeSelect title="资源权限" arr={types?.rights} type="rightId" />
+            <TypeSelect title="专业领域" arr={types?.subjects} type="subjectId" />
           </div>
           {isCourse ? (
-            <TypeSelect title="课程类型" arr={types.categories} type="categories" isMultiple={true} />
+            <TypeSelect title="课程类型" arr={types?.categories} type="categories" isMultiple={true} />
           ) : (
             <>
-              <TypeSelect title="适用软件" arr={types.tools} type="toolIds" isMultiple={true} />
-              <TypeSelect title="资源类型" arr={types.firstCategories} type="firstCategories" />
-              <TypeSelect title="二级分类" arr={types.secondaryCategories} type="secondaryCategories" isMultiple={true} />
+              <TypeSelect title="适用软件" arr={types?.tools} type="toolIds" isMultiple={true} />
+              <TypeSelect title="资源类型" arr={types?.firstCategories} type="firstCategories" />
+              <TypeSelect title="二级分类" arr={types?.secondaryCategories} type="secondaryCategories" isMultiple={true} />
             </>
           )
           }

@@ -17,6 +17,6 @@ public interface ResourceTypesMapper {
     List<CategoryVO> getSubjectLists();
     List<CategoryVO> getToolLists();
     List<CategoryVO> getRightLists();
-    List<CategoryVO> getCategoryFistLists();
+    List<CategoryVO> getCategoryFirstLists();
     List<CategoryVO> getCategorySecondLists(Integer subjectId, Integer parentId);
 }

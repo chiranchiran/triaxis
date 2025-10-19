@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -30,6 +31,10 @@ public class UserInfoVO implements Serializable {
      * 会员等级：0-普通用户，1-VIP，2-SVIP
      */
     private Integer vipLevel;
+    /**
+     * 会员到期时间
+     */
+    private LocalDateTime vipTime;
     /**
      * 积分余额
      */

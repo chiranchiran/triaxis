@@ -11,8 +11,9 @@ import { useNavigate } from 'react-router-dom';
 import FilterButton from '../../components/FilterButton'
 import MyButton from '../../components/MyButton';
 import CourseContainer from '../../components/CourseContainer';
+import { useGetResource, useGetResourceTypes } from '../../hooks/api/resources';
 
-const types = {
+let types = {
   rights: [
     { id: 1, name: '全部' },
     { id: 2, name: '免费' },
@@ -128,6 +129,7 @@ const types = {
 }
 
 const Resource = () => {
+  const { data: ResourcesTypes } = useGetResourceTypes()
   const [loading, setLoading] = useState(false);
   const [resources, setResources] = useState([]);
   const [total, setTotal] = useState(0);
@@ -152,8 +154,8 @@ const Resource = () => {
 
   //获取分类
   useEffect(() => {
-
-  }, [])
+    types = ResourcesTypes
+  }, [ResourcesTypes])
 
 
   // 获取资源列表
@@ -305,20 +307,20 @@ const Resource = () => {
     >
 
       {resources.map(resource => (
-        <Col key={resource.id} xs={24} sm={12} lg={8} xl={6}>
-          <Badge.Ribbon text={`${getPriceTag(resource.pricePoints)[0]}`} className={`${getPriceTag(resource.pricePoints)[1]}`} size="large">
+        <Col key={resource?.id} xs={24} sm={12} lg={8} xl={6}>
+          <Badge.Ribbon text={`${getPriceTag(resource?.pricePoints)[0]}`} className={`${getPriceTag(resource.pricePoints)[1]}`} size="large">
             <Card
               className="resource-card border-main overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 bg-card"
               cover={
                 <div
                   className="relative h-42 bg-gray-light overflow-hidden"
-                  onClick={() => navigate(`/resources/${resource.id}`)}
+                  onClick={() => navigate(`/resources/${resource?.id}`)}
                 >
-                  {resource.thumbnailPath ? (
+                  {resource?.thumbnailPath ? (
                     <img
                       alt="预览图加载失败"
-                      title={resource.title}
-                      src={resource.thumbnailPath}
+                      title={resource?.title}
+                      src={resource?.thumbnailPath}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -330,12 +332,12 @@ const Resource = () => {
 
                   <div className="absolute top-3 left-3 bg-like text-sm px-2 py-1 rounded-lg flex items-center">
                     <HeartOutlined className="mr-1" />
-                    {resource.likeCount || 0}
+                    {resource?.likeCount || 0}
                   </div>
 
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-dark p-3">
                     <h3 className="text-light font-medium text-sm text-center line-clamp-1">
-                      {resource.title}
+                      {resource?.title}
                     </h3>
                   </div>
                 </div>
@@ -344,17 +346,17 @@ const Resource = () => {
               <div className="space-y-2">
                 {/* 描述 */}
                 <p className="text-main text-sm line-clamp-2 leading-5">
-                  {resource.description}
+                  {resource?.description}
                 </p>
                 {/* 资源信息 - 发布时间和时长 */}
                 <div className="flex items-center justify-between text-xs text-secondary">
                   <span className="flex items-center">
                     <ClockCircleOutlined className="mr-1" />
-                    {resource.uploadTime}
+                    {resource?.uploadTime}
                   </span>
                   <span className="flex items-center">
                     <FileOutlined className="mr-1" />
-                    ({resource.fileExtension}) 4MB
+                    ({resource?.fileExtension}) 4MB
                   </span>
                 </div>
 
@@ -362,11 +364,11 @@ const Resource = () => {
                 <div className="mb-0 flex items-center justify-start text-md text-secondary border-t border-light space-x-4">
                   <span className="flex items-center">
                     <DownloadOutlined className="mr-1" />
-                    {resource.downloadCount || 0}
+                    {resource?.downloadCount || 0}
                   </span>
                   <span className="flex items-center">
                     <StarOutlined className="mr-1" />
-                    {resource.favoriteCount || 0}
+                    {resource?.favoriteCount || 0}
                   </span>
                 </div>
 
@@ -381,18 +383,18 @@ const Resource = () => {
                     下载
                   </MyButton>
                   <MyButton
-                    type={favoritedResources.has(resource.id) ? "black" : "white"}
+                    type={favoritedResources.has(resource?.id) ? "black" : "white"}
                     size="long"
                     icon={<StarOutlined />}
-                    onClick={() => handleFavorite(resource.id)}
+                    onClick={() => handleFavorite(resource?.id)}
                   >
                   </MyButton>
                   <MyButton
-                    type={likedResources.has(resource.id) ? "black" : "white"}
+                    type={likedResources.has(resource?.id) ? "black" : "white"}
 
                     size="long"
                     icon={<HeartOutlined />}
-                    onClick={() => handleLike(resource.id)}
+                    onClick={() => handleLike(resource?.id)}
                   >
                   </MyButton>
                 </div>

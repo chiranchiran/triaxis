@@ -28,7 +28,7 @@ public class ResourceTypesServiceImpl implements ResourceTypesService {
         List<CategoryVO> subjects = resourceTypesMapper.getSubjectLists();
         List<CategoryVO> rights = resourceTypesMapper.getRightLists();
         List<CategoryVO> tools = resourceTypesMapper.getToolLists();
-        List<CategoryVO> categoryFirst = resourceTypesMapper.getCategoryFistLists();
+        List<CategoryVO> categoryFirst = resourceTypesMapper.getCategoryFirstLists();
         return ResourcesTypesVO.builder().subjects(subjects).rights(rights).tools(tools).categoriesFirst(categoryFirst).build();
     }
 

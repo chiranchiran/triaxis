@@ -27,9 +27,9 @@ export const removeLoginData = () => {
 }
 export const getLoginData = () => {
   return {
-    accessToken: localStorage.getItem("accessToken"),
-    refreshToken: localStorage.getItem("refreshToken")
-  } || {}
+    accessToken: localStorage.getItem("accessToken") || "",
+    refreshToken: localStorage.getItem("refreshToken") || ""
+  }
 }
 
 //设置、删除、获取用户数据

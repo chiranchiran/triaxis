@@ -5,8 +5,8 @@ export const getResourceTypes = () => {
   return service.get('/resources/types',)
 }
 //获取二级分类
-export const getCategoryFirst = (data) => {
-  return service.post('/resources/categories', data)
+export const getCategorySecondary = (data) => {
+  return service.get('/resources/categories', data)
 }
 //搜索
 export const getResources = (data) => {

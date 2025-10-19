@@ -30,9 +30,9 @@ import LoginBase from '../../components/LoginBase';
 
 const Login = () => {
   const [form] = useForm()
-  const { mutate: getCaptcha, isError: isCaptcha, data } = useCaptcha()
-  const { mutate: countLogin, isSuccess: isCount } = useLoginByCount()
-  const { mutate: phoneLogin, isSuccess: isPhone } = useLoginByMobile()
+  const { mutate: doCaptcha, isError: isCaptcha, data } = useCaptcha()
+  const { mutate: doCountLogin, isSuccess: isCount } = useLoginByCount()
+  const { mutate: doPhoneLogin, isSuccess: isPhone } = useLoginByMobile()
   //倒计时
   const [count, setCount] = useState(60);
   const [isTiming, setIsTiming] = useState(false)
@@ -106,7 +106,7 @@ const Login = () => {
     const { phone } = await form.validateFields(['phone'])
     setCount(60);
     setIsTiming(true);
-    getCaptcha({ phone }, {
+    doCaptcha({ phone }, {
       onError: () => {
         setIsTiming(false)
         setCount(60);
@@ -133,12 +133,12 @@ const Login = () => {
     if (loginType === 0) {
       const { username, password } = values
       logger.debug("开始登录", { username, password })
-      countLogin({ username, password })
+      doCountLogin({ username, password })
       //手机号登录
     } else {
       const { phone, captcha } = values
       logger.debug("开始登录", { phone, captcha })
-      phoneLogin({ phone, captcha })
+      doPhoneLogin({ phone, captcha })
     }
   }
 

@@ -23,7 +23,7 @@ const onRegister = (data, dispatch, navigate) => {
 const onLogout = (error, dispatch, navigate) => {
   dispatch(logout())
 }
-const config = {
+const authconfig = {
   login: {
     success: {
       showMessage: true,
@@ -55,6 +55,7 @@ const config = {
       handler: onAutoSuccess
     },
     error: {
+      noDetail: true,
       showMessage: false,
       message: "自动登录失败！",
       handler: onAutoError
@@ -83,4 +84,4 @@ const config = {
     }
   },
 }
-export default config
+export default authconfig
