@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+//@RestController
 @RequestMapping("/user/resources")
 @RequiredArgsConstructor
 public class UserResourceController {
@@ -33,9 +33,9 @@ public class UserResourceController {
             @RequestParam(defaultValue = "10") Integer pageSize) {
         ResourceSearchDTO searchDTO = new ResourceSearchDTO();
         // 这里需要扩展CourseSearchDTO，添加userId字段
-        searchDTO.setId(id);
-        searchDTO.setPage(page);
-        searchDTO.setPageSize(pageSize);
+//        searchDTO.setId(id);
+//        searchDTO.setPage(page);
+//        searchDTO.setPageSize(pageSize);
 
         PageResult<ResourceVO> result = resourceService.getResources(searchDTO);
         return Result.success(result);

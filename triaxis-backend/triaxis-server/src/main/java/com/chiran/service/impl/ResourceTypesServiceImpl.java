@@ -33,7 +33,7 @@ public class ResourceTypesServiceImpl implements ResourceTypesService {
     }
 
     @Override
-    public List<CategoryVO> getCategoryFirst(Integer subjectId, Integer parentId) {
+    public List<CategoryVO> getCategorySecondary(Integer subjectId, Integer parentId) {
         return resourceTypesMapper.getCategorySecondLists(subjectId,parentId);
     }
 }

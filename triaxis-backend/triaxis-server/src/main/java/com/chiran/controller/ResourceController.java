@@ -1,6 +1,6 @@
 package com.chiran.controller;
 
-import com.chiran.dto.CategorySecondDTO;
+import com.chiran.dto.ResourceCategorySecondaryDTO;
 import com.chiran.dto.ResourceDTO;
 import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.result.PageResult;
@@ -10,6 +10,7 @@ import com.chiran.service.ResourceTypesService;
 import com.chiran.vo.CategoryVO;
 import com.chiran.vo.ResourceVO;
 import com.chiran.vo.ResourcesTypesVO;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -49,9 +50,9 @@ public class ResourceController {
      * 获取二级分类
      */
     @PostMapping("/categories")
-    public Result<List<CategoryVO>> getCategories(@RequestBody CategorySecondDTO categoryDTO) {
+    public Result<List<CategoryVO>> getCategories(@RequestBody ResourceCategorySecondaryDTO categoryDTO) {
         log.debug("获取资源二级分类");
-        List<CategoryVO> category = resourceTypesService.getCategoryFirst(categoryDTO.getSubjectId(), categoryDTO.getParentId());
+        List<CategoryVO> category = resourceTypesService.getCategorySecondary(categoryDTO.getSubjectId(), categoryDTO.getParentId());
         return Result.success(category);
     }
 
@@ -68,8 +69,8 @@ public class ResourceController {
      * 查看某个资源
      */
     @GetMapping("/{id}")
-    public Result<ResourceVO> getResource(@PathVariable Integer id) {
-        ResourceVO resource = resourceService.getResourceDetail(id);
+    public Result<ResourceVO> getResource(@PathVariable Integer id, HttpServletRequest request) {
+        ResourceVO resource = resourceService.getResourceDetail(id,(Integer)request.getAttribute("userId"));
         return Result.success(resource);
     }
 

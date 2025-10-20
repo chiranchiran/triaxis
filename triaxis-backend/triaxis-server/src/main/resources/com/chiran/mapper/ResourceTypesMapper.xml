@@ -32,7 +32,7 @@
         where is_active = true
           and level = 2
           and parent_id = #{parentId}
-        and subject_id In (#{subjectId},NULL)
+          and (subject_id = #{subjectId} OR subject_id IS NULL)
         order by sort_order
     </select>
 </mapper>

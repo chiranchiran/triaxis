@@ -23,7 +23,7 @@ public interface ResourceService extends IService<Resource> {
     /**
      * 根据ID获取资源详情
      */
-    ResourceVO getResourceDetail(Integer id);
+    ResourceVO getResourceDetail(Integer id,Integer userId);
 
     /**
      * 新增资源

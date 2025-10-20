@@ -7,11 +7,11 @@ import java.util.List;
 
 @Data
 public class ResourceSearchDTO implements Serializable {
-    private Integer id;
+    private Integer userId;
     private Integer rightId;
     private Integer subjectId;
-    private List<Integer> toolId;
-    private List<Integer> categoryId;
+    private List<Integer> toolIds;
+    private List<Integer> categoryIds;
     private Integer page;
     private Integer pageSize;
     private String search;

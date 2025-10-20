@@ -36,12 +36,14 @@ public class LoginInterceptor implements HandlerInterceptor {
         // 从请求头获取 accessToken
         String accessToken = request.getHeader(jwtProperties.getAccessToken().getHeader());
         if (request.getRequestURI().contains("/api/download") || request.getRequestURI().contains("/api/user")) {
-            jwtUtil.getSubjectFromAccessTokenHeader(accessToken);
+            String id =  jwtUtil.getSubjectFromAccessTokenHeader(accessToken);
+            request.setAttribute("userId", Integer.parseInt(id));
             log.debug("accessToken校验通过");
             return true;
         } else {
             if (accessToken != null) {
-                jwtUtil.getSubjectFromAccessTokenHeader(accessToken);
+                String id =  jwtUtil.getSubjectFromAccessTokenHeader(accessToken);
+                request.setAttribute("userId", Integer.parseInt(id));
                 log.debug("accessToken校验通过");
                 return true;
             }

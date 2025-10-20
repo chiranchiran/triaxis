@@ -6,36 +6,28 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceVO implements Serializable {
+public class ResourceSearchVO implements Serializable {
     //资源信息
     private Integer id;
     private String title;
     private String description;
     private Long size;
     private String extension;
-    private Integer rightId;
-    private Integer subjectId;
     private Integer userId;
-    private Integer price = 0;
-    private String details;
+    private Integer price;
     private Integer downloadCount;
     private Integer collectCount;
     private Integer likeCount;
     private LocalDateTime publishTime;
     private LocalDateTime updateTime;
-    private List<Integer> toolIds;
-    private List<Integer> categoryIds;
     //用户与资源的关系
-    private Boolean isLiked = false;
-    private Boolean isCollected = false;
-    private Boolean isPurchased = false;
+    private Boolean isLiked;
+    private Boolean isCollected;
+    private Boolean isPurchased;
 }

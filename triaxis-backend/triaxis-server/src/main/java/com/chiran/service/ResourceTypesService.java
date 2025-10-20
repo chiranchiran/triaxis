@@ -18,5 +18,5 @@ public interface ResourceTypesService {
 
     ResourcesTypesVO getTypes();
 
-    List<CategoryVO> getCategoryFirst(Integer subjectId, Integer parentId);
+    List<CategoryVO> getCategorySecondary(Integer subjectId, Integer parentId);
 }
