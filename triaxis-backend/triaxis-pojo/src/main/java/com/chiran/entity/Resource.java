@@ -1,10 +1,10 @@
 package com.chiran.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,6 +38,8 @@ public class Resource implements Serializable {
     @TableField("path")
     private String path;
 
+    @TableField("cover_image")
+    private String coverImage;
     /**
      * 文件大小(字节)
      */
@@ -119,18 +121,21 @@ public class Resource implements Serializable {
     /**
      * 创建时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
     /**
      * 发布时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField("publish_time")
     private LocalDateTime publishTime;
 
     /**
      * 更新时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 

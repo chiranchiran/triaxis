@@ -20,7 +20,13 @@ service.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`
     }
-    logger.debug('请求拦截诶器请求配置', config);
+    logger.debug('请求拦截诶器请求配置', {
+      url: config.url,
+      parmas: config.params,
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    });
     return config
   },
   (error) => {
@@ -56,11 +62,11 @@ service.interceptors.response.use(
     const originalRequest = error.config
     //处理无响应
     if (!error.response) {
-      logger.debug("处理无响应错误")
+      logger.debug("处理无响应错误", error)
       return handleNetworkError(error, originalRequest)
     }
     //处理http错误
-    logger.debug("处理http错误")
+    logger.debug("处理http错误", error)
     return handleHttpError(error, originalRequest)
   }
 )

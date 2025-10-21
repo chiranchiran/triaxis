@@ -2,15 +2,15 @@ import service from "../../utils/api/service"
 
 //获取3个大类和一级分类
 export const getResourceTypes = () => {
-  return service.get('/resources/types',)
+  return service.get('/resources/types')
 }
 //获取二级分类
 export const getCategorySecondary = (data) => {
-  return service.get('/resources/categories', data)
+  return service.post('/resources/categories', data)
 }
 //搜索
-export const getResources = (data) => {
-  return service.get('/resources/search', data)
+export const getResources = (params) => {
+  return service.get('/resources/search', { params })
 }
 //查看某个资源
 export const getResource = (id) => {

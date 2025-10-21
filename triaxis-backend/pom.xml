@@ -52,6 +52,12 @@
                 <version>${spring.version}</version>
                 <scope>test</scope>
             </dependency>
+            <!-- json依赖 -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson-bom.version}</version>
+            </dependency>
             <!-- 添加校验 starter 依赖 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>

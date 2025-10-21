@@ -1,4 +1,5 @@
 import { apiConfigs } from "../../api/config"
+import { logger } from "../../utils/logger"
 import { useApi } from "./useApi"
 
 export const useGet = (fn, queryKey, params, options = {}) => {
@@ -6,10 +7,11 @@ export const useGet = (fn, queryKey, params, options = {}) => {
     queryKey,
     config: apiConfigs.common.get,
     params,
+    isMutation: false,
     ...options
   })
 }
-export const useUpdate = (fn, params, options = {}) => {
+export const useUpdate = (fn, queryKey, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.delete,
@@ -18,7 +20,7 @@ export const useUpdate = (fn, params, options = {}) => {
     ...options
   })
 }
-export const useDelete = (fn, params, options = {}) => {
+export const useDelete = (fn, queryKey, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.delete,
@@ -27,7 +29,7 @@ export const useDelete = (fn, params, options = {}) => {
     ...options
   })
 }
-export const useAdd = (fn, params, options = {}) => {
+export const useAdd = (fn, queryKey, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.add,
@@ -36,7 +38,7 @@ export const useAdd = (fn, params, options = {}) => {
     ...options
   })
 }
-export const useUpload = (fn, params, options = {}) => {
+export const useUpload = (fn, queryKey, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.upload,
@@ -45,7 +47,7 @@ export const useUpload = (fn, params, options = {}) => {
     ...options
   })
 }
-export const useView = (fn, params, options = {}) => {
+export const useView = (fn, queryKey, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.view,

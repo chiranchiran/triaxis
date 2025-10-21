@@ -6,6 +6,7 @@ import { useMessage, useNotification } from "./useMessage"
 import { handlePromiseError } from "../../utils/error/errorHandler"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
+import { useEffect } from "react"
 export const useApi = (apiFunc, {
   queryKey = [],
   config,
@@ -103,8 +104,23 @@ export const useApi = (apiFunc, {
       queryFn: () => apiFunc(params),
       enabled,
       onSuccess: handleSuccess,
-      onError: handleError
+      onError: handleError,
+      keepPreviousData: true
     });
+
+
+  // 主要的错误和成功处理通过 useEffect
+  useEffect(() => {
+    if (requestResult.isError && requestResult.error) {
+      handleError(requestResult.error);
+    }
+  }, [requestResult.isError, requestResult.error]);
+
+  useEffect(() => {
+    if (requestResult.isSuccess && requestResult.data) {
+      handleSuccess(requestResult.data);
+    }
+  }, [requestResult.isSuccess, requestResult.data]);
   return {
     ...requestResult,
     handleSuccess,

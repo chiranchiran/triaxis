@@ -3,11 +3,11 @@ export default {
   get: {
     success: {
       showMessage: false,
-      message: "添加成功",
+      message: "获取成功",
     },
     error: {
       showMessage: false,
-      message: "添加失败！",
+      message: "获取成功",
     }
   },
   add: {

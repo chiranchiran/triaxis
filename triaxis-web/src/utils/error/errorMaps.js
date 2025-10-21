@@ -52,7 +52,7 @@ export const BUSINESS_ERROR_MAP = {
 
   // 业务逻辑 (14000-14999)
   14000: { type: 'BUSINESS_ERROR', level: 'error', message: '无法操作！' },
-  14001: { type: 'BUSINESS_ERROR', level: 'error', message: '该优惠券已失效' },
+  14001: { type: 'BUSINESS_ERROR', level: 'error', message: '资源不存在或已经删除' },
   14002: { type: 'BUSINESS_ERROR', level: 'error', message: '订单已进入配送阶段，无法取消' },
   14003: { type: 'BUSINESS_ERROR', level: 'error', message: '您已提交过相同订单' },
 

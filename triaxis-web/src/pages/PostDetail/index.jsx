@@ -572,7 +572,7 @@ const PostDetail = () => {
                             </span>
                           )}
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-800 mb-3">
+                        <h1 className="text-2xl font-bold text-main mb-3">
                           {post.title}
                         </h1>
                       </div>
@@ -588,7 +588,7 @@ const PostDetail = () => {
                           className="border border-gray-300 mr-5"
                         />
                         <div className='pl-5'>
-                          <div className="font-medium text-gray-800">
+                          <div className="font-medium main">
                             {post.author.name}
                           </div>
                           <div className="flex items-center space-x-2 mt-1">

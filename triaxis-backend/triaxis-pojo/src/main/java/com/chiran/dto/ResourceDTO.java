@@ -11,6 +11,7 @@ public class ResourceDTO {
     private String title;
     private String description;
     private String path;
+    private String coverImage;
     private Long size;
     private String extension;
     private Integer rightId;

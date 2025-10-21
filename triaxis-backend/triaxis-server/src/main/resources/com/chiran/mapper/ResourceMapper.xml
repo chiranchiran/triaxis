@@ -8,6 +8,7 @@
         r.description,
         r.size,
         r.extension,
+        r.cover_image,
         r.user_id,
         r.price,
         r.download_count,
@@ -15,6 +16,8 @@
         r.like_count,
         r.publish_time,
         r.update_time,
+        u.username,
+        u.avatar,
         -- 是否点赞：true=已点赞，false=未点赞
         CASE
         WHEN #{dto.userId} IS NULL THEN false
@@ -34,10 +37,11 @@
         END AS isPurchased
         FROM resources r
         LEFT JOIN resource_software rs ON r.id = rs.resource_id AND rs.deleted = 0
-        LEFT JOIN resourse_category rc ON r.id = rc.resource_id AND rc.deleted = 0
+        LEFT JOIN resource_category rc ON r.id = rc.resource_id AND rc.deleted = 0
         LEFT JOIN user_likes ul ON r.id = ul.target_id and ul.target_type=1 AND ul.user_id = #{dto.userId} AND ul.deleted = 0
         LEFT JOIN user_collections uf ON r.id = uf.target_id and uf.target_type=1 AND uf.user_id = #{dto.userId} AND uf.deleted = 0
         LEFT JOIN user_purchases up ON r.id = up.target_id and up.target_type=1 AND up.user_id = #{dto.userId} AND up.deleted = 0
+        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
         WHERE r.deleted = 0
         AND r.status = 3  <!-- 只查询已发布的资源 -->
 

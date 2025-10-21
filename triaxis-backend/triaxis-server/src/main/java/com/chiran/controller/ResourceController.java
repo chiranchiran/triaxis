@@ -61,6 +61,7 @@ public class ResourceController {
      */
     @GetMapping("/search")
     public Result<PageResult> getResources(ResourceSearchDTO resourceSearchDTO) {
+        log.debug("搜索资源，参数是{}", resourceSearchDTO);
         PageResult<ResourceVO> pageResult = resourceService.getResources(resourceSearchDTO);
         return Result.success(pageResult);
     }
@@ -70,6 +71,7 @@ public class ResourceController {
      */
     @GetMapping("/{id}")
     public Result<ResourceVO> getResource(@PathVariable Integer id, HttpServletRequest request) {
+       log.debug("查看资源，id是{}",id);
         ResourceVO resource = resourceService.getResourceDetail(id,(Integer)request.getAttribute("userId"));
         return Result.success(resource);
     }
@@ -79,6 +81,7 @@ public class ResourceController {
      */
     @PostMapping
     public Result<Boolean> addResource(@RequestBody ResourceDTO dto) {
+        log.debug("上传资源，是{}",dto);
         Boolean success = resourceService.addResource(dto);
         return Result.success(success);
     }
@@ -88,6 +91,7 @@ public class ResourceController {
      */
     @PutMapping
     public Result<Boolean> updateResource(@RequestBody ResourceDTO dto) {
+        log.debug("修改资源，是{}",dto);
         Boolean flag = resourceService.updateResource(dto);
         return Result.success(flag);
     }
@@ -97,6 +101,7 @@ public class ResourceController {
      */
     @DeleteMapping("/{id}")
     public Result<Boolean> removeResource(@PathVariable Integer id) {
+        log.debug("删除某个资源，id是{}",id);
         Boolean flag = resourceService.removeResource(id);
         return Result.success(flag);
     }
@@ -106,6 +111,7 @@ public class ResourceController {
      */
     @DeleteMapping("/batch")
     public Result<Boolean> removeResources(@RequestBody List<Integer> ids) {
+        log.debug("删除某个资源，id是{}",ids);
         Boolean success = resourceService.removeResources(ids);
         return Result.success(success);
     }
