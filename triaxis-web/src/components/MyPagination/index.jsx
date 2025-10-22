@@ -14,7 +14,7 @@ function MyPagination({ currentPage = 1, pageSize = 10, total, onChange }) {
         onChange={onChange}
         showQuickJumper
         showSizeChanger
-        pageSizeOpts={[10, 20, 50, 200]}>
+        pageSizeOpts={[12, 16, 24, 32, 128, 200]}>
       </Pagination>
     </div>
   )

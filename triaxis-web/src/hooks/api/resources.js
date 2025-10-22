@@ -2,7 +2,9 @@
 import { getCategorySecondary, getResource, getResources, getResourceTypes, removeResource, removeResources, updateResource, uploadResource } from "../../api/modules/resources"
 import { useDelete, useGet, useUpdate, useUpload } from "../common/useData"
 
-export const useGetResourceTypes = (options) => useGet(getResourceTypes, ['Resources', 'types'], null, options)
+export const RESOURCE_TYPES_QUERY_KEY = ['Resources', 'types']
+
+export const useGetResourceTypes = (options) => useGet(getResourceTypes, RESOURCE_TYPES_QUERY_KEY, null, options)
 export const useGetSecondaryCategory = (params, options) => useGet(getCategorySecondary, ['Resources', 'types', params.subjectId, params.parentId], params, options)
 export const useGetResources = (params, options) => useGet(getResources, ['Resources', 'list', params], params, options)
 export const useGetResource = (params, options) => useGet(getResource, ['Resources', params.id], params, options)

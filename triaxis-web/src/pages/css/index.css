@@ -15,3 +15,16 @@
 .comment .ant-form-item:last-child {
   margin-bottom: 0 !important;
 }
+.side {
+  position: sticky;
+  top: 20px;
+  /* 当元素距离视口顶部 ≤20px 时触发固定 */
+  z-index: 100;
+  width: 300px;
+  height: 200px;
+  background: white;
+}
+.parent {
+  overflow: visible;
+  min-height: 100vh;
+}

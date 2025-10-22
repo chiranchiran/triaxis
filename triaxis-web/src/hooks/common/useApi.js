@@ -43,7 +43,9 @@ export const useApi = (apiFunc, {
       }
     }
     //刷新缓存
-    queryClient.invalidateQueries({ queryKey });
+    if (isMutation) {
+      queryClient.invalidateQueries({ queryKey });
+    }
   }
 
   //默认错误处理

@@ -1,5 +1,5 @@
 // ResourceDetail.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Button,
   Rate,
@@ -36,6 +36,8 @@ import MyButton from '../../components/MyButton';
 import { CustomCard, DetailCard } from '../../components/DetailCard';
 import VirtualList from 'rc-virtual-list';
 import Review from '../../components/Review';
+import { useCollect, useLike } from '../../hooks/api/common';
+import { throttle } from 'lodash';
 const { TextArea } = Input;
 
 // 模拟资源详情数据
@@ -155,6 +157,8 @@ const userLevelColors = {
 
 
 const ResourceDetail = () => {
+  const { mutation: dolike } = useLike();
+  const { mutation: doCollect } = useCollect();
   const [resource, setResource] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -183,79 +187,6 @@ const ResourceDetail = () => {
     loadData();
   }, []);
 
-  // 处理点赞
-  const handleLike = () => {
-    setLiked(!liked);
-    if (!liked) {
-      setResource(prev => ({
-        ...prev,
-        likeCount: prev.likeCount + 1
-      }));
-      message.success('点赞成功！');
-    } else {
-      setResource(prev => ({
-        ...prev,
-        likeCount: prev.likeCount - 1
-      }));
-      message.info('已取消点赞');
-    }
-  };
-
-  // 处理收藏
-  const handleFavorite = () => {
-    setFavorited(!favorited);
-    if (!favorited) {
-      setResource(prev => ({
-        ...prev,
-        favoriteCount: prev.favoriteCount + 1
-      }));
-      message.success('收藏成功！');
-    } else {
-      setResource(prev => ({
-        ...prev,
-        favoriteCount: prev.favoriteCount - 1
-      }));
-      message.info('已取消收藏');
-    }
-  };
-
-  // 处理下载
-  const handleDownload = () => {
-    message.success('开始下载资源...');
-    // 这里应该是实际的下载逻辑
-  };
-
-  // 处理评价提交
-  const handleReviewSubmit = async (values) => {
-    setSubmitting(true);
-    try {
-      // 模拟API调用
-      setTimeout(() => {
-        const newReview = {
-          id: reviews.length + 1,
-          user: {
-            name: '当前用户',
-            avatar: '/images/avatar-current.jpg',
-            level: '普通用户'
-          },
-          rating: values.rating,
-          content: values.content,
-          createTime: new Date().toLocaleString(),
-          likes: 0
-        };
-
-        setReviews(prev => [newReview, ...prev]);
-        reviewForm.resetFields();
-        message.success('评价提交成功！');
-        setSubmitting(false);
-      }, 500);
-    } catch (error) {
-      console.error('提交评价失败:', error);
-      message.error('提交评价失败，请重试');
-      setSubmitting(false);
-    }
-  };
-
   // 获取价格标签
   const getPriceTag = (pricePoints) => {
     if (pricePoints === 0) {
@@ -265,12 +196,6 @@ const ResourceDetail = () => {
     } else {
       return ["tag-blue", `${pricePoints}积分`]
     }
-  };
-
-
-  // 获取用户等级颜色
-  const getUserLevelColor = (level) => {
-    return userLevelColors[level] || 'bg-gray-100 text-gray-600 border-gray-200';
   };
 
   const Statis = ({ count, children }) => {
@@ -371,6 +296,50 @@ const ResourceDetail = () => {
       setReviews(mockReviews);
     }, 800);
   };
+  const sidebarRef = useRef(null);
+  const [isFixed, setIsFixed] = useState(false);
+
+  // 滚动事件处理：判断侧边栏顶部距离视口顶部是否 <= 20px
+  const handleScroll = () => {
+    if (!sidebarRef.current) return;
+
+    // 获取侧边栏相对于视口的位置（关键！）
+    const rect = sidebarRef.current.getBoundingClientRect();
+    console.log('侧边栏顶部距离视口顶部：', rect.top);
+    // rect.top 是侧边栏顶部到视口顶部的距离（正数：在视口内；负数：已滚动出视口）
+    const isWithinThreshold = rect.top <= 50; // 距离顶部<=20px时需要固定
+
+    // 更新固定状态
+    if (isWithinThreshold && !isFixed) {
+      setIsFixed(true);
+    } else if (!isWithinThreshold && isFixed) {
+      setIsFixed(false);
+    }
+  };
+
+  // 监听滚动事件（添加节流优化性能）
+  useEffect(() => {
+    // 简单节流：50ms内只执行一次
+    const throttledScroll = (e) => {
+      let lastTime = 0;
+      return () => {
+        const now = Date.now();
+        if (now - lastTime > 50) {
+          handleScroll();
+          lastTime = now;
+        }
+      };
+    };
+
+    const scrollHandler = throttledScroll();
+    window.addEventListener('scroll', scrollHandler);
+    // 初始加载时检查一次位置（避免页面刷新时已在固定区域）
+    handleScroll();
+
+    return () => {
+      window.removeEventListener('scroll', scrollHandler);
+    };
+  }, [isFixed]);
   const onScroll = e => {
     // Refer to: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollHeight#problems_and_solutions
     if (
@@ -563,9 +532,9 @@ const ResourceDetail = () => {
         </Col>
 
         {/* 右侧操作和信息面板 */}
-        <Col xs={24} lg={8}>
+        <Col xs={24} lg={8} className="parent"  >
           {/* 操作卡片 */}
-          <CustomCard className="top-4mb-4 space-y-4">
+          <CustomCard className="mb-4 space-y-4 overflow-visible h-auto">
             {/* 上传者信息 */}
             <div className="flex items-center space-x-8 p-3">
               <Avatar
@@ -587,7 +556,6 @@ const ResourceDetail = () => {
                 </div>
               </div>
             </div>
-
             {/* 统计信息 */}
             <div className="grid grid-cols-4 gap-3 text-center bg-main rounded-lg">
               <Statis count={resource.downloadCount} >下载</Statis>
@@ -595,8 +563,6 @@ const ResourceDetail = () => {
               <Statis count={resource.viewCount} >收藏</Statis>
               <Statis count={resource.fileExtension} >格式</Statis>
             </div>
-
-
             {/* 文件信息 */}
             <div className="space-y-3">
               <FileTime count={resource.fileSize}>文件大小：</FileTime>
@@ -604,16 +570,14 @@ const ResourceDetail = () => {
               <FileTime count={resource.updateTime}>更新时间：</FileTime>
               <FileTime count={resource.category.softwareTools}>适用软件：</FileTime>
             </div>
-
-
             {/* 操作按钮 */}
-            <div className="gap-3 sticky z-10 top-20 flex flex-col justify-stretch">
+            <div ref={sidebarRef} className="side gap-3 flex flex-col justify-stretch" >
               <div className='flex'>
                 <MyButton
                   size='large'
                   type="black"
                   icon={<DownloadOutlined />}
-                  onClick={handleDownload}
+
                   className="flex-1"
                 >立即下载</MyButton>
               </div>
@@ -623,13 +587,13 @@ const ResourceDetail = () => {
                 <MyButton
                   type="white"
                   icon={<StarOutlined />}
-                  onClick={handleFavorite}
+
                   className="flex-1 py-4"
                 >收藏</MyButton>
                 <MyButton
                   type="white"
                   icon={<HeartOutlined />}
-                  onClick={handleLike}
+
                   className="flex-1 py-4"
                 >点赞</MyButton>
               </div>
@@ -638,7 +602,7 @@ const ResourceDetail = () => {
                   size='large'
                   type="white"
                   icon={<ShareAltOutlined />}
-                  onClick={handleDownload}
+
                   className="flex-1"
                 >立即分享</MyButton>
               </div>
@@ -653,7 +617,7 @@ const ResourceDetail = () => {
 
             <Form
               form={reviewForm}
-              onFinish={handleReviewSubmit}
+
               layout="vertical"
               className='!pt-4'
             >

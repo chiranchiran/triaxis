@@ -16,8 +16,46 @@ import { getUserData } from '../../utils/localStorage';
 import { useCollect } from '../../hooks/api/common';
 import { useLike } from '../../hooks/api/common';
 import MyButton from '../../components/MyButton';
-import { isDataValid, subUsername } from '../../utils/error/commonUtil';
-
+import { subUsername } from '../../utils/error/commonUtil';
+const filterList = [
+  {
+    title: "资源权限",
+    type: "rightId",
+    field: "rights",
+    isMultiple: false,
+    isTypes: true
+  },
+  {
+    title: "专业领域",
+    type: "subjectId",
+    field: "subjects",
+    isMultiple: false,
+    isTypes: true,
+    isNotAll: true
+  },
+  {
+    title: "适用软件",
+    type: "toolIds",
+    field: "tools",
+    isMultiple: true,
+    isTypes: true
+  },
+  {
+    title: "资源类型",
+    type: "categoriesFirst",
+    field: "categoriesFirst",
+    isMultiple: false,
+    isFirst: true,
+    isTypes: true,
+    isNotAll: true
+  },
+  {
+    title: "二级分类",
+    type: "categoriesSecondary",
+    isMultiple: true,
+    isTypes: false
+  }
+]
 const Resource = () => {
   const navigate = useNavigate();
   const userData = getUserData();
@@ -28,174 +66,44 @@ const Resource = () => {
   const [searchParams, setSearchParams] = useState({
     search: "",
     page: 1,
-    pageSize: 10,
+    pageSize: 12,
     orderBy: 0
   });
+
   // 筛选条件和搜索参数状态
   const [selectedFilters, setSelectedFilters] = useState({
     rightId: null,
     subjectId: null,
-    toolIds: [null],
+    toolIds: [],
     categoriesFirst: null,
-    categoriesSecondary: [null]
+    categoriesSecondary: []
   });
-  // 获取分类数据
-  const { data: resourceTypes = {}, isLoading: typesLoading, isError: typesError } = useGetResourceTypes({ enabled: true, });
-
-  // 获取二级分类数据 
-  const { data: categoriesSecondaryData, isLoading: secondaryLoading, isError: secondaryError } = useGetSecondaryCategory({
-    subjectId: selectedFilters.subjectId,
-    parentId: selectedFilters.categoriesFirst
-  });
-
-
-  // 为每个分类列表添加"全部"选项
-  const enhancedResourceTypes = useMemo(() => {
-    if (!resourceTypes) return {}
-
-    return {
-      ...resourceTypes,
-      rights: isDataValid(resourceTypes.rights)
-        ? [{ id: null, name: '全部' }, ...resourceTypes.rights]
-        : (resourceTypes.rights || []),
-      subjects: isDataValid(resourceTypes.subjects)
-        ? [{ id: null, name: '全部' }, ...resourceTypes.subjects]
-        : (resourceTypes.subjects || []),
-      tools: isDataValid(resourceTypes.tools)
-        ? [{ id: null, name: '全部' }, ...resourceTypes.tools]
-        : (resourceTypes.tools || []),
-    };
-  }, [resourceTypes]);
-
-  const enhancedSecondaryCategory = useMemo(() => {
-    return isDataValid(categoriesSecondaryData)
-      ? [{ id: null, name: '全部' }, ...(categoriesSecondaryData || [])]
-      : (categoriesSecondaryData || [])
-  }, [categoriesSecondaryData]);
-  const allSecondaryCategories = useMemo(() => {
-    return isDataValid(categoriesSecondaryData) ? categoriesSecondaryData.map((item) => item.id) : []
-  }, [categoriesSecondaryData]);
-  // 初始化一级分类选择
-  useEffect(() => {
-    if (enhancedResourceTypes.rights &&
-      enhancedResourceTypes.subjects &&
-      enhancedResourceTypes.tools &&
-      enhancedResourceTypes.categoriesFirst) {
-
-      const hasEnoughData =
-        enhancedResourceTypes.rights.length > 1 &&
-        enhancedResourceTypes.subjects.length > 1 &&
-        enhancedResourceTypes.tools.length > 1 &&
-        enhancedResourceTypes.categoriesFirst.length > 1;
-
-      if (hasEnoughData) {
-        setSelectedFilters(prev => ({
-          ...prev,
-          rightId: enhancedResourceTypes.rights[1].id,
-          subjectId: enhancedResourceTypes.subjects[1].id,
-          toolIds: [enhancedResourceTypes.tools[1].id],
-          categoriesFirst: enhancedResourceTypes.categoriesFirst[1].id
-        }));
-      }
+  const getParams = arr => {
+    if (arr.length < 1) return;
+    if (Array.isArray(arr[0])) {
+      return JSON.parse(JSON.stringify(arr[0]));
     }
-  }, [enhancedResourceTypes]);
-
-  // 初始化二级分类选择
-  useEffect(() => {
-    if (enhancedSecondaryCategory.length > 1) {
-      setSelectedFilters(prev => ({
-        ...prev,
-        categoriesSecondary: [enhancedSecondaryCategory[1].id]
-      }));
-    }
-  }, [enhancedSecondaryCategory]);
-
-
-  // 构建筛选配置
-  const filterConfigs = useMemo(() => [
-    {
-      title: "资源权限",
-      type: "rightId",
-      list: enhancedResourceTypes?.rights || [],
-      isMultiple: false
-    },
-    {
-      title: "专业领域",
-      type: "subjectId",
-      list: enhancedResourceTypes?.subjects || [],
-      isMultiple: false
-    },
-    {
-      title: "适用软件",
-      type: "toolIds",
-      list: enhancedResourceTypes?.tools || [],
-      isMultiple: true
-    },
-    {
-      title: "资源类型",
-      type: "categoriesFirst",
-      list: enhancedResourceTypes?.categoriesFirst || [],
-      isMultiple: false
-    },
-    {
-      title: "二级分类",
-      type: "categoriesSecondary",
-      list: enhancedSecondaryCategory,
-      isMultiple: true
-    }
-  ], [enhancedResourceTypes, enhancedSecondaryCategory]);
-
-
-
-  // 获取资源数据
-  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({
+    return arr;
+  };
+  const resourcesParams = useMemo(() => ({
     useId: id,
     rightId: selectedFilters.rightId,
     subjectId: selectedFilters.subjectId,
     toolIds: selectedFilters.toolIds,
-    categoryIds: selectedFilters.categoriesSecondary[0] === null ? allSecondaryCategories : selectedFilters.categoriesSecondary,
+    categoryIds: getParams(selectedFilters.categoriesSecondary),
     ...searchParams
+  }), [
+    id,
+    selectedFilters.rightId,
+    selectedFilters.subjectId,
+    selectedFilters.toolIds,
+    selectedFilters.categoriesSecondary,
+    searchParams
+  ]);
+
+  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources(resourcesParams, {
+    enabled: !!selectedFilters.subjectId && !!selectedFilters.categoriesFirst && !!getParams(selectedFilters.categoriesSecondary)
   });
-
-  // 处理搜索
-  const handleSearch = (value) => {
-    setSearchParams(prev => ({
-      ...prev,
-      search: value,
-      page: 1
-    }));
-  };
-
-  // 处理筛选条件变化
-  const handleFilterChange = useCallback((type, value) => {
-    setSelectedFilters(prev => {
-      const newFilters = { ...prev };
-      const currentValues = prev[type] || [];
-
-      if (type === 'rightId' || type === 'subjectId' || type === 'categoriesFirst') {
-        newFilters[type] = value;
-        if (type === 'categoriesFirst') {
-          newFilters.categoriesSecondary = [];
-        }
-      } else if (type === 'toolIds' || type === 'categoriesSecondary') {
-        if (value === null) {
-          newFilters[type] = [null];
-        } else {
-          const withoutNull = currentValues.filter(item => item !== null);
-          if (withoutNull.includes(value)) {
-            newFilters[type] = withoutNull.filter(item => item !== value);
-          } else {
-            newFilters[type] = [...withoutNull, value];
-          }
-          if (newFilters[type].length === 0) {
-            newFilters[type] = [null];
-          }
-        }
-      }
-      return newFilters;
-    });
-  }, []);
-
 
   // 获取价格标签
   const getPriceTag = (isPurchased, price) => {
@@ -211,22 +119,23 @@ const Resource = () => {
   };
 
   const records = resources.records || [];
-  const loading = resourcesLoading || typesLoading || secondaryLoading;
-  const isError = resourcesError || typesError || secondaryError
 
   return (
     <CourseContainer
       title="发现优质设计资源"
       description="海量专业资源，助力你的设计创作"
       placeholder="搜索你想要的资源素材..."
-      filterConfigs={isError ? [] : filterConfigs}
-      handleFilterChange={handleFilterChange}
-      data={isError ? [] : resources}
-      handleSearch={handleSearch}
+      filterList={filterList}
+      useGetTypes={useGetResourceTypes}
+      enableSecondaryCategory={true}
+      getSecondaryCategory={useGetSecondaryCategory}
+      dataLoading={resourcesLoading}
+      dataError={resourcesError}
+      data={resourcesError ? {} : resources}
       selectedFilters={selectedFilters}
+      setSelectedFilters={setSelectedFilters}
       searchParams={searchParams}
       setSearchParams={setSearchParams}
-      loading={loading}
     >
       {records.map(resource => {
         const {
@@ -252,7 +161,7 @@ const Resource = () => {
         const [priceText, ribbonClass] = getPriceTag(isPurchased, price);
 
         return (
-          <Col key={id} xs={24} sm={12} lg={8} xl={6}>
+          <Col xs={24} sm={12} lg={8} xl={6} key={id}>
             <Badge.Ribbon text={priceText} className={ribbonClass} size="large">
               <Card
                 className="resource-card border-main overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 bg-card"
@@ -295,7 +204,7 @@ const Resource = () => {
                   </p>
 
                   {/* 资源信息 - 发布时间和时长 */}
-                  <div className="flex items-center justify-start  gap-4 text-xs text-secondary">
+                  <div className="flex items-center justify-between gap-4 text-xs text-secondary">
                     <span className="flex items-center cursor-pointer" title={username}>
                       <Avatar
                         size={16}
@@ -303,7 +212,7 @@ const Resource = () => {
                         icon={<UserOutlined />}
                         className="border border-main !mr-1"
                       />
-                      {subUsername(username, 10)}
+                      {subUsername(username, 15)}
                     </span>
                     {publishTime && (
                       <span className="flex items-center">
@@ -317,7 +226,6 @@ const Resource = () => {
                         {updateTime}
                       </span>
                     )}
-
                   </div>
 
                   {/* 统计信息 */}
