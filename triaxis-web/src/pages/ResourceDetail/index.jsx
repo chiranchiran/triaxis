@@ -28,7 +28,8 @@ import {
   ShareAltOutlined,
   EyeOutlined,
   LikeOutlined,
-  MessageOutlined
+  MessageOutlined,
+  ConsoleSqlOutlined
 } from '@ant-design/icons';
 import ReactMarkdown from 'markdown-to-jsx';
 import './index.less'
@@ -38,6 +39,8 @@ import VirtualList from 'rc-virtual-list';
 import Review from '../../components/Review';
 import { useCollect, useLike } from '../../hooks/api/common';
 import { throttle } from 'lodash';
+import { useGetResource, useGetResourceReviews } from '../../hooks/api/resources';
+import { useParams } from 'react-router-dom';
 const { TextArea } = Input;
 
 // 模拟资源详情数据
@@ -157,42 +160,60 @@ const userLevelColors = {
 
 
 const ResourceDetail = () => {
+  const { id } = useParams()
   const { mutation: dolike } = useLike();
   const { mutation: doCollect } = useCollect();
-  const [resource, setResource] = useState(null);
-  const [reviews, setReviews] = useState([]);
+  const { data: resource, isLoading: resourceLoading, isError: resourceError } = useGetResource(id, { enabled: !!id })
+  const { data: reviews, isLoading: reviewsLoading, isError: reviewsError } = useGetResourceReviews()
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [reviewForm] = Form.useForm();
+  const downloadRef = useRef(null)
+  const [stickyTop, setStickyTop] = useState(0)
 
-  // 模拟数据加载
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        // 模拟API调用
-        setTimeout(() => {
-          setResource(mockResourceDetail);
-          setReviews(mockReviews);
-          setLoading(false);
-        }, 800);
-      } catch (error) {
-        console.error('加载资源详情失败:', error);
-        setLoading(false);
+  const updateStickyPosition = () => {
+    if (downloadRef.current) {
+      const rect = downloadRef.current.getBoundingClientRect();
+      const distanceToTop = Math.floor(rect.top);
+      const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize)
+      const remValue = distanceToTop / rootFontSize;
+      console.log('实时 top 值', remValue, stickyTop);
+      if (!stickyTop) {
+        setStickyTop(remValue - 13)
+        console.log("第一次设置为", remValue - 13)
+      } else {
+        setStickyTop(pre => pre - (6 - remValue))
+        console.log("设置为", stickyTop - (6 - remValue))
       }
+    }
+  };
+  const handleResize = throttle(() => {
+    updateStickyPosition(); // 屏幕变化时重新计算
+  }, 100);
+
+  useEffect(() => {
+
+    updateStickyPosition();
+    // 监听屏幕变化（包括窗口缩小、旋转等）
+    window.addEventListener('resize', handleResize);
+    // 监听滚动（如果滚动也会影响元素位置）
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleResize);
+      handleResize.cancel();
     };
 
-    loadData();
-  }, []);
+  }, [resource]);
+
 
   // 获取价格标签
-  const getPriceTag = (pricePoints) => {
-    if (pricePoints === 0) {
+  const getPriceTag = (right, pricePoints) => {
+    if (right === 1) {
       return ["tag-green", "免费"]
-    } else if (pricePoints === -1) {
-      return ["tag-orange", VIP专享]
+    } else if (right === 2) {
+      return ["tag-orange", "VIP专享"]
     } else {
       return ["tag-blue", `${pricePoints}积分`]
     }
@@ -296,65 +317,14 @@ const ResourceDetail = () => {
       setReviews(mockReviews);
     }, 800);
   };
-  const sidebarRef = useRef(null);
-  const [isFixed, setIsFixed] = useState(false);
 
-  // 滚动事件处理：判断侧边栏顶部距离视口顶部是否 <= 20px
-  const handleScroll = () => {
-    if (!sidebarRef.current) return;
-
-    // 获取侧边栏相对于视口的位置（关键！）
-    const rect = sidebarRef.current.getBoundingClientRect();
-    console.log('侧边栏顶部距离视口顶部：', rect.top);
-    // rect.top 是侧边栏顶部到视口顶部的距离（正数：在视口内；负数：已滚动出视口）
-    const isWithinThreshold = rect.top <= 50; // 距离顶部<=20px时需要固定
-
-    // 更新固定状态
-    if (isWithinThreshold && !isFixed) {
-      setIsFixed(true);
-    } else if (!isWithinThreshold && isFixed) {
-      setIsFixed(false);
-    }
-  };
-
-  // 监听滚动事件（添加节流优化性能）
-  useEffect(() => {
-    // 简单节流：50ms内只执行一次
-    const throttledScroll = (e) => {
-      let lastTime = 0;
-      return () => {
-        const now = Date.now();
-        if (now - lastTime > 50) {
-          handleScroll();
-          lastTime = now;
-        }
-      };
-    };
-
-    const scrollHandler = throttledScroll();
-    window.addEventListener('scroll', scrollHandler);
-    // 初始加载时检查一次位置（避免页面刷新时已在固定区域）
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', scrollHandler);
-    };
-  }, [isFixed]);
-  const onScroll = e => {
-    // Refer to: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollHeight#problems_and_solutions
-    if (
-      Math.abs(e.currentTarget.scrollHeight - e.currentTarget.scrollTop - CONTAINER_HEIGHT) <= 1
-    ) {
-      appendData();
-    }
-  };
   const IconText = ({ icon, text }) => (
     <Space>
       {React.createElement(icon)}
       {text}
     </Space>
   );
-  if (loading) {
+  if (resourceLoading) {
     return (
       <div className="max-w-7xl mx-auto py-8 flex flex-col justify-center">
         <Skeleton active />
@@ -363,6 +333,43 @@ const ResourceDetail = () => {
       </div>
     );
   }
+  const {
+    resourceDetail: {
+      title,
+      description = "没有具体介绍",
+      price = 0,
+      coverImage = "",
+      details,
+      likeCount = 0,
+      collectCount = 0,
+      downloadCount = 0,
+      extension,
+      size = 100,
+      publishTime,
+      updateTime,
+    },
+    images: [],
+    tags: [],
+    category: {
+      subject,
+      right,
+      tools: [],
+      firstCategories: [],
+      secondaryCategories: [],
+    },
+    uploader: {
+      userId,
+      username = "已注销",
+      school,
+      major,
+      grade,
+      avatar,
+    },
+    userActions: {
+      isLiked = false,
+      isCollected = false,
+      isPurchased = false
+    } } = resource
 
   return (
     <section className="max-w-7xl mx-auto py-8">
@@ -375,15 +382,15 @@ const ResourceDetail = () => {
               <div>
                 <div className="flex flex-wrap items-start justify-between mb-4">
                   <h1 className="text-2xl font-bold text-main mr-4 mb-2">
-                    {resource.title}
+                    {title}
                   </h1>
                   <div className="flex space-x-2">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriceTag(resource.pricePoints)[0]}`} >
-                      {getPriceTag(resource.pricePoints)[1]}</span>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPriceTag(right, price)[0]}`} >
+                      {getPriceTag(right, price)[1]}</span>
                   </div>
                 </div>
                 <p className="text-main text-lg leading-relaxed bg-primary-light p-4 rounded-lg border border-main">
-                  {resource.description}
+                  {description}
                 </p>
               </div>
 
@@ -391,9 +398,9 @@ const ResourceDetail = () => {
               <div className="bg-main rounded-lg p-4 border border-main">
                 <div className="relative h-80 bg-card rounded-lg overflow-hidden border border-main">
                   <img
-                    src={resource.thumbnailPath}
-                    alt='预览图暂时无法加载'
-                    title={resource.title}
+                    src={coverImage}
+                    alt='封面预览图暂时无法加载'
+                    title={title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-1 rounded text-sm">
@@ -402,16 +409,17 @@ const ResourceDetail = () => {
                 </div>
 
                 {/* 小图预览 */}
-                {resource.previewImages && resource.previewImages.length > 0 && (
+                {images && images.length > 0 && (
                   <div className="flex space-x-3 mt-4">
-                    {resource.previewImages.map((img, index) => (
+                    {images.map((img, index) => (
                       <div
                         key={index}
                         className="preview w-20 h-20 bg-card rounded border border-main cursor-pointer hover:border-primary-dark transition-colors"
                       >
                         <img
                           src={img}
-                          alt={`预览图 ${index + 1}`}
+                          title={`预览图 ${index + 1}`}
+                          alt="预览图暂时无法加载"
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -428,15 +436,15 @@ const ResourceDetail = () => {
                   <ReactMarkdown
                     options={{
                       overrides: {
-                        h2: { component: 'h4', props: { className: 'text-xl font-semibold text-main mt-6 mb-3' } },
-                        h3: { component: 'h5', props: { className: 'text-lg font-semibold text-main mt-4 mb-2' } },
+                        h2: { component: 'h3', props: { className: 'text-xl font-semibold text-main mt-6 mb-3' } },
+                        h3: { component: 'h4', props: { className: 'text-lg font-semibold text-main mt-4 mb-2' } },
                         ul: { props: { className: 'list-disc list-inside space-y-1' } },
                         li: { props: { className: 'text-main' } },
                         p: { props: { className: 'text-main 0 mb-3' } }
                       }
                     }}
                   >
-                    {resource.detailedDescription}
+                    {details}
                   </ReactMarkdown>
                 </div>
               </DetailCard>
@@ -444,25 +452,25 @@ const ResourceDetail = () => {
               {/* 标签 */}
               <div className='flex flex-col gap-4'>
                 <div className="flex flex-wrap flex-col gap-2 text-base text-secondary">
-                  <span>学科：{resource.category.subject}</span>
-                  <span>一级分类：{resource.category.firstCategory.map((item, index) => (
+                  <span>学科：{subject}</span>
+                  <span>一级分类：{firstCategories.map((item, index) => (
                     <span key={index}>
                       {item}
-                      {index !== resource.category.firstCategory.length - 1 && <span className="mx-2 separator">/</span>}
+                      {index !== firstCategories.length - 1 && <span className="mx-2 separator">/</span>}
                     </span>
                   ))}</span>
-                  <span>二级分类：{resource.category.secondaryCategory.map((item, index) => (
+                  <span>二级分类：{secondaryCategories.map((item, index) => (
                     <span key={index}>
                       {item}
-                      {index !== resource.category.secondaryCategory.length - 1 && <span className="mx-2 separator">/</span>}
+                      {index !== secondaryCategories.length - 1 && <span className="mx-2 separator">/</span>}
                     </span>
                   ))}</span>
                 </div>
                 {
-                  resource.category.map
+                  tags.map
                 }
                 <div className="flex flex-wrap gap-2">
-                  {resource.tags.map((tag, index) => (
+                  {tags.map((tag, index) => (
                     <span
                       key={index}
                       className={`inline-flex tag-orange items-center px-3 py-1.5 rounded text-sm font-medium border}`}
@@ -475,7 +483,6 @@ const ResourceDetail = () => {
             </div>
 
           </CustomCard>
-
           {/* 评价区域 */}
           <DetailCard
             title="用户评价">
@@ -532,131 +539,132 @@ const ResourceDetail = () => {
         </Col>
 
         {/* 右侧操作和信息面板 */}
-        <Col xs={24} lg={8} className="parent"  >
-          {/* 操作卡片 */}
-          <CustomCard className="mb-4 space-y-4 overflow-visible h-auto">
-            {/* 上传者信息 */}
-            <div className="flex items-center space-x-8 p-3">
-              <Avatar
-                size={48}
-                src={resource.uploader.avatar}
-                icon={<UserOutlined />}
-                className="border border-main"
-              />
-              <div className="flex-1 min-w-0 pl-5">
-                <div className="text-base text-main truncate mb-1">
-                  {resource.uploader.name}
-                </div>
-                <div className='flex text-secondary justify-start flex-wrap'>
-                  <span>{resource.uploader.school}</span>
-                  <span className="mx-1 separator">/</span>
-                  <span>{resource.uploader.major}</span>
-                  <span className="mx-1 separator">/</span>
-                  <span>{resource.uploader.grade}</span>
-                </div>
-              </div>
-            </div>
-            {/* 统计信息 */}
-            <div className="grid grid-cols-4 gap-3 text-center bg-main rounded-lg">
-              <Statis count={resource.downloadCount} >下载</Statis>
-              <Statis count={resource.likeCount} >点赞</Statis>
-              <Statis count={resource.viewCount} >收藏</Statis>
-              <Statis count={resource.fileExtension} >格式</Statis>
-            </div>
-            {/* 文件信息 */}
-            <div className="space-y-3">
-              <FileTime count={resource.fileSize}>文件大小：</FileTime>
-              <FileTime count={resource.uploadTime}>上传时间：</FileTime>
-              <FileTime count={resource.updateTime}>更新时间：</FileTime>
-              <FileTime count={resource.category.softwareTools}>适用软件：</FileTime>
-            </div>
-            {/* 操作按钮 */}
-            <div ref={sidebarRef} className="side gap-3 flex flex-col justify-stretch" >
-              <div className='flex'>
-                <MyButton
-                  size='large'
-                  type="black"
-                  icon={<DownloadOutlined />}
-
-                  className="flex-1"
-                >立即下载</MyButton>
-              </div>
-
-
-              <div className="grid grid-cols-2 gap-3">
-                <MyButton
-                  type="white"
-                  icon={<StarOutlined />}
-
-                  className="flex-1 py-4"
-                >收藏</MyButton>
-                <MyButton
-                  type="white"
-                  icon={<HeartOutlined />}
-
-                  className="flex-1 py-4"
-                >点赞</MyButton>
-              </div>
-              <div className='flex'>
-                <MyButton
-                  size='large'
-                  type="white"
-                  icon={<ShareAltOutlined />}
-
-                  className="flex-1"
-                >立即分享</MyButton>
-              </div>
-            </div>
-          </CustomCard>
-
-          {/* 提交评价卡片 */}
-          <DetailCard
-            title="发表评价"
-            className='comment !shadow-md hover:!shadow-lg mt-8'
-          >
-
-            <Form
-              form={reviewForm}
-
-              layout="vertical"
-              className='!pt-4'
-            >
-              <Form.Item
-                name="rating"
-                label="评分"
-                rules={[{ required: true, message: '请选择评分' }]}
-              >
-                <Rate className="text-rate" />
-              </Form.Item>
-
-              <Form.Item
-                name="content"
-                label="评价内容"
-                rules={[
-                  { required: false, message: '请输入评价内容' },
-                  { min: 10, message: '评价内容至少10个字符' }
-                ]}
-              >
-                <TextArea
-                  allowClear
-                  rows={4}
-                  placeholder="输入您对资源的评价..."
-                  className="resize-none border border-light  focus:border-main rounded transition-colors"
+        <Col xs={24} lg={8}>
+          <div style={{ top: `-${stickyTop}rem` }} className={`flex flex-col gap-8 sticky`}>
+            {/* 操作卡片 */}
+            <CustomCard className="space-y-4 overflow-visible h-auto">
+              {/* 上传者信息 */}
+              <div className="flex items-center space-x-8 p-3">
+                <Avatar
+                  size={48}
+                  src={avatar}
+                  icon={<UserOutlined />}
+                  className="border border-main"
                 />
-              </Form.Item>
-
-              <Form.Item>
+                <div className="flex-1 min-w-0 pl-5">
+                  <div className="text-base text-main truncate mb-1">
+                    {username}
+                  </div>
+                  <div className='flex text-secondary justify-start flex-wrap'>
+                    <span>{school}</span>
+                    <span className="mx-1 separator">/</span>
+                    <span>{major}</span>
+                    <span className="mx-1 separator">/</span>
+                    <span>{grade}</span>
+                  </div>
+                </div>
+              </div>
+              {/* 统计信息 */}
+              <div className="grid grid-cols-4 gap-3 text-center bg-main rounded-lg">
+                <Statis count={downloadCount} >下载</Statis>
+                <Statis count={likeCount} >点赞</Statis>
+                <Statis count={collectCount} >收藏</Statis>
+                <Statis count={extension} >格式</Statis>
+              </div>
+              {/* 文件信息 */}
+              <div className="space-y-3">
+                <FileTime count={size}>文件大小：</FileTime>
+                <FileTime count={publishTime}>上传时间：</FileTime>
+                <FileTime count={updateTime}>更新时间：</FileTime>
+                <FileTime count={tools}>适用软件：</FileTime>
+              </div>
+              {/* 操作按钮 */}
+              <div ref={downloadRef} className="gap-3 z-999999 flex flex-col justify-stretch" >
                 <div className='flex'>
                   <MyButton
                     size='large'
                     type="black"
-                    loading={submitting}
+                    icon={<DownloadOutlined />}
                     className="flex-1"
-                  >提交评价</MyButton>
+                  >立即下载</MyButton>
                 </div>
-              </Form.Item>
-            </Form>
-          </DetailCard>
+
+
+                <div className="grid grid-cols-2 gap-3">
+                  <MyButton
+                    type="white"
+                    icon={<StarOutlined />}
+
+                    className="flex-1 py-4"
+                  >收藏</MyButton>
+                  <MyButton
+                    type="white"
+                    icon={<HeartOutlined />}
+
+                    className="flex-1 py-4"
+                  >点赞</MyButton>
+                </div>
+                <div className='flex'>
+                  <MyButton
+                    size='large'
+                    type="white"
+                    icon={<ShareAltOutlined />}
+
+                    className="flex-1"
+                  >立即分享</MyButton>
+                </div>
+              </div>
+            </CustomCard>
+
+            {/* 提交评价卡片 */}
+            <DetailCard
+              title="发表评价"
+              className='comment !shadow-md hover:!shadow-lg !overflow-visible h-auto'
+            >
+
+              <Form
+                form={reviewForm}
+
+                layout="vertical"
+                className='!pt-4'
+              >
+                <Form.Item
+                  name="rating"
+                  label="评分"
+                  rules={[{ required: true, message: '请选择评分' }]}
+                >
+                  <Rate className="text-rate" />
+                </Form.Item>
+
+                <Form.Item
+                  name="content"
+                  label="评价内容"
+                  rules={[
+                    { required: false, message: '请输入评价内容' },
+                    { min: 10, message: '评价内容至少10个字符' }
+                  ]}
+                >
+                  <TextArea
+                    allowClear
+                    rows={4}
+                    placeholder="输入您对资源的评价..."
+                    className="resize-none border border-light  focus:border-main rounded transition-colors"
+                  />
+                </Form.Item>
+
+                <Form.Item>
+                  <div className='flex'>
+                    <MyButton
+                      size='large'
+                      type="black"
+                      loading={submitting}
+                      className="flex-1"
+                    >提交评价</MyButton>
+                  </div>
+                </Form.Item>
+              </Form>
+            </DetailCard>
+          </div>
         </Col>
       </Row>
     </section >

@@ -172,7 +172,7 @@ const Resource = () => {
                   >
                     {coverImage ? (
                       <img
-                        alt="预览图加载失败"
+                        alt="封面预览图加载失败"
                         title={title}
                         src={coverImage}
                         className="w-full h-full object-cover"
@@ -180,7 +180,7 @@ const Resource = () => {
                     ) : (
                       <div className="flex items-center justify-center h-full text-main text-center">
                         <div className="text-4xl mb-2">📁</div>
-                        <div className="text-sm">暂无预览图</div>
+                        <div className="text-sm">暂无封面图</div>
                       </div>
                     )}
 

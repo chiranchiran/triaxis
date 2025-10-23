@@ -4,12 +4,13 @@ import { useDelete, useGet, useUpdate, useUpload } from "../common/useData"
 
 export const RESOURCE_TYPES_QUERY_KEY = ['Resources', 'types']
 
-export const useGetResourceTypes = (options) => useGet(getResourceTypes, RESOURCE_TYPES_QUERY_KEY, null, options)
-export const useGetSecondaryCategory = (params, options) => useGet(getCategorySecondary, ['Resources', 'types', params.subjectId, params.parentId], params, options)
+export const useGetResourceTypes = (options) => useGet(getResourceTypes, ['Resources', 'types'], null, options)
+export const useGetSecondaryCategory = (params, options) => useGet(getCategorySecondary, ['Resources', 'categories', params.subjectId, params.parentId], params, options)
 export const useGetResources = (params, options) => useGet(getResources, ['Resources', 'list', params], params, options)
-export const useGetResource = (params, options) => useGet(getResource, ['Resources', params.id], params, options)
+export const useGetResource = (id, options) => useGet(getResource, ['Resources', 'detail', id], id, options)
 export const useuploadResource = (params, options) => useUpload(uploadResource, params, options)
 export const useupdateResource = (params, options) => useUpdate(updateResource, ['Resources', params.id], params, options)
 export const useremoveResource = (params, options) => useDelete(removeResource, params, options)
 export const useremoveResources = (params, options) => useDelete(removeResources, params, options)
 
+export const useGetResourceReviews = (id, options) => useGet(getResourceViews, ['Resources', 'reviews', id], id, options)
