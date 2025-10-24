@@ -1,13 +1,11 @@
 package com.chiran.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -19,8 +17,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("resource_rights")
-public class ResourceRights implements Serializable {
+@TableName("subjects")
+public class Subject implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,6 +37,18 @@ public class ResourceRights implements Serializable {
     @TableField("is_active")
     private Boolean isActive;
 
-    @TableField("created_at")
-    private LocalDateTime createdAt;
+    @TableField("create_time")
+    private Date createTime;
+
+    @TableField("update_time")
+    private Date updateTime;
+
+    @TableField("create_by")
+    private Integer createBy;
+    @TableField("update_by")
+    private Integer updateBy;
+
+    @TableField("deleted")
+    @TableLogic
+    private Integer deleted;
 }

@@ -5,6 +5,7 @@ import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.entity.Resource;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chiran.result.PageResult;
+import com.chiran.vo.ResourceSearchVO;
 import com.chiran.vo.ResourceVO;
 
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.chiran.service;
 
-import com.chiran.entity.ResourceSoftware;
+import com.chiran.entity.ResourceTool;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author chiran
  * @since 2025-10-07
  */
-public interface ResourceSoftwareService extends IService<ResourceSoftware> {
+public interface ResourceToolService extends IService<ResourceTool> {
 
 }

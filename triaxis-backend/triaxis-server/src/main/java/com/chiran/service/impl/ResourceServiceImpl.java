@@ -1,33 +1,27 @@
 package com.chiran.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.chiran.bo.CategoryBO;
+import com.chiran.bo.ResourceCategoryBO;
+import com.chiran.bo.ResourceSearchBO;
 import com.chiran.dto.ResourceDTO;
 import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.entity.*;
-import com.chiran.exception.BusinessException;
 import com.chiran.mapper.*;
 import com.chiran.result.PageResult;
-import com.chiran.service.ResourceSoftwareService;
-import com.chiran.service.ResourceService;
+import com.chiran.service.*;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.chiran.utils.CheckUserUtil;
+import com.chiran.utils.BeanUtil;
 import com.chiran.utils.ExceptionUtil;
 import com.chiran.vo.ResourceVO;
-import org.apache.catalina.mapper.Mapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -42,9 +36,13 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Autowired
     private ResourceMapper resourceMapper;
     @Autowired
-    private ResourceSoftwareService resourceSoftwareService;
+    private ResourceTypesService resourceTypesService;
     @Autowired
-    private UserActionMapper userActionMapper;
+    private UserActionService userActionService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ResourceImageMapper resourceImageMapper;
 
     @Override
     public PageResult<ResourceVO> getResources(ResourceSearchDTO dto) {
@@ -78,23 +76,30 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
                 .eq(Resource::getId, id)
                 .update();
 
-        ResourceVO resourceVO = new ResourceVO();
-        BeanUtils.copyProperties(resource, resourceVO);
+        ResourceSearchBO resourceSearchBO = new ResourceSearchBO();
+        BeanUtils.copyProperties(resource, resourceSearchBO);
+//查询相关的的缩略图
+        LambdaQueryWrapper<ResourceImage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(ResourceImage::getId, ResourceImage::getName).eq(ResourceImage::getResourceId, id).orderByAsc(ResourceImage::getCreateTime);
+        List<ResourceImage> list = resourceImageMapper.selectList(queryWrapper);
+        List<CategoryBO> images = BeanUtil.copyList(list, CategoryBO::new);
+        //查询分类信息
 
-        // 查询关联的软件工具ID
-        List<Integer> toolIds = resourceSoftwareService.lambdaQuery()
-                .select(ResourceSoftware::getSoftwareId)
-                .eq(ResourceSoftware::getResourceId, resource.getId())
-                .list()
-                .stream()
-                .map(ResourceSoftware::getSoftwareId)
-                .collect(Collectors.toList());
-        resourceVO.setToolIds(toolIds);
+        ResourceCategoryBO resourceCategoryBO =resourceTypesService.selectAllCategories(id);
+        resourceCategoryBO.setRight(resource.getRight());
+        resourceCategoryBO.setSubject(resourceTypesService.getSubjectName(resource.getSubjectId()));
+        resourceCategoryBO.setTools(resourceTypesService.getTools(resource.getId()));
 
-        Integer resourceId = resource.getId();
-        if (userActionMapper.checkIsLiked(userId, resourceId, 1)) resourceVO.setIsLiked(true);
-        if (userActionMapper.checkIsCollectd(userId, resourceId, 1)) resourceVO.setIsCollected(true);
-        if (userActionMapper.checkIsPurchased(userId, resourceId, 1)) resourceVO.setIsPurchased(true);
+        ResourceVO resourceVO = ResourceVO.builder()
+                .resourceDetail(resourceSearchBO)
+                .uploader(userService.selectUploader(resource.getUserId()))
+                .userActions(userActionService.checkAllAction(userId, id, 1))
+                .images(images)
+                .tags(userActionService.selectTags(id, 1))
+                .category(resourceCategoryBO)
+                .build();
+
+
         return resourceVO;
     }
 
@@ -152,8 +157,8 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 //        // 更新关联的软件工具
 //        if (dto.getToolIds() != null) {
 //            // 删除原有关联
-//            resourceSoftwareService.lambdaUpdate()
-//                    .eq(ResourceSoftware::getResourceId, dto.getId())
+//            resourceToolService.lambdaUpdate()
+//                    .eq(ResourceTool::getResourceId, dto.getId())
 //                    .remove();
 //
 //            // 保存新的关联
@@ -167,7 +172,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean removeResource(Integer id) { return false;}
+    public Boolean removeResource(Integer id) {
+        return false;
+    }
 
     @Override
     public Boolean removeResources(List<Integer> ids) {
@@ -201,9 +208,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 //     * 保存资源与软件的关联关系
 //     */
 //    private void saveResourceSoftware(Integer resourceId, List<Integer> toolIds) {
-//        List<ResourceSoftware> relations = toolIds.stream()
+//        List<ResourceTool> relations = toolIds.stream()
 //                .map(toolId -> {
-//                    ResourceSoftware relation = new ResourceSoftware();
+//                    ResourceTool relation = new ResourceTool();
 //                    relation.setResourceId(resourceId);
 //                    relation.setSoftwareId(toolId);
 //                    relation.setCreatedAt(new Date());
@@ -211,7 +218,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 //                })
 //                .collect(Collectors.toList());
 //
-//        resourceSoftwareService.saveBatch(relations);
+//        resourceToolService.saveBatch(relations);
 //    }
 //
 //    /**
@@ -222,12 +229,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 //        BeanUtils.copyProperties(resource, vo);
 //
 //        // 查询关联的软件工具ID
-//        List<Integer> toolIds = resourceSoftwareService.lambdaQuery()
-//                .select(ResourceSoftware::getSoftwareId)
-//                .eq(ResourceSoftware::getResourceId, resource.getId())
+//        List<Integer> toolIds = resourceToolService.lambdaQuery()
+//                .select(ResourceTool::getSoftwareId)
+//                .eq(ResourceTool::getResourceId, resource.getId())
 //                .list()
 //                .stream()
-//                .map(ResourceSoftware::getSoftwareId)
+//                .map(ResourceTool::getSoftwareId)
 //                .collect(Collectors.toList());
 //        vo.setToolIds(toolIds);
 //
@@ -242,4 +249,4 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 //        BeanUtils.copyProperties(dto, resource);
 //        return resource;
 //    }
-    }
+}

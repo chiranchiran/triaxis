@@ -1,6 +1,6 @@
 package com.chiran.mapper;
 
-import com.chiran.vo.CategoryVO;
+import com.chiran.bo.CategoryBO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -15,5 +15,5 @@ import java.util.List;
  */
 @Mapper
 public interface CoursesTypesMapper {
-    List<CategoryVO> getCategoryLists();
+    List<CategoryBO> getCategoryLists();
 }

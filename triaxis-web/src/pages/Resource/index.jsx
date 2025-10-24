@@ -20,15 +20,24 @@ import { subUsername } from '../../utils/error/commonUtil';
 const filterList = [
   {
     title: "资源权限",
-    type: "rightId",
+    type: "right",
     field: "rights",
+    list: [{
+      id: 1,
+      name: "免费"
+    }, {
+      id: 2,
+      name: "积分兑换"
+    }, {
+      id: 3,
+      name: "VIP专享"
+    }],
     isMultiple: false,
     isTypes: true
   },
   {
     title: "专业领域",
     type: "subjectId",
-    field: "subjects",
     isMultiple: false,
     isTypes: true,
     isNotAll: true
@@ -36,14 +45,12 @@ const filterList = [
   {
     title: "适用软件",
     type: "toolIds",
-    field: "tools",
     isMultiple: true,
     isTypes: true
   },
   {
     title: "资源类型",
     type: "categoriesFirst",
-    field: "categoriesFirst",
     isMultiple: false,
     isFirst: true,
     isTypes: true,
@@ -59,7 +66,6 @@ const filterList = [
 const Resource = () => {
   const navigate = useNavigate();
   const userData = getUserData();
-  const id = userData?.id;
   const { mutation: dolike } = useLike();
   const { mutation: doCollect } = useCollect();
 
@@ -72,7 +78,7 @@ const Resource = () => {
 
   // 筛选条件和搜索参数状态
   const [selectedFilters, setSelectedFilters] = useState({
-    rightId: null,
+    right: null,
     subjectId: null,
     toolIds: [],
     categoriesFirst: null,
@@ -86,15 +92,13 @@ const Resource = () => {
     return arr;
   };
   const resourcesParams = useMemo(() => ({
-    useId: id,
-    rightId: selectedFilters.rightId,
+    right: selectedFilters.right,
     subjectId: selectedFilters.subjectId,
     toolIds: selectedFilters.toolIds,
     categoryIds: getParams(selectedFilters.categoriesSecondary),
     ...searchParams
   }), [
-    id,
-    selectedFilters.rightId,
+    selectedFilters.right,
     selectedFilters.subjectId,
     selectedFilters.toolIds,
     selectedFilters.categoriesSecondary,
@@ -106,13 +110,15 @@ const Resource = () => {
   });
 
   // 获取价格标签
-  const getPriceTag = (isPurchased, price) => {
+  const getPriceTag = (isPurchased, right, price) => {
     if (isPurchased) return ['已购买', 'ribbon-green'];
-    switch (price) {
-      case 0:
+    switch (right) {
+      case 1:
         return ['免费', 'ribbon-green'];
-      case -1:
+      case 3:
         return ['VIP专享', 'ribbon-orange'];
+      case 2:
+        return [`${price}积分`, 'ribbon-blue'];
       default:
         return [`${price}积分`, 'ribbon-blue'];
     }
@@ -139,26 +145,32 @@ const Resource = () => {
     >
       {records.map(resource => {
         const {
-          id,
-          title,
-          description = "没有具体介绍",
-          price = 0,
-          coverImage = "",
-          size = 100,
-          likeCount = 0,
-          collectCount = 0,
-          downloadCount = 0,
-          userId,
-          username = "已注销",
-          avatar,
-          publishTime,
-          updateTime,
-          isLiked = false,
-          isCollected = false,
-          isPurchased = false
-        } = resource;
-
-        const [priceText, ribbonClass] = getPriceTag(isPurchased, price);
+          resourceDetail: {
+            id,
+            title = "",
+            description = "没有具体介绍",
+            right,
+            price = 0,
+            coverImage = "",
+            likeCount = 0,
+            collectCount = 0,
+            downloadCount = 0,
+            size = 100,
+            publishTime,
+            updateTime,
+          } = {},
+          uploader: {
+            userId,
+            username = "已注销",
+            avatar,
+          } = {},
+          userActions: {
+            isLiked = false,
+            isCollected = false,
+            isPurchased = false
+          } = {}
+        } = resource || {}
+        const [priceText, ribbonClass] = getPriceTag(isPurchased, right, price);
 
         return (
           <Col xs={24} sm={12} lg={8} xl={6} key={id}>

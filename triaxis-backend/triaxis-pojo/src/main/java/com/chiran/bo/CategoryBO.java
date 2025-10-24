@@ -1,4 +1,4 @@
-package com.chiran.vo;
+package com.chiran.bo;
 
 
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryVO implements Serializable {
+public class CategoryBO implements Serializable {
     Integer id;
     String name;
 }

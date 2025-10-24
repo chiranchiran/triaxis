@@ -1,5 +1,6 @@
 package com.chiran.mapper;
 
+import com.chiran.bo.UserBO;
 import com.chiran.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.chiran.vo.UserStatsVO;
@@ -26,4 +27,6 @@ public interface UserMapper extends BaseMapper<User> {
      */
     int updateUserPoints(@Param("userId") Integer userId,
                          @Param("points") Integer points);
+
+
 }

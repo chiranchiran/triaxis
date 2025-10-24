@@ -1,7 +1,9 @@
 package com.chiran.mapper;
 
-import com.chiran.vo.CategoryVO;
+import com.chiran.bo.CategoryBO;
+import com.chiran.bo.ResourceCategoryBO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 /**
@@ -14,9 +16,11 @@ import java.util.List;
  */
 @Mapper
 public interface ResourceTypesMapper {
-    List<CategoryVO> getSubjectLists();
-    List<CategoryVO> getToolLists();
-    List<CategoryVO> getRightLists();
-    List<CategoryVO> getCategoryFirstLists();
-    List<CategoryVO> getCategorySecondLists(Integer subjectId, Integer parentId);
+    List<CategoryBO> getSubjectLists();
+    List<CategoryBO> getToolLists();
+    List<CategoryBO> getCategoryFirstLists();
+    List<CategoryBO> getCategorySecondLists(Integer subjectId, Integer parentId);
+
+    ResourceCategoryBO selectAllCategories(@Param("resourceId") Integer resourceId
+    );
 }

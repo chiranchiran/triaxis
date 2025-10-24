@@ -55,8 +55,8 @@ public class Resource implements Serializable {
     /**
      * 权限ID（关联rights表）
      */
-    @TableField("right_id")
-    private Integer rightId;
+    @TableField(value = "`right`")
+    private Integer right;
 
     /**
      * 科目ID（关联subjects表）

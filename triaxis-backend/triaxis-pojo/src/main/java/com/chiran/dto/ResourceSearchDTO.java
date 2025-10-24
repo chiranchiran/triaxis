@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class ResourceSearchDTO implements Serializable {
     private Integer userId;
-    private Integer rightId;
+    private Integer right;
     private Integer subjectId;
     private List<Integer> toolIds;
     private List<Integer> categoryIds;

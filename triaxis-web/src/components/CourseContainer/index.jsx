@@ -9,6 +9,7 @@ import MyButton from '../MyButton';
 import MyPagination from '../MyPagination';
 import { isDataValid } from '../../utils/error/commonUtil';
 import './index.less'
+import { logger } from '../../utils/logger';
 
 const { Search } = Input;
 const SORT_OPTIONS = [
@@ -54,15 +55,19 @@ const CourseContainer = ({
   // 为每个分类列表添加"全部"选项
   const enhancedtypes = useMemo(() => {
     if (!types) return {};
-    const enhanced = { ...types };
-
-    for (const key in enhanced) {
-      const config = filterList.find(item => item.field === key);
-      if (!config?.isNotAll) {
-        enhanced[key] = addAll(types[key])
-      }
+    const enhanced = {
+      right: filterList[0].list,
+      subjectId: types.subjects,
+      toolIds: types.tools,
+      categoriesFirst: types.categoriesFirst
     }
 
+    for (const key in enhanced) {
+      const config = filterList.find(item => item.type === key);
+      if (!config?.isNotAll) {
+        enhanced[key] = addAll(enhanced[key])
+      }
+    }
     return enhanced;
   }, [types]);
 
@@ -77,19 +82,17 @@ const CourseContainer = ({
 
   // 初始化一级分类选择
   useEffect(() => {
+    logger.debug("初始化一级分类")
     if (Object.keys(enhancedtypes).length === 0) return;
 
-    const hasEnoughData =
-      enhancedtypes.rights?.length > 1 &&
-      enhancedtypes.subjects?.length > 1 &&
-      enhancedtypes.tools?.length > 1;
+    const hasEnoughData = enhancedtypes.subjectId?.length > 1 && enhancedtypes.toolIds?.length > 1;
 
     if (!hasEnoughData) return;
     const field = filterList.filter(item => !item.isFirst && item.isTypes).map(i => i.type)
+
     const multiple = filterList.filter(item => item.isMultiple).map(i => i.type)
     const filters = field.reduce((acc, item) => {
-      const config = filterList.find(i => i.type === item);
-      const value = enhancedtypes[config?.field][0]?.id || null;
+      const value = enhancedtypes[item][0]?.id || null;
       acc[item] = multiple.includes(item) ? [value] : value;
       return acc;
     }, {});
@@ -121,7 +124,7 @@ const CourseContainer = ({
       let list = [];
 
       if (item.isTypes) {
-        list = enhancedtypes[item.field] || [];
+        list = enhancedtypes[item.type] || [];
       } else {
         list = enhancedSecondaryCategory;
       }

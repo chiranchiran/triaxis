@@ -163,50 +163,13 @@ const ResourceDetail = () => {
   const { id } = useParams()
   const { mutation: dolike } = useLike();
   const { mutation: doCollect } = useCollect();
-  const { data: resource, isLoading: resourceLoading, isError: resourceError } = useGetResource(id, { enabled: !!id })
-  const { data: reviews, isLoading: reviewsLoading, isError: reviewsError } = useGetResourceReviews()
+  const { data: resource = {}, isLoading: resourceLoading, isError: resourceError } = useGetResource(id, { enabled: !!id })
+  const { data: reviews = {}, isLoading: reviewsLoading, isError: reviewsError } = useGetResourceReviews(id, { enabled: !!id })
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [liked, setLiked] = useState(false);
   const [favorited, setFavorited] = useState(false);
   const [reviewForm] = Form.useForm();
-  const downloadRef = useRef(null)
-  const [stickyTop, setStickyTop] = useState(0)
-
-  const updateStickyPosition = () => {
-    if (downloadRef.current) {
-      const rect = downloadRef.current.getBoundingClientRect();
-      const distanceToTop = Math.floor(rect.top);
-      const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize)
-      const remValue = distanceToTop / rootFontSize;
-      console.log('实时 top 值', remValue, stickyTop);
-      if (!stickyTop) {
-        setStickyTop(remValue - 13)
-        console.log("第一次设置为", remValue - 13)
-      } else {
-        setStickyTop(pre => pre - (6 - remValue))
-        console.log("设置为", stickyTop - (6 - remValue))
-      }
-    }
-  };
-  const handleResize = throttle(() => {
-    updateStickyPosition(); // 屏幕变化时重新计算
-  }, 100);
-
-  useEffect(() => {
-
-    updateStickyPosition();
-    // 监听屏幕变化（包括窗口缩小、旋转等）
-    window.addEventListener('resize', handleResize);
-    // 监听滚动（如果滚动也会影响元素位置）
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize);
-      handleResize.cancel();
-    };
-
-  }, [resource]);
-
 
   // 获取价格标签
   const getPriceTag = (right, pricePoints) => {
@@ -240,7 +203,7 @@ const ResourceDetail = () => {
                   key={index}
                   className="px-2 py-0.5 rounded text-xs bg-main text-main border border-main"
                 >
-                  {tool}
+                  {tool.name}
                 </span>
               ))}
             </span>
@@ -335,11 +298,12 @@ const ResourceDetail = () => {
   }
   const {
     resourceDetail: {
-      title,
+      title = "",
       description = "没有具体介绍",
+      right,
       price = 0,
       coverImage = "",
-      details,
+      details = "",
       likeCount = 0,
       collectCount = 0,
       downloadCount = 0,
@@ -347,16 +311,15 @@ const ResourceDetail = () => {
       size = 100,
       publishTime,
       updateTime,
-    },
-    images: [],
-    tags: [],
+    } = {},
+    images = [],
+    tags = [],
     category: {
       subject,
-      right,
-      tools: [],
-      firstCategories: [],
-      secondaryCategories: [],
-    },
+      tools = [],
+      categoriesFirst = [],
+      categoriesSecondary = [],
+    } = {},
     uploader: {
       userId,
       username = "已注销",
@@ -364,12 +327,14 @@ const ResourceDetail = () => {
       major,
       grade,
       avatar,
-    },
+    } = {},
     userActions: {
       isLiked = false,
       isCollected = false,
       isPurchased = false
-    } } = resource
+    } = {}
+  } = resource || {}
+  const { total = 0, records = [] } = reviews
 
   return (
     <section className="max-w-7xl mx-auto py-8">
@@ -453,29 +418,29 @@ const ResourceDetail = () => {
               <div className='flex flex-col gap-4'>
                 <div className="flex flex-wrap flex-col gap-2 text-base text-secondary">
                   <span>学科：{subject}</span>
-                  <span>一级分类：{firstCategories.map((item, index) => (
+                  <span>一级分类：{categoriesFirst && categoriesFirst.map((item, index) => (
                     <span key={index}>
-                      {item}
-                      {index !== firstCategories.length - 1 && <span className="mx-2 separator">/</span>}
+                      {item.name}
+                      {index !== categoriesFirst.length - 1 && <span className="mx-2 separator">/</span>}
                     </span>
                   ))}</span>
-                  <span>二级分类：{secondaryCategories.map((item, index) => (
+                  <span>二级分类：{categoriesSecondary && categoriesSecondary.map((item, index) => (
                     <span key={index}>
-                      {item}
-                      {index !== secondaryCategories.length - 1 && <span className="mx-2 separator">/</span>}
+                      {item.name}
+                      {index !== categoriesSecondary.length - 1 && <span className="mx-2 separator">/</span>}
                     </span>
                   ))}</span>
                 </div>
                 {
-                  tags.map
+                  tags && tags.map
                 }
                 <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
+                  {tags && tags.map((tag, index) => (
                     <span
                       key={index}
                       className={`inline-flex tag-orange items-center px-3 py-1.5 rounded text-sm font-medium border}`}
                     >
-                      #{tag}
+                      #{tag.name}
                     </span>
                   ))}
                 </div>
@@ -487,7 +452,7 @@ const ResourceDetail = () => {
           <DetailCard
             title="用户评价">
             <div className="ml-3 py-2 text-base text-main">
-              共{reviews.length} 条评价
+              共{total} 条评价
             </div>
             <div className="space-y-1">
               <List
@@ -532,7 +497,7 @@ const ResourceDetail = () => {
                 )}
               />
               <Review />
-              {reviews.map((review, index) => renderReviewItem(review, index))}
+              {records.map((review, index) => renderReviewItem(review, index))}
             </div>
           </DetailCard>
 
@@ -540,7 +505,7 @@ const ResourceDetail = () => {
 
         {/* 右侧操作和信息面板 */}
         <Col xs={24} lg={8}>
-          <div style={{ top: `-${stickyTop}rem` }} className={`flex flex-col gap-8 sticky`}>
+          <div className={`flex flex-col gap-8 sticky -top-73`}>
             {/* 操作卡片 */}
             <CustomCard className="space-y-4 overflow-visible h-auto">
               {/* 上传者信息 */}
@@ -557,9 +522,9 @@ const ResourceDetail = () => {
                   </div>
                   <div className='flex text-secondary justify-start flex-wrap'>
                     <span>{school}</span>
-                    <span className="mx-1 separator">/</span>
+                    {school && <span className="mx-1 separator">/</span>}
                     <span>{major}</span>
-                    <span className="mx-1 separator">/</span>
+                    {major && <span className="mx-1 separator">/</span>}
                     <span>{grade}</span>
                   </div>
                 </div>
@@ -579,7 +544,7 @@ const ResourceDetail = () => {
                 <FileTime count={tools}>适用软件：</FileTime>
               </div>
               {/* 操作按钮 */}
-              <div ref={downloadRef} className="gap-3 z-999999 flex flex-col justify-stretch" >
+              <div className="gap-3 z-999999 flex flex-col justify-stretch" >
                 <div className='flex'>
                   <MyButton
                     size='large'

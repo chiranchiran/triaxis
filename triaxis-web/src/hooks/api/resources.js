@@ -1,5 +1,5 @@
 
-import { getCategorySecondary, getResource, getResources, getResourceTypes, removeResource, removeResources, updateResource, uploadResource } from "../../api/modules/resources"
+import { getCategorySecondary, getResource, getResources, getResourceTypes, getResourceViews, removeResource, removeResources, updateResource, uploadResource } from "../../api/modules/resources"
 import { useDelete, useGet, useUpdate, useUpload } from "../common/useData"
 
 export const RESOURCE_TYPES_QUERY_KEY = ['Resources', 'types']

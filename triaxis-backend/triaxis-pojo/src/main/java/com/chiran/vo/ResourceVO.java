@@ -1,5 +1,6 @@
 package com.chiran.vo;
 
+import com.chiran.bo.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,29 +17,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourceVO implements Serializable {
-    //资源信息
-    private Integer id;
-    private String title;
-    private String description;
-    private Long size;
-    private String extension;
-    private Integer rightId;
-    private Integer subjectId;
-    private Integer userId;
-    private Integer price = 0;
-    private String details;
-    private Integer downloadCount;
-    private Integer collectCount;
-    private Integer likeCount;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime publishTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime updateTime;
-    private List<Integer> toolIds;
-    private List<Integer> categoryIds;
-    //用户与资源的关系
-    private Boolean isLiked = false;
-    private Boolean isCollected = false;
-    private Boolean isPurchased = false;
+public class ResourceVO  implements Serializable {
+    private ResourceSearchBO resourceDetail;
+    private UserBO uploader;
+    private UserActionsBO userActions;
+    private List<CategoryBO> images;
+    private List<CategoryBO> tags;
+    private ResourceCategoryBO category;
 }

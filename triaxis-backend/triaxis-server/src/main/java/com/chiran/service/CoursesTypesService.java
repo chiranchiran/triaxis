@@ -1,10 +1,6 @@
 package com.chiran.service;
 
-import com.chiran.vo.CategoryVO;
 import com.chiran.vo.CoursesTypesVO;
-import com.chiran.vo.ResourcesTypesVO;
-
-import java.util.List;
 
 /**
  * <p>

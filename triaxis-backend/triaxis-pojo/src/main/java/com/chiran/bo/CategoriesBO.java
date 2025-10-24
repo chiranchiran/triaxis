@@ -1,6 +1,5 @@
-package com.chiran.vo;
+package com.chiran.bo;
 
-import com.chiran.bo.CategoryBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +12,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResourcesTypesVO implements Serializable {
-    private List<CategoryBO> subjects;
+public class CategoriesBO implements Serializable {
+    private String subject;
     private List<CategoryBO> tools;
     private List<CategoryBO> categoriesFirst;
+    private List<CategoryBO> categoriesSecondary;
 }

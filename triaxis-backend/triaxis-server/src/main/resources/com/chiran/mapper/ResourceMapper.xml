@@ -1,10 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.chiran.mapper.ResourceMapper">
-    <select id="searchResources" resultType="com.chiran.vo.ResourceSearchVO">
+
+    <resultMap id="ResourceSearchVOMap" type="com.chiran.vo.ResourceSearchVO">
+        <!-- 映射资源详情 -->
+        <association property="resourceDetail" javaType="com.chiran.bo.ResourceSearchBO">
+            <id property="id" column="id"/>
+            <result property="title" column="title"/>
+            <result property="right" column="right"/>
+            <result property="description" column="description"/>
+            <result property="size" column="size"/>
+            <result property="extension" column="extension"/>
+            <result property="coverImage" column="cover_image"/>
+            <result property="price" column="price"/>
+            <result property="downloadCount" column="download_count"/>
+            <result property="collectCount" column="collect_count"/>
+            <result property="likeCount" column="like_count"/>
+            <result property="publishTime" column="publish_time"/>
+            <result property="updateTime" column="update_time"/>
+        </association>
+
+        <!-- 映射上传者信息 -->
+        <association property="uploader" javaType="com.chiran.bo.UserBO">
+            <result property="userId" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+
+        <!-- 映射用户行为状态 -->
+        <association property="userActions" javaType="com.chiran.bo.UserActionsBO">
+            <result property="isLiked" column="isLiked"/>
+            <result property="isCollected" column="isCollected"/>
+            <result property="isPurchased" column="isPurchased"/>
+        </association>
+    </resultMap>
+
+    <select id="searchResources" resultMap="ResourceSearchVOMap">
         SELECT
         r.id,
         r.title,
+        r.`right`,
         r.description,
         r.size,
         r.extension,
@@ -19,65 +54,57 @@
         u.username,
         u.avatar,
         -- 是否点赞：true=已点赞，false=未点赞
-        CASE
-        WHEN #{dto.userId} IS NULL THEN false
-        WHEN ul.id IS NOT NULL THEN true
-        ELSE false
-        END AS isLiked,
+        EXISTS(
+        SELECT 1 FROM user_likes ul
+        WHERE ul.target_id = r.id AND ul.target_type = 1
+        AND ul.user_id = #{dto.userId} AND ul.deleted = 0
+        ) AS isLiked,
         -- 是否收藏：true=已收藏，false=未收藏
-        CASE
-        WHEN #{dto.userId} IS NULL THEN false
-        WHEN uf.id IS NOT NULL THEN true
-        ELSE false
-        END AS isCollected,
-        CASE
-        WHEN #{dto.userId} IS NULL THEN false
-        WHEN up.id IS NOT NULL THEN true
-        ELSE false
-        END AS isPurchased
+        EXISTS(
+        SELECT 1 FROM user_collections uf
+        WHERE uf.target_id = r.id AND uf.target_type = 1
+        AND uf.user_id = #{dto.userId} AND uf.deleted = 0
+        ) AS isCollected,
+        EXISTS(
+        SELECT 1 FROM user_purchases up
+        WHERE up.target_id = r.id AND up.target_type = 1
+        AND up.user_id = #{dto.userId} AND up.deleted = 0
+        ) AS isPurchased
         FROM resources r
-        LEFT JOIN resource_software rs ON r.id = rs.resource_id AND rs.deleted = 0
-        LEFT JOIN resource_category rc ON r.id = rc.resource_id AND rc.deleted = 0
-        LEFT JOIN user_likes ul ON r.id = ul.target_id and ul.target_type=1 AND ul.user_id = #{dto.userId} AND ul.deleted = 0
-        LEFT JOIN user_collections uf ON r.id = uf.target_id and uf.target_type=1 AND uf.user_id = #{dto.userId} AND uf.deleted = 0
-        LEFT JOIN user_purchases up ON r.id = up.target_id and up.target_type=1 AND up.user_id = #{dto.userId} AND up.deleted = 0
         LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
         WHERE r.deleted = 0
-        AND r.status = 3  <!-- 只查询已发布的资源 -->
+        AND r.status = 3   <!-- 只查询已发布的资源 -->
 
-        <!-- 单个条件查询 -->
-        <if test="dto.rightId != null">
-            AND r.right_id = #{dto.rightId}
+        <if test="dto.right != null">
+            AND r.`right` = #{dto.right}
         </if>
         <if test="dto.subjectId != null">
             AND r.subject_id = #{dto.subjectId}
         </if>
 
-        <!-- 多类型查询 - toolId -->
+        <!-- 使用 EXISTS 替代 IN 查询 -->
         <if test="dto.toolIds != null and dto.toolIds.size() > 0">
-            AND r.id IN (
-            SELECT DISTINCT resource_id
-            FROM resource_software
-            WHERE software_id IN
+            AND EXISTS(
+            SELECT 1 FROM resource_software rs
+            WHERE rs.resource_id = r.id AND rs.deleted = 0
+            AND rs.software_id IN
             <foreach collection="dto.toolIds" item="tool" open="(" close=")" separator=",">
                 #{tool}
             </foreach>
             )
         </if>
 
-        <!-- 多类型查询 - categoryId -->
         <if test="dto.categoryIds != null and dto.categoryIds.size() > 0">
-            AND r.id IN (
-            SELECT DISTINCT resource_id
-            FROM resource_category
-            WHERE category_id IN
+            AND EXISTS(
+            SELECT 1 FROM resource_category rc
+            WHERE rc.resource_id = r.id AND rc.deleted = 0
+            AND rc.category_id IN
             <foreach collection="dto.categoryIds" item="category" open="(" close=")" separator=",">
                 #{category}
             </foreach>
             )
         </if>
 
-        <!-- 模糊搜索 -->
         <if test="dto.search != null and dto.search != ''">
             AND (
             r.title LIKE CONCAT('%', #{dto.search}, '%')
@@ -85,13 +112,16 @@
             OR r.details LIKE CONCAT('%', #{dto.search}, '%')
             )
         </if>
+        GROUP BY
 
-        GROUP BY r.id
+        r.id, r.title, r.`right`, r.description, r.size, r.extension,
+        r.cover_image, r.user_id, r.price, r.download_count, r.collect_count,
+        r.like_count, r.publish_time, r.update_time, u.username, u.avatar
 
         <!-- 排序 -->
         <choose>
             <when test="dto.orderBy == 0">
-                ORDER BY r.create_time DESC
+                ORDER BY r.publish_time DESC
             </when>
             <when test="dto.orderBy == 1">
                 ORDER BY r.collect_count DESC
@@ -103,11 +133,10 @@
                 ORDER BY r.like_count DESC
             </when>
             <when test="dto.orderBy == 4">
-                <!-- 综合排序：可以结合多个因素，这里简单示例 -->
                 ORDER BY (r.download_count * 0.3 + r.collect_count * 0.2 + r.like_count * 0.5) DESC
             </when>
             <otherwise>
-                ORDER BY r.create_time DESC
+                ORDER BY r.publish_time DESC
             </otherwise>
         </choose>
     </select>

@@ -1,6 +1,7 @@
 package com.chiran.service;
 
-import com.chiran.vo.CategoryVO;
+import com.chiran.bo.CategoryBO;
+import com.chiran.bo.ResourceCategoryBO;
 import com.chiran.vo.ResourcesTypesVO;
 
 import java.util.List;
@@ -18,5 +19,8 @@ public interface ResourceTypesService {
 
     ResourcesTypesVO getTypes();
 
-    List<CategoryVO> getCategorySecondary(Integer subjectId, Integer parentId);
+    List<CategoryBO> getCategorySecondary(Integer subjectId, Integer parentId);
+    String getSubjectName(Integer subjectId);
+    List<CategoryBO> getTools(Integer id);
+    ResourceCategoryBO selectAllCategories(Integer id);
 }

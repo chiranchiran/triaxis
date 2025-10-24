@@ -7,7 +7,8 @@ import com.chiran.result.PageResult;
 import com.chiran.result.Result;
 import com.chiran.service.ResourceService;
 import com.chiran.service.ResourceTypesService;
-import com.chiran.vo.CategoryVO;
+import com.chiran.bo.CategoryBO;
+import com.chiran.vo.ResourceSearchVO;
 import com.chiran.vo.ResourceVO;
 import com.chiran.vo.ResourcesTypesVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,9 +51,9 @@ public class ResourceController {
      * 获取二级分类
      */
     @PostMapping("/categories")
-    public Result<List<CategoryVO>> getCategories(@RequestBody ResourceCategorySecondaryDTO categoryDTO) {
+    public Result<List<CategoryBO>> getCategories(@RequestBody ResourceCategorySecondaryDTO categoryDTO) {
         log.debug("获取资源二级分类");
-        List<CategoryVO> category = resourceTypesService.getCategorySecondary(categoryDTO.getSubjectId(), categoryDTO.getParentId());
+        List<CategoryBO> category = resourceTypesService.getCategorySecondary(categoryDTO.getSubjectId(), categoryDTO.getParentId());
         return Result.success(category);
     }
 
@@ -60,7 +61,8 @@ public class ResourceController {
      * 查询资源
      */
     @GetMapping("/search")
-    public Result<PageResult> getResources(ResourceSearchDTO resourceSearchDTO) {
+    public Result<PageResult> getResources(ResourceSearchDTO resourceSearchDTO,HttpServletRequest request) {
+        resourceSearchDTO.setUserId((Integer)request.getAttribute("userId"));
         log.debug("搜索资源，参数是{}", resourceSearchDTO);
         PageResult<ResourceVO> pageResult = resourceService.getResources(resourceSearchDTO);
         return Result.success(pageResult);

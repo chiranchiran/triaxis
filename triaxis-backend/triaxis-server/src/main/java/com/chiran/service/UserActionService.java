@@ -1,26 +1,15 @@
-package com.chiran.mapper;
+package com.chiran.service;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.chiran.bo.CategoryBO;
 import com.chiran.bo.UserActionsBO;
-import com.chiran.entity.UserLike;
-import com.chiran.utils.CheckUserUtil;
-import org.apache.ibatis.annotations.Mapper;
+import com.chiran.dto.UserLoginCountDTO;
+import com.chiran.dto.UserLoginPhoneDTO;
+import com.chiran.vo.UserInfoVO;
 
 import java.util.List;
-import java.util.Map;
 
-/**
- * <p>
- *  Mapper 接口
- * </p>
- *
- * @author chiran
- * @since 2025-10-07
- */
-@Mapper
-public interface UserActionMapper{
-    //检查是否点赞
+public interface UserActionService {
+
     boolean checkIsLiked(Integer userId, Integer targetId, Integer targetType);
     //检查是否收藏
     boolean checkIsCollectd(Integer userId, Integer targetId, Integer targetType);
