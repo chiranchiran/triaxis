@@ -9,7 +9,7 @@ import './index.less'
 import { useLogout } from '../../hooks/api/login';
 import Logo from '../Logo';
 import { usePrefernce } from '../../hooks/usePreference';
-import MyButton from '../MyButton';
+import { MyButton } from '../MyButton';
 
 const Header = () => {
   const { Search } = Input;

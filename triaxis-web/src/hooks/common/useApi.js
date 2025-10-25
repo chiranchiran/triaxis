@@ -51,7 +51,7 @@ export const useApi = (apiFunc, {
   //默认错误处理
   const defaultOnError = (error) => {
     //根据拦截器返回的自定义error分别处理
-    if (!errorConfig.noDetail) handlePromiseError(error, notification, messageApi, navigate)
+    handlePromiseError(error, !errorConfig.noDetail, notification, messageApi, navigate)
     //配置文件handler
     const handler = errorConfig.handler
     if (handler && typeof handler === 'function') {
@@ -60,21 +60,7 @@ export const useApi = (apiFunc, {
     }
     //错误消息显示
     if (errorConfig.showMessage) {
-      showError(error)
-    }
-  }
-  // 根据错误级别显示不同提示
-  function showError(error) {
-    const { message, level = 'error' } = error
-    switch (level) {
-      case 'warn':
-        messageApi.warning({ message })
-        break
-      case 'info':
-        messageApi.info({ message })
-        break
-      default:
-        messageApi.error({ message })
+      messageApi.error(errorConfig.message)
     }
   }
   const handleSuccess = (data) => {

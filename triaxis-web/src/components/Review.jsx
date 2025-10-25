@@ -1,445 +1,378 @@
 import React, { useState } from 'react';
-import { Avatar, Rate, Button, List, Input } from 'antd';
-import { HeartOutlined, HeartFilled, MessageOutlined, UserOutlined, MoreOutlined } from '@ant-design/icons';
+import { Avatar, Rate, Input, Spin, Space } from 'antd';
+import { HeartOutlined, HeartFilled, MessageOutlined, UserOutlined, MoreOutlined, LoadingOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { useLike } from '../hooks/api/common';
+import { useGetReviews, useGetReviewReplies } from '../hooks/api/reviews';
+import { Radio, RadioGroup } from '@douyinfe/semi-ui';
+import { MyButton } from './MyButton';
+import { logger } from '../utils/logger';
+import { useQueryClient } from '@tanstack/react-query';
 
 dayjs.extend(relativeTime);
+const { TextArea } = Input;
 
-// 模拟评论数据
-const generateMockReviews = () => [
-  {
-    id: 1,
-    user: {
-      name: '设计学院学生',
-      avatar: '/images/avatar-2.jpg',
-      level: '初级用户'
-    },
-    rating: 5,
-    content: '这个资源非常实用，图纸质量很高，对我的课程设计帮助很大！强烈推荐给建筑学的同学们。',
-    createTime: '2023-11-15 14:30',
-    likes: 23,
-    liked: false,
-
-    replies: [
-      {
-        id: 101,
-        user: {
-          name: '资源作者',
-          avatar: '/images/avatar-author.jpg',
-          level: '专业认证'
-        },
-        content: '谢谢你的认可！后续我会更新更多建筑案例解析～',
-        createTime: '2023-11-15 16:20',
-        likes: 5,
-        liked: false
-      },
-      {
-        id: 102,
-        user: {
-          name: '建筑小白',
-          avatar: '/images/avatar-5.jpg',
-          level: '新手上路'
-        },
-        content: '同感！这个资料对我帮助也很大',
-        createTime: '2023-11-16 09:15',
-        likes: 2,
-        liked: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    user: {
-      name: '资深建筑师',
-      avatar: '/images/avatar-3.jpg',
-      level: '专家用户'
-    },
-    rating: 4,
-    content: '内容很全面，特别是几个知名项目的分析很到位。建议可以增加更多技术指标的说明。',
-    createTime: '2023-11-10 09:15',
-    likes: 15,
-    liked: true,
-    replies: [
-      {
-        id: 201,
-        user: {
-          name: '资源作者',
-          avatar: '/images/avatar-author.jpg',
-          level: '专业认证'
-        },
-        content: '感谢专业建议！下个版本会补充技术参数细节',
-        createTime: '2023-11-10 11:30',
-        likes: 3,
-        liked: false
-      }
-    ]
-  },
-  {
-    id: 3,
-    user: {
-      name: '城市规划师',
-      avatar: '/images/avatar-4.jpg',
-      level: '高级用户'
-    },
-    rating: 5,
-    content: '非常好的参考资料，商业综合体的流线组织分析特别有帮助，期待作者更多类似资源。',
-    createTime: '2023-11-05 16:45',
-    likes: 18,
-    liked: false,
-    replies: []
-  },
-  {
-    id: 4,
-    user: {
-      name: '室内设计师',
-      avatar: '/images/avatar-6.jpg',
-      level: '中级用户'
-    },
-    rating: 4,
-    content: '色彩搭配和空间布局的分析很专业，如果能增加一些软装设计的建议就更完美了！',
-    createTime: '2023-11-03 10:20',
-    likes: 12,
-    liked: false,
-    replies: [
-      {
-        id: 401,
-        user: {
-          name: '设计爱好者',
-          avatar: '/images/avatar-7.jpg',
-          level: '初级用户'
-        },
-        content: '我也觉得软装部分可以再详细一些',
-        createTime: '2023-11-03 14:45',
-        likes: 1,
-        liked: false
-      },
-      {
-        id: 402,
-        user: {
-          name: '资源作者',
-          avatar: '/images/avatar-author.jpg',
-          level: '专业认证'
-        },
-        content: '收到建议！正在准备软装专题内容',
-        createTime: '2023-11-04 09:30',
-        likes: 4,
-        liked: false
-      }
-    ]
-  }
+// 排序选项配置（与后端orderBy参数对应：1=最新发布，2=最多点赞，3=最多回复）
+const SORT_OPTIONS = [
+  { name: "最新发布", id: 1 },
+  { name: "最多点赞", id: 2 },
+  { name: "最多回复", id: 3 }
 ];
 
-// 生成更多模拟数据
-const generateMoreReviews = () => {
-  const baseReviews = generateMockReviews();
-  for (let i = 5; i <= 15; i++) {
-    baseReviews.push({
-      id: i,
-      user: {
-        name: `用户${i}`,
-        avatar: `/images/avatar-${i % 8 + 1}.jpg`,
-        level: ['新手上路', '初级用户', '中级用户', '高级用户', '专家用户'][i % 5]
-      },
-      rating: Math.floor(Math.random() * 2) + 4, // 4-5星
-      content: `这是第${i}条模拟评论内容，用于测试评论区展示效果和交互功能。`,
-      createTime: dayjs().subtract(Math.floor(Math.random() * 30), 'day').format('YYYY-MM-DD HH:mm'),
-      likes: Math.floor(Math.random() * 50),
-      liked: Math.random() > 0.7,
-      replies: []
-    });
-  }
-  return baseReviews;
-};
-
-const Review = () => {
-  const [reviews, setReviews] = useState(generateMoreReviews());
+const Review = ({ targetType, targetId }) => {
+  const queryClient = useQueryClient();
   const [expandedReplies, setExpandedReplies] = useState({});
-  const [replyCounts, setReplyCounts] = useState({});
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [replyContent, setReplyContent] = useState('');
+  const [replyingTo, setReplyingTo] = useState([])
+  let content
+  const [replyContent, setReplyContent] = useState({
+    id: null,
+    content: ""
+  });
 
-  // 处理点赞
-  const handleLike = (reviewId, isReply = false, parentId = null) => {
-    setReviews(prev => prev.map(review => {
-      if (isReply && review.id === parentId) {
-        return {
-          ...review,
-          replies: review.replies.map(reply =>
-            reply.id === reviewId
-              ? { ...reply, likes: reply.liked ? reply.likes - 1 : reply.likes + 1, liked: !reply.liked }
-              : reply
-          )
-        };
-      }
-      if (!isReply && review.id === reviewId) {
-        return {
-          ...review,
-          likes: review.liked ? review.likes - 1 : review.likes + 1,
-          liked: !review.liked
-        };
-      }
-      return review;
-    }));
+  //获取顶层评论
+  const [reviewParams, setReviewParams] = useState({
+    targetType,
+    targetId,
+    orderBy: 1
+  })
+  const { data: reviewRes = {}, isFetching: reviewsLoading, refetch: refetchReviews } = useGetReviews(
+    reviewParams,
+    { enabled: !!reviewParams.targetId && !!reviewParams.targetType && !!reviewParams.orderBy });
+  const { total = 0, records: reviews = [] } = reviewRes;
+
+  //获取二级评论
+  const [replyParams, setReplyParams] = useState({
+    parentId: null,
+    rootId: null,
+    targetType,
+    targetId,
+    orderBy: 1
+  });
+  const { isFetching: repliesLoading, refetch: refetchReplies } = useGetReviewReplies(
+    replyParams,
+    { enabled: !!replyParams.targetId && !!replyParams.targetType && !!replyParams.orderBy && !!replyParams.parentId });
+  // const { records: replies = [] } = replyRes;
+
+  //处理点赞
+  const { mutation: doLike, isLoading: likeLoading, isSuccess: likeSuccess } = useLike();
+  const handleLike = async (targetId, isReply = false) => {
+    await doLike({
+      targetType: 4,
+      targetId,
+      isLiked: !isReply
+        ? !reviews.find(r => r.id === targetId)?.isLiked
+        : !replies.find(r => r.id === targetId)?.isLiked
+    });
+    // 点赞成功后刷新对应数据
+    if (isReply) refetchReplies();
+    else refetchReviews();
   };
 
-  // 切换回复展开状态
-  const toggleReplies = (reviewId) => {
-    setExpandedReplies(prev => ({
-      ...prev,
-      [reviewId]: !prev[reviewId]
-    }));
+  // 回复展开/收起
+  const toggleReplies = (id) => {
+    const isExpanded = expandedReplies[id];
+    logger.debug("当前状态是", isExpanded, id)
+    setExpandedReplies(prev => ({ ...prev, [id]: !isExpanded }));
+
+    if (!isExpanded) {
+      const newreplyParams = {
+        ...replyParams,
+        parentId: id,
+        rootId: id
+      };
+      setReplyParams(newreplyParams);
+    }
   };
-
-  // 加载更多回复
-  const loadMoreReplies = (reviewId) => {
-    setReplyCounts(prev => ({
-      ...prev,
-      [reviewId]: (prev[reviewId] || 1) + (prev[reviewId] === 1 ? 10 : 20)
-    }));
-  };
-
-  // 收起回复
-  const collapseReplies = (reviewId) => {
-    setReplyCounts(prev => ({
-      ...prev,
-      [reviewId]: 1
-    }));
-  };
-
-  // 开始回复
-  const startReply = (reviewId) => {
-    setReplyingTo(reviewId);
-    setReplyContent('');
-  };
-
-  // 提交回复
-  const submitReply = (reviewId) => {
-    if (!replyContent.trim()) return;
-
-    const newReply = {
-      id: Date.now(),
-      user: {
-        name: '当前用户',
-        avatar: '/images/avatar-current.jpg',
-        level: '中级用户'
-      },
-      content: replyContent,
-      createTime: dayjs().format('YYYY-MM-DD HH:mm'),
-      likes: 0,
-      liked: false
-    };
-
-    setReviews(prev => prev.map(review =>
-      review.id === reviewId
-        ? { ...review, replies: [...review.replies, newReply] }
-        : review
-    ));
-
+  const getReply = (parentId) => {
+    return queryClient.getQueryData(['reviews', 'replies', targetType, targetId, parentId]);
+  }
+  //处理排序
+  const handleOrder = (value) => {
+    setReviewParams(pre => ({ ...pre, orderBy: value }))
+    setExpandedReplies({})
+  }
+  const cancelReply = () => {
     setReplyingTo(null);
-    setReplyContent('');
+    setReplyContent({
+      id: null,
+      content: ""
+    });
+  };
+  // 回复提交（需对接新增回复的Hook，此处预留逻辑）
+  const submitReply = async (id) => {
+    setReplyContent((pre) => ({ ...pre, content }))
+    if (!replyContent.trim()) return;
+    try {
+      // 1. 调用新增回复的Hook（需项目提供，示例代码）
+      // const addReplyRes = await doAddReply({
+      //   parentId: id,
+      //   rootId: id,
+      //   targetType,
+      //   targetId,
+      //   content: replyContent,
+      //   isAnonymous: false // 可加匿名开关
+      // });
+      // 2. 提交成功后刷新回复列表
+      // refetchReplies();
+      // 3. 清空输入
+      cancelReply();
+    } catch (error) {
+      console.error("回复失败：", error);
+    }
   };
 
-  // 渲染单条回复
-  const renderReply = (reply, parentId) => (
-    <div key={reply.id} className="flex space-x-3 py-3">
-      <Avatar
-        size={32}
-        src={reply.user.avatar}
-        icon={<UserOutlined />}
-        className="border border-gray-200 flex-shrink-0"
-      />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2 mb-1">
-          <span className="font-medium text-gray-800 text-sm">{reply.user.name}</span>
-          <span className="bg-blue-100 text-blue-600 text-xs px-1.5 py-0.5 rounded">
-            {reply.user.level}
-          </span>
-          <span className="text-gray-400 text-xs">{dayjs(reply.createTime).fromNow()}</span>
-        </div>
-        <p className="text-gray-700 text-sm leading-relaxed mb-2">{reply.content}</p>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => handleLike(reply.id, true, parentId)}
-            className={`flex items-center text-xs transition-colors ${reply.liked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'
-              }`}
-          >
-            {reply.liked ? <HeartFilled className="mr-1" /> : <HeartOutlined className="mr-1" />}
-            <span>{reply.likes}</span>
-          </button>
-        </div>
-      </div>
-    </div>
+  const LoadingComponent = ({ isLoading, children }) => (
+    <Spin
+      spinning={isLoading}
+      indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />}
+      tip="加载中..."
+    >
+      {children}
+    </Spin>
   );
-
-  // 渲染回复列表
-  const renderReplies = (replies, reviewId) => {
-    const displayCount = replyCounts[reviewId] || 1;
-    const visibleReplies = replies.slice(0, displayCount);
-    const hasMore = replies.length > displayCount;
-
+  const Answer = ({ id, username }) => {
+    const flag = replyContent.id === id
+    if (!flag) {
+      return
+    }
     return (
-      <div className="ml-11 mt-3 space-y-1">
-        {visibleReplies.map(reply => renderReply(reply, reviewId))}
-
-        {hasMore && (
-          <div className="flex items-center space-x-4 pt-2">
-            <button
-              onClick={() => loadMoreReplies(reviewId)}
-              className="text-blue-500 text-sm hover:text-blue-600 transition-colors"
+      <div className="flex space-x-3 mt-4">
+        <div className="flex-1">
+          <TextArea
+            allowClear
+            value={content}
+            onChange={(e) => content = e}
+            placeholder={`回复 @${username}...`}
+            rows={3}
+            className="mb-2 !text-base"
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <MyButton size="small" type="gray" onClick={cancelReply}>取消</MyButton>
+            <MyButton
+              size="small"
+              type="gray"
+              onClick={() => submitReply(id)}
+              disabled={!replyContent.content.trim()}
             >
-              展开{replies.length - displayCount}条回复
-            </button>
-            {displayCount > 1 && (
-              <button
-                onClick={() => collapseReplies(reviewId)}
-                className="text-gray-500 text-sm hover:text-gray-600 transition-colors"
-              >
-                收起
-              </button>
-            )}
+              发送
+            </MyButton>
           </div>
-        )}
-
-        {displayCount > 1 && !hasMore && replies.length > 1 && (
-          <button
-            onClick={() => collapseReplies(reviewId)}
-            className="text-gray-500 text-sm hover:text-gray-600 transition-colors pt-2"
-          >
-            收起回复
-          </button>
-        )}
+        </div>
       </div>
-    );
-  };
-
+    )
+  }
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg">
-      {/* 评论区标题 */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">全部评论 ({reviews.length})</h2>
-        <div className="flex items-center space-x-4 text-sm text-gray-500">
-          <span>最新</span>
-          <span>最热</span>
+    <div className="max-w-4xl mx-auto p-6 bg-card rounded-lg">
+      {/* 评论区标题 + 排序 */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+        <h2 className="text-lg font-bold text-main">全部评论 ({total})</h2>
+        <div className="flex items-center space-x-2">
+          <Space vertical="true" spacing='loose' align='start'>
+            <RadioGroup
+              onChange={(e) => handleOrder(e.target.value)}
+              type='button'
+              MyButtonSize='middle'
+              value={reviewParams.orderBy}
+              aria-label="单选组合示例"
+              name="demo-radio-large"
+              className='!text-sm'
+            >
+              {SORT_OPTIONS.map((item, index) => (
+                <Radio key={item.id} value={item.id}>
+                  {item.name}
+                </Radio>
+              ))}
+            </RadioGroup>
+          </Space>
         </div>
       </div>
 
       {/* 评论列表 */}
-      <div className="space-y-6">
-        {reviews.map(review => (
-          <div key={review.id} className="border-b border-gray-100 pb-6 last:border-b-0">
-            {/* 主评论 */}
-            <div className="flex space-x-4">
-              <Avatar
-                size={48}
-                src={review.user.avatar}
-                icon={<UserOutlined />}
-                className="border border-main flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-3">
-                    <span className="font-medium text-gray-800 text-sm">
-                      {review.user.name}
-                    </span>
-                    <span className="bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full">
-                      {review.user.level}
-                    </span>
-                    <Rate
-                      disabled
-                      defaultValue={review.rating}
-                      className="text-sm text-amber-500"
+      <LoadingComponent isLoading={reviewsLoading}>
+        <div className="space-y-4">
+          {reviews.length === 0 && !reviewsLoading ? (
+            <div className="text-center py-10 text-secondary">
+              暂无评论，快来抢沙发～
+            </div>
+          ) : (
+            reviews.map(mainReview => {
+              const {
+                id,
+                rate = 3,
+                content = "该用户没有评价",
+                publishTime = "",
+                likeCount = 0,
+                isLiked = false,
+                replyCount = 0,
+                user = {},
+              } = mainReview || {};
+              const {
+                avatar,
+                userId,
+                username = "匿名用户",
+                school,
+                grade,
+                major
+              } = user || {};
+
+              return (
+                <div key={id} className="border-b border-main pb-4 last:border-b-0">
+                  {/* 主评论内容 */}
+                  <div className="flex space-x-4">
+                    <Avatar
+                      size={40}
+                      src={avatar}
+                      icon={<UserOutlined />}
+                      className="border border-main cursor-pointer flex-shrink-0"
                     />
-                  </div>
-                  <MoreOutlined className="text-gray-400 hover:text-gray-600 cursor-pointer" />
-                </div>
 
-                <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                  {review.content}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 text-xs">
-                    {dayjs(review.createTime).fromNow()}
-                  </span>
-                  <div className="flex items-center space-x-6">
-                    <button
-                      onClick={() => handleLike(review.id)}
-                      className={`flex items-center text-sm transition-colors ${review.liked ? 'text-rose-500' : 'text-gray-500 hover:text-rose-500'
-                        }`}
-                    >
-                      {review.liked ? <HeartFilled className="mr-1" /> : <HeartOutlined className="mr-1" />}
-                      <span>{review.likes}</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        toggleReplies(review.id);
-                        if (!expandedReplies[review.id]) {
-                          setReplyCounts(prev => ({ ...prev, [review.id]: 1 }));
-                        }
-                      }}
-                      className="flex items-center text-gray-500 hover:text-blue-600 text-sm transition-colors"
-                    >
-                      <MessageOutlined className="mr-1" />
-                      <span>{review.replies.length}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 回复输入框 */}
-                {replyingTo === review.id && (
-                  <div className="mt-4 flex space-x-3">
-                    <Avatar size={32} src="/images/avatar-current.jpg" className="flex-shrink-0" />
-                    <div className="flex-1">
-                      <Input.TextArea
-                        value={replyContent}
-                        onChange={(e) => setReplyContent(e.target.value)}
-                        placeholder="写下你的回复..."
-                        rows={2}
-                        className="mb-2"
-                      />
-                      <div className="flex justify-end space-x-2">
-                        <Button onClick={() => setReplyingTo(null)}>取消</Button>
-                        <Button type="primary" onClick={() => submitReply(review.id)}>
-                          回复
-                        </Button>
+                    <div className="flex-1 min-w-0 pl-4">
+                      {/* 主评论上传者 */}
+                      <div className="flex flex-wrap items-center gap-4">
+                        <span className="text-secondary text-sm cursor-pointer">{username}</span>
+                        <span className="text-secondary text-sm">
+                          {[school, major, grade].filter(Boolean).join(" / ")}
+                        </span>
+                        <Rate
+                          disabled
+                          defaultValue={rate}
+                          className="text-sm text-rate ml-auto"
+                        />
                       </div>
+                      {/* 主评论内容 */}
+                      <p className="text-main text-base leading-relaxed py-2">
+                        {content}
+                      </p>
+                      {/* 主评论时间 + 操作 */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div>
+                          <span className="text-secondary mr-4">
+                            {dayjs(publishTime, "YYYY.MM.DD HH:mm:ss").fromNow()}
+                          </span>
+                          <span className="font-semibold text-secondary cursor-pointer" onClick={() => setReplyContent({ content: "", id })}>回复</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                          <button
+                            onClick={() => handleLike(id)}
+                            disabled={likeLoading}
+                            className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-like" : "text-secondary hover:!text-like"
+                              }`}
+                          >  {isLiked ? <HeartFilled /> : <HeartOutlined />}
+                            {likeCount}
+                          </button>
+                          <button
+                            onClick={() => toggleReplies(id)}
+                            className="flex cursor-pointer items-center gap-1 text-secondary transition-colors"
+                          >
+                            <MessageOutlined />{replyCount}
+                          </button>
+
+                          <MoreOutlined className="text-secondary cursor-pointer" />
+                        </div>
+                      </div>
+                      {/* 回复输入框：当前回复该主评论时显示 */}
+                      <Answer id={id} username={username} />
+                      {/* 回复区域：展开时显示 */}
+                      {expandedReplies[id] && (
+                        <div className="mt-4 space-y-4">
+                          {/* 回复列表 */}
+                          <LoadingComponent isLoading={repliesLoading}>
+                            {
+                              getReply(id)?.total === 0 && !repliesLoading ? (
+                                <div className="text-center py-4 text-secondary text-sm">
+                                  暂无回复，快来回复吧～
+                                </div>
+                              ) : (
+                                getReply(id)?.records.map(reply => {
+                                  const {
+                                    id: replyId,
+                                    content: replyContent,
+                                    publishTime: replyPublishTime,
+                                    likeCount: replyLikeCount,
+                                    isLiked: replyIsLiked,
+                                    user: replyUser = {}
+                                  } = reply;
+                                  const {
+                                    avatar: replyAvatar,
+                                    userId: replyUserId,
+                                    username: replyUsername = "匿名用户",
+                                    school: replySchool,
+                                    grade: replyGrade,
+                                    major: replyMajor
+                                  } = replyUser || {}
+                                  return (
+                                    <div key={replyId} className="flex space-x-3 flex-1 min-w-0 pl-3 py-2">
+                                      {/* 回复用户头像 */}
+                                      <Avatar
+                                        size={32}
+                                        src={replyAvatar}
+                                        icon={<UserOutlined />}
+                                        className="border cursor-pointer border-main flex-shrink-0"
+                                      />
+                                      {/* 回复内容区 */}
+
+                                      <div className="flex-1 min-w-0 pl-4">
+                                        {/* 主评论上传者 */}
+                                        <div className="flex flex-wrap items-center gap-4">
+                                          <span className="text-secondary cursor-pointer text-sm">{replyUsername}</span>
+                                          <span className="text-secondary text-sm">
+                                            {[replySchool, replyMajor, replyGrade].filter(Boolean).join(" / ")}
+                                          </span>
+                                        </div>
+                                        {/* 回复标注：@主评论用户 */}
+                                        <div className='py-2'>
+
+                                          <span className="text-main text-base">回复</span>
+                                          <span className="text-secondary cursor-pointer text-base"> @{username}：</span>
+                                          <span className="text-main text-base leading-relaxed py-2">
+                                            {replyContent}
+                                          </span>
+                                        </div>
+
+                                        {/* 评论时间 + 操作 */}
+                                        <div className="flex items-center justify-between text-sm">
+                                          <div>
+                                            <span className="text-secondary mr-4">
+                                              {dayjs(replyPublishTime, "YYYY.MM.DD HH:mm:ss").fromNow()}
+                                            </span>
+                                            <span className="font-semibold text-secondary cursor-pointer" onClick={() => setReplyContent({ content: "", id: replyId })}>回复</span>
+                                          </div>
+                                          <div className="flex items-center gap-6">
+                                            <button
+                                              onClick={() => handleLike(replyId)}
+                                              disabled={likeLoading}
+                                              className={`flex items-center gap-1 cursor-pointer transition-colors ${replyIsLiked ? "text-like" : "text-secondary hover:!text-like"
+                                                }`}
+                                            >  {replyIsLiked ? <HeartFilled /> : <HeartOutlined />}
+                                              {replyLikeCount}
+                                            </button>
+
+                                            <MoreOutlined className="text-secondary cursor-pointer" />
+                                          </div>
+                                        </div>
+                                        <Answer id={replyId} username={replyUsername} />
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )}
+                          </LoadingComponent>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-
-                {/* 回复列表 */}
-                {expandedReplies[review.id] && review.replies.length > 0 && (
-                  <>
-                    {renderReplies(review.replies, review.id)}
-                    <button
-                      onClick={() => startReply(review.id)}
-                      className="ml-11 mt-2 text-blue-500 text-sm hover:text-blue-600 transition-colors"
-                    >
-                      回复
-                    </button>
-                  </>
-                )}
-
-                {/* 没有回复时的回复按钮 */}
-                {expandedReplies[review.id] && review.replies.length === 0 && (
-                  <div className="ml-11 mt-3">
-                    <button
-                      onClick={() => startReply(review.id)}
-                      className="text-blue-500 text-sm hover:text-blue-600 transition-colors"
-                    >
-                      成为第一个回复的人
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </LoadingComponent>
     </div>
   );
-};
+}
+
+
+
 
 export default Review;

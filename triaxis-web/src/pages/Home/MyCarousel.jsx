@@ -1,6 +1,6 @@
 import { Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import MyButton from '../../components/MyButton';
+import { MyButton } from '../../components/MyButton';
 import { Carousel, Space, Typography } from '@douyinfe/semi-ui';
 
 function MyCarousel({ imgList, textList = null, path, description }) {

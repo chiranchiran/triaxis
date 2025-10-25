@@ -31,14 +31,6 @@
   padding: 5px 14px 14px !important;
   border-radius: 0 0 8px 8px;
 }
-.check .semi-radio-addon-buttonRadio-checked {
-  font-weight: 600 !important;
-  background: var(--accent-orange-light) !important;
-  color: var(--accent-orange-dark) !important;
-}
-.check .semi-radio-addon-buttonRadio {
-  font-weight: 400;
-}
 .check .ant-ribbon .ant-ribbon-text {
   color: inherit;
   background: inherit;
@@ -68,4 +60,13 @@
 }
 .check .large-ribbon .ant-ribbon {
   width: 150px;
+}
+.semi-radio-addon-buttonRadio-checked {
+  font-weight: 600 !important;
+  background: var(--accent-orange-light) !important;
+  color: var(--accent-orange-dark) !important;
+}
+.semi-radio-addon-buttonRadio {
+  font-weight: 400;
+  font-size: var(--text-sm);
 }

@@ -11,7 +11,8 @@ public class ResourceSearchDTO implements Serializable {
     private Integer right;
     private Integer subjectId;
     private List<Integer> toolIds;
-    private List<Integer> categoryIds;
+    private List<Integer> categoriesFirst;
+    private List<Integer> categoriesSecondary;
     private Integer page;
     private Integer pageSize;
     private String search;

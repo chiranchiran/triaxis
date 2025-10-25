@@ -39,7 +39,8 @@ const authconfig = {
     }
   }, logout: {
     success: {
-      showMessage: false,
+      showMessage: true,
+      message: "成功退出登录",
       handler: onLogout
     },
     error: {

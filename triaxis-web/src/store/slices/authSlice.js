@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { defaultAutoLogin, getLoginData, getUserData, removeAllData, removeLoginData, setAllData, setAuthenticated, setAutoLoginData, setLoginData, setUserData } from "../../utils/localStorage";
+import { defaultAutoLogin, getLoginData, getUserData, removeAllData, setAllData, setAuthenticated, setAutoLoginData } from "../../utils/localStorage";
 import { logger } from "../../utils/logger";
 import { refresh } from "../../api/modules/login";
 /**redux管理数据

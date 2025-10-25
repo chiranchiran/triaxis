@@ -85,25 +85,50 @@
         <!-- 使用 EXISTS 替代 IN 查询 -->
         <if test="dto.toolIds != null and dto.toolIds.size() > 0">
             AND EXISTS(
-            SELECT 1 FROM resource_software rs
+            SELECT 1 FROM resource_tool rs
             WHERE rs.resource_id = r.id AND rs.deleted = 0
-            AND rs.software_id IN
+            AND rs.tool_id IN
             <foreach collection="dto.toolIds" item="tool" open="(" close=")" separator=",">
                 #{tool}
             </foreach>
             )
         </if>
 
-        <if test="dto.categoryIds != null and dto.categoryIds.size() > 0">
-            AND EXISTS(
-            SELECT 1 FROM resource_category rc
-            WHERE rc.resource_id = r.id AND rc.deleted = 0
-            AND rc.category_id IN
-            <foreach collection="dto.categoryIds" item="category" open="(" close=")" separator=",">
-                #{category}
-            </foreach>
-            )
-        </if>
+        <choose>
+            <!-- 1. 二级分类有值：按原逻辑查二级分类关联 -->
+            <when test="dto.categoriesSecondary != null and dto.categoriesSecondary.size() > 0">
+                AND EXISTS(
+                SELECT 1 FROM resource_category rc
+                WHERE rc.resource_id = r.id
+                AND rc.deleted = 0
+                AND rc.category_id IN
+                <foreach collection="dto.categoriesSecondary" item="category" open="(" close=")" separator=",">
+                    #{category}
+                </foreach>
+                )
+            </when>
+
+            <!-- 2. 二级分类为空，但一级分类有值：查二级分类的parent_id是否匹配一级分类 -->
+            <when test="(dto.categoriesSecondary == null or dto.categoriesSecondary.size() == 0)
+                and dto.categoriesFirst != null and dto.categoriesFirst.size() > 0">
+                AND EXISTS(
+                SELECT 1 FROM resource_category rc
+                -- 关联分类表，获取二级分类的parent_id（即一级分类ID）
+                INNER JOIN resource_categories rcate ON rc.category_id = rcate.id
+                WHERE rc.resource_id = r.id
+                AND rc.deleted = 0
+                AND rcate.deleted = 0
+                -- 筛选parent_id在一级分类列表中
+                AND rcate.parent_id IN
+                <foreach collection="dto.categoriesFirst" item="category" open="(" close=")" separator=",">
+                    #{category}
+                </foreach>
+                )
+            </when>
+
+            <!-- 3. 两者都为空：不添加任何条件 -->
+            <otherwise/>
+        </choose>
 
         <if test="dto.search != null and dto.search != ''">
             AND (

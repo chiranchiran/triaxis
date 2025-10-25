@@ -32,7 +32,3 @@ export const removeResource = (id) => {
 export const removeResources = (data) => {
   return service.delete('/resources/batch', data)
 }
-//查看资源的评论
-export const getResourceViews = (id) => {
-  return service.get(`/resources/views/${id}`)
-}

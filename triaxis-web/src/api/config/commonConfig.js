@@ -10,6 +10,17 @@ export default {
       message: "获取成功",
     }
   },
+  getView: {
+    success: {
+      showMessage: false,
+      message: "获取成功",
+    },
+    error: {
+      noDetail: true,
+      showMessage: true,
+      message: "评论获取失败！",
+    }
+  },
   add: {
     success: {
       showMessage: true,

@@ -22,7 +22,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import CourseContainer from '../../components/CourseContainer';
-import MyButton from '../../components/MyButton';
+import { MyButton } from '../../components/MyButton';
 import ScoreIcon from '../../components/Score';
 
 const { Search } = Input;

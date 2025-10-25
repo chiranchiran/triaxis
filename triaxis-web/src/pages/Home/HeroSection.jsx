@@ -5,7 +5,7 @@ import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import UrbanPlanningKnowledgeGraph from './KnowledgeGraph';
 import Logo from '../../components/Logo';
-import MyButton from '../../components/MyButton';
+import { MyButton } from '../../components/MyButton';
 
 const HeroSection = () => {
   const navigate = useNavigate();

@@ -35,7 +35,7 @@ export const handleGlobalError = () => {
   }
 }
 //处理数据层Promise错误
-export function handlePromiseError(error, notification, messageApi, navigate) {
+export function handlePromiseError(error, showMessage, notification, messageApi, navigate) {
   logger.debug("捕获到primise错误", error)
   if (!error) return
   const { type, level = 'error', message, details } = error
@@ -45,37 +45,37 @@ export function handlePromiseError(error, notification, messageApi, navigate) {
       return
     case 'CLIENT_ERROR':
     case 'SYSTEM_ERROR':
-      notification[level]({ message: "请求错误", description: message })
+      if (showMessage) notification[level]({ message: "请求错误", description: message })
       break
     case 'SERVER_ERROR':
-      notification[level]({ message: "服务器错误", description: message })
+      if (showMessage) notification[level]({ message: "服务器错误", description: message })
       break
     case 'NETWORK_ERROR':
-      notification[level]({ message: "网络错误", description: message })
+      if (showMessage) notification[level]({ message: "网络错误", description: message })
       break;
     case 'AUTH_ERROR':
-      handleAuthError(error, notification);
+      handleAuthError(error, showMessage, notification, navigate);
       break;
     case 'USER_ERROR':
-      notification[level]({ message: "登录错误", description: message })
+      if (showMessage) notification[level]({ message: "登录错误", description: message })
       break;
     case 'VALIDATION_ERROR':
     case 'BUSINESS_ERROR':
     case 'ORDER_ERROR':
-      messageApi[level](message, navigate)
+      if (showMessage) messageApi[level](message, navigate)
       break;
     case 'PAYMENT_ERROR':
-      notification[level]({ message: "支付失败", description: message })
+      if (showMessage) notification[level]({ message: "支付失败", description: message })
       break
     default:
       logger.error(error)
-      notification[level]({ message: "未知错误", description: "请重试！" })
+      if (showMessage) notification[level]({ message: "未知错误", description: "请重试！" })
   }
 }
-function handleAuthError(error, notification, navigate) {
+function handleAuthError(error, showMessage, notification, navigate) {
   const { code } = error;
   if (code === 11000 || 11001) {
-    notification.info({ message: "请登录！", description: message })
+    if (showMessage) notification.info({ message: "请登录！", description: message })
     store.dispatch(logout())
     // 跳转到登录页
     setTimeout(() => {
@@ -84,5 +84,5 @@ function handleAuthError(error, notification, navigate) {
   }
 
   //11003逻辑
-  notification.error({ message: "未知错误！", description: error.message })
+  if (showMessage) notification.error({ message: "未知错误！", description: error.message })
 }

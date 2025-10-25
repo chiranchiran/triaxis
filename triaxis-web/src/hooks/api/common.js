@@ -10,3 +10,4 @@ export const useCollect = (params, options) => {
 export const useDownload = (params, options) => {
   return useUpload(uploadResource, ['Resources', 'types'], params, options)
 }
+

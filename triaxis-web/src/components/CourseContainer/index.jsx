@@ -3,13 +3,10 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import { Input, Button, Row, Col, Empty, Spin, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { RadioGroup, Radio } from '@douyinfe/semi-ui';
-import { useNavigate } from 'react-router-dom';
-import FilterButton from '../FilterButton';
-import MyButton from '../MyButton';
 import MyPagination from '../MyPagination';
 import { isDataValid } from '../../utils/error/commonUtil';
 import './index.less'
-import { logger } from '../../utils/logger';
+import { FilterButton, MyButton } from '../MyButton';
 
 const { Search } = Input;
 const SORT_OPTIONS = [
@@ -82,7 +79,7 @@ const CourseContainer = ({
 
   // 初始化一级分类选择
   useEffect(() => {
-    logger.debug("初始化一级分类")
+
     if (Object.keys(enhancedtypes).length === 0) return;
 
     const hasEnoughData = enhancedtypes.subjectId?.length > 1 && enhancedtypes.toolIds?.length > 1;
@@ -92,7 +89,8 @@ const CourseContainer = ({
 
     const multiple = filterList.filter(item => item.isMultiple).map(i => i.type)
     const filters = field.reduce((acc, item) => {
-      const value = enhancedtypes[item][0]?.id || null;
+      const config = filterList.find(i => i.type === item);
+      const value = enhancedtypes[item][config.default]?.id || null;
       acc[item] = multiple.includes(item) ? [value] : value;
       return acc;
     }, {});
@@ -100,9 +98,9 @@ const CourseContainer = ({
       ...selectedFilters,
       ...filters
     };
-
+    const config = filterList.find(i => i.isFirst);
     if (enableSecondaryCategory && enhancedtypes.categoriesFirst?.length > 1) {
-      newFilters.categoriesFirst = enhancedtypes.categoriesFirst[1]?.id || null;
+      newFilters.categoriesFirst = enhancedtypes.categoriesFirst[config.default]?.id || null;
     }
 
     setSelectedFilters(newFilters);
@@ -111,10 +109,10 @@ const CourseContainer = ({
   // 初始化二级分类选择
   useEffect(() => {
     if (!enableSecondaryCategory || enhancedSecondaryCategory.length <= 1) return;
-
+    const config = filterList.find(i => !i.isTypes);
     setSelectedFilters(prev => ({
       ...prev,
-      categoriesSecondary: [enhancedSecondaryCategory[0]?.id]
+      categoriesSecondary: [enhancedSecondaryCategory[config.default]?.id]
     }));
   }, [enhancedSecondaryCategory, enableSecondaryCategory]);
 
@@ -152,12 +150,11 @@ const CourseContainer = ({
         }
       } else {
         if (value === null) {
-          if (!config.isTypes) {
-            newFilters[type] = [allSecondaryCategories, null];
+          if (config.isFirst) {
+            newFilters[type] = null;
           } else {
             newFilters[type] = [null];
           }
-
         } else {
           const withoutNull = currentValues.filter(item => item !== null);
           if (withoutNull.includes(value)) {
@@ -275,11 +272,13 @@ const CourseContainer = ({
 
       <div className="check max-w-7xl mx-auto ">
         {/* 筛选条件区域 */}
-        <div className="flex flex-col justify-start gap-5 bg-card rounded-xl shadow-sm p-6 mb-8 border border-main min-h-40">
+        <div className="flex flex-col justify-start gap-5 bg-card rounded-xl shadow-sm p-6 mb-8 border border-main">
           {filterConfigs.length > 0 && !isError &&
             filterConfigs.map((config, index) => (
               <TypeSelect key={config.type || index} config={config} />
             ))
+          }{
+            isError && <p className='text-center text-lg'>出现错误，暂无搜索项</p>
           }
         </div>
 
@@ -333,7 +332,7 @@ const CourseContainer = ({
             <Empty
               image={Empty.PRESENTED_IMAGE_SIMPLE}
               description="暂无相关结果"
-              className="py-20"
+              className="pt-10 pb-20"
             >
               <MyButton
                 size="large"
@@ -347,7 +346,7 @@ const CourseContainer = ({
                   });
                 }}
               >
-                重新搜索
+                重置搜索条件
               </MyButton>
             </Empty>
           )}

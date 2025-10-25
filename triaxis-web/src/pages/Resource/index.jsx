@@ -15,13 +15,14 @@ import { converBytes } from '../../utils/convertUnit';
 import { getUserData } from '../../utils/localStorage';
 import { useCollect } from '../../hooks/api/common';
 import { useLike } from '../../hooks/api/common';
-import MyButton from '../../components/MyButton';
+import { MyButton } from '../../components/MyButton';
 import { subUsername } from '../../utils/error/commonUtil';
 const filterList = [
   {
     title: "资源权限",
     type: "right",
     field: "rights",
+    default: 1,
     list: [{
       id: 1,
       name: "免费"
@@ -38,6 +39,7 @@ const filterList = [
   {
     title: "专业领域",
     type: "subjectId",
+    default: 0,
     isMultiple: false,
     isTypes: true,
     isNotAll: true
@@ -45,20 +47,23 @@ const filterList = [
   {
     title: "适用软件",
     type: "toolIds",
+    default: 0,
     isMultiple: true,
     isTypes: true
   },
   {
     title: "资源类型",
     type: "categoriesFirst",
+    default: 2,
     isMultiple: false,
     isFirst: true,
     isTypes: true,
-    isNotAll: true
+    isNotAll: false
   },
   {
     title: "二级分类",
     type: "categoriesSecondary",
+    default: 0,
     isMultiple: true,
     isTypes: false
   }
@@ -84,29 +89,9 @@ const Resource = () => {
     categoriesFirst: null,
     categoriesSecondary: []
   });
-  const getParams = arr => {
-    if (arr.length < 1) return;
-    if (Array.isArray(arr[0])) {
-      return JSON.parse(JSON.stringify(arr[0]));
-    }
-    return arr;
-  };
-  const resourcesParams = useMemo(() => ({
-    right: selectedFilters.right,
-    subjectId: selectedFilters.subjectId,
-    toolIds: selectedFilters.toolIds,
-    categoryIds: getParams(selectedFilters.categoriesSecondary),
-    ...searchParams
-  }), [
-    selectedFilters.right,
-    selectedFilters.subjectId,
-    selectedFilters.toolIds,
-    selectedFilters.categoriesSecondary,
-    searchParams
-  ]);
 
-  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources(resourcesParams, {
-    enabled: !!selectedFilters.subjectId && !!selectedFilters.categoriesFirst && !!getParams(selectedFilters.categoriesSecondary)
+  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ ...selectedFilters, ...searchParams }, {
+    enabled: !!selectedFilters.subjectId && (selectedFilters.categoriesSecondary.length > 0 || (selectedFilters.categoriesSecondary.length === 0 && selectedFilters.categoriesFirst === null))
   });
 
   // 获取价格标签

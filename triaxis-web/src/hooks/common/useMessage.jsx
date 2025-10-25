@@ -55,7 +55,7 @@ const wrapMessage = (nativeMessageApi, globalDefaultConfig = {}) => {
 
   // 基础默认配置
   const baseDefaultConfig = {
-    duration: 2,
+    duration: 3,
     ...globalDefaultConfig,
   };
 
@@ -87,8 +87,8 @@ export const MessageProvider = ({ children, config = {} }) => {
   const wrappedNotificationApi = wrapNotification(nativeNotificationApi, config.defaultNotificationConfig);
 
   return (
-    <NotificationContext.Provider value={wrappedNotificationApi}>
-      <MessageContext.Provider value={wrappedMessageApi}>
+    <NotificationContext.Provider value={nativeNotificationApi}>
+      <MessageContext.Provider value={nativeMessageApi}>
         {notificationHolder}
         {messageHolder}
         {children}

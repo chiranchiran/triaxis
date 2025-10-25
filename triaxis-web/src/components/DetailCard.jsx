@@ -17,4 +17,44 @@ const DetailCard = ({ title, children, className = '', ...props }) => (
     {children}
   </CustomCard>
 )
-export { DetailCard, CustomCard }
+const Statis = ({ count, children }) => {
+  return (
+    <div className="text-center p-2">
+      <div className="text-xl font-bold text-main">
+        {count}
+      </div>
+      <div className="text-xs text-main mt-1">{children}</div>
+    </div>)
+}
+const FileTime = ({ count, children }) => {
+  if (!count) return
+  if (Array.isArray(count)) {
+    {
+      return (
+        <div className="flex justify-between text-sm p-2 gap-6">
+          <span className="text-main text-nowrap">{children}</span>
+          <span className="font-medium text-main flex justify-end gap-2 flex-wrap">
+            {count.map((tool, index) => (
+              <span
+                key={index}
+                className="px-2 py-0.5 rounded text-xs bg-main text-main border border-main"
+              >
+                {tool.name}
+              </span>
+            ))}
+          </span>
+        </div>
+      )
+    }
+  } else {
+
+    return (
+      <div className="flex justify-between text-sm p-2 gap-10">
+        <span className="text-main text-nowrap">{children}</span>
+        <span className="font-medium text-main">{count}</span>
+      </div>
+    )
+  }
+
+}
+export { DetailCard, CustomCard, FileTime, Statis }

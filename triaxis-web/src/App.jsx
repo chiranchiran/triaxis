@@ -10,6 +10,8 @@ import SiteFooter from './components/SiteFooter/index.jsx'
 import { useLocation } from 'react-router-dom'
 import { logger } from './utils/logger.js'
 import { ReactFlowProvider } from 'reactflow'
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn'
 
 function App() {
   const { defaultAlgorithm, darkAlgorithm, compactAlgorithm } = theme;
@@ -39,7 +41,7 @@ function App() {
   }, [checkAutoLogin])
   //检查语言和主题设置
   useEffect(() => {
-
+    dayjs.locale('zh-cn');
   }, [])
   return (
     <ConfigProvider

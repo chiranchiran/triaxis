@@ -4,7 +4,7 @@ import { FireOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import News from './News';
 import './index.less'
 import MyCarousel from './MyCarousel';
-import MyButton from '../../components/MyButton';
+import { MyButton } from '../../components/MyButton';
 
 function Home() {
   const courseDescription = {

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserReviewMapper">
+
+    <!-- 通用ResultMap：映射ReviewSearchVO（包含UserBO） -->
+    <resultMap id="ReviewSearchVOResultMap" type="com.chiran.vo.ReviewSearchVO">
+        <id column="review_id" property="id"/>
+        <result column="rate" property="rate"/>
+        <result column="content" property="content"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="is_liked" property="isLiked"/>
+        <result column="reply_count" property="replyCount"/>
+
+        <!-- 嵌套映射评论用户信息（UserBO） -->
+        <association property="user" javaType="com.chiran.bo.UserBO">
+            <result column="user_id" property="userId"/>
+            <result column="username" property="username"/>
+            <result column="avatar" property="avatar"/>
+            <result column="school" property="school"/>
+            <result column="grade" property="grade"/>
+            <result column="major" property="major"/>
+        </association>
+    </resultMap>
+
+
+    <!-- 第一个接口：根据targetType和targetId查询主评论列表 -->
+    <select id="getReviews" parameterType="com.chiran.dto.ReviewSearchDTO" resultMap="ReviewSearchVOResultMap">
+        SELECT
+        r.id AS review_id,
+        r.rate,
+        r.content,
+        r.publish_time,
+        r.like_count,
+        r.reply_count,
+        -- 判断当前用户是否点赞（user_likes表存在记录则为true）
+        EXISTS(
+        SELECT 1 FROM user_likes ul
+        WHERE ul.target_id = r.id AND ul.target_type = 4
+        AND ul.user_id = #{userId} AND ul.deleted = 0
+        ) AS is_liked,
+        -- 匿名评论：隐藏userId和username（设为null），非匿名则正常返回
+        CASE
+        WHEN r.is_anonymous = 1 THEN NULL
+        ELSE u.id
+        END AS user_id,
+        CASE
+        WHEN r.is_anonymous = 1 THEN NULL
+        ELSE u.username
+        END AS username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major
+        FROM
+        user_reviews r
+        -- 关联评论用户信息（users表）
+        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
+        WHERE
+        r.deleted = 0 -- 只查未删除的评论
+        AND r.status = 1 -- 只查审核通过的评论
+        AND ISNULL(parent_id)
+        <!-- 动态条件：targetType和targetId必传（非空时生效） -->
+        <if test="targetType != null">AND r.target_type = #{targetType}</if>
+        <if test="targetId != null">AND r.target_id = #{targetId}</if>
+
+        ORDER BY
+        <choose>
+            <when test="orderBy == 1">r.publish_time DESC</when>
+            <when test="orderBy == 2">r.like_count DESC</when>
+            <when test="orderBy == 2">r.reply_count DESC</when>
+            <otherwise>r.publish_time DESC</otherwise>
+        </choose>
+    </select>
+
+
+    <!-- 功能：查询某条评论的所有回复，包含用户信息和当前用户点赞状态 -->
+    <select id="getReviewReplies" parameterType="com.chiran.dto.ReviewSearchDTO" resultMap="ReviewSearchVOResultMap">
+        SELECT
+        r.id AS review_id,
+        r.rate,
+        r.content,
+        r.publish_time,
+        r.like_count,
+        r.reply_count,
+        -- 判断当前用户是否点赞
+        EXISTS(
+        SELECT 1 FROM user_likes ul
+        WHERE ul.target_id = r.id AND ul.target_type = 4
+        AND ul.user_id = #{userId} AND ul.deleted = 0
+        ) AS is_liked,
+        -- 匿名处理：隐藏userId和username
+        CASE
+        WHEN r.is_anonymous = 1 THEN NULL
+        ELSE u.id
+        END AS user_id,
+        CASE
+        WHEN r.is_anonymous = 1 THEN NULL
+        ELSE u.username
+        END AS username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major
+        FROM
+        user_reviews r
+        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
+        WHERE
+        r.deleted = 0
+        AND r.status = 1 -- 审核通过
+        AND r.parent_id = #{parentId}
+        <if test="rootId != null">AND r.root_id = #{rootId}</if>
+        ORDER BY r.publish_time DESC
+    </select>
+</mapper>
