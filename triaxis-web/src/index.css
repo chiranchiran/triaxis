@@ -75,78 +75,78 @@ html[data-theme='dark'] {
 
 /* 基础工具类 */
 .bg-main {
-  background-color: var(--bg);
+  background-color: var(--bg) !important;
 }
 
 .bg-gray {
-  background-color: var(--bg-gray);
+  background-color: var(--bg-gray) !important;
 }
 
 .bg-gray-light {
-  background-color: var(--bg-gray-light);
+  background-color: var(--bg-gray-light) !important;
 }
 
 
 .bg-card {
-  background-color: var(--bg-elevated);
+  background-color: var(--bg-elevated) !important;
 }
 
 .bg-dark {
-  background-color: var(--bg-dark);
+  background-color: var(--bg-dark) !important;
 }
 
 .bg-light {
-  background-color: var(--bg-light);
+  background-color: var(--bg-light) !important;
 }
 
 .bg-primary {
-  background-color: var(--primary);
+  background-color: var(--primary) !important;
 }
 
 .bg-primary-50 {
-  background-color: var(--primary-50);
+  background-color: var(--primary-50) !important;
 }
 
 .bg-like {
-  background-color: var(--bg-like);
+  background-color: var(--bg-like) !important;
   color: var(--text-like);
 }
 
 .bg-score {
-  background-color: var(--bg-score);
+  background-color: var(--bg-score) !important;
   color: var(--text-score);
 }
 
 .bg-primary-light {
-  background-color: var(--primary-light);
+  background-color: var(--primary-light) !important;
 }
 
 .bg-black-light {
-  background-color: var(--black);
+  background-color: var(--black) !important;
 }
 
 .bg-green {
-  background-color: var(--accent-green);
+  background-color: var(--accent-green) !important;
 }
 
 .bg-green-50 {
-  background-color: var(--accent-green-50);
+  background-color: var(--accent-green-50) !important;
 }
 
 .bg-green-light {
-  background-color: var(--accent-green-light);
+  background-color: var(--accent-green-light) !important;
 }
 
 .bg-orange {
-  background-color: var(--accent-orange);
+  background-color: var(--accent-orange) !important;
 }
 
 .bg-orange-50 {
-  background-color: var(--accent-orange-50);
+  background-color: var(--accent-orange-50) !important;
 }
 
 .bg-orange-light {
-  background-color: var(--accent-orange-light);
+  background-color: var(--accent-orange-light) !important;
 }
 
 
@@ -353,4 +353,20 @@ button {
 .semi-typography {
   font-family: inherit !important;
   /* 继承根节点字体 */
+}
+
+.ant-col,
+.ant-row,
+.ant-radio-wrapper {
+  font-size: var(--text-base);
+}
+
+.ant-form-item .ant-form-item-label>label {
+
+  display: block;
+}
+
+.ant-form-item .ant-form-item-label>label.ant-form-item-required::before {
+  margin-inline-end: 6px;
+  font-size: var(--text-sm);
 }

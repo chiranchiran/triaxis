@@ -16,7 +16,7 @@ import UserCenter from "../pages/UserCenter/index.jsx"
 import FeedbackDisplay from "../pages/Feedback/index.jsx"
 import ResourceDetail from "../pages/ResourceDetail/index.jsx"
 import CourseDetail from "../pages/CourseDetail/index.jsx"
-import UploadResource from "../pages/Upload/index.jsx"
+import UploadResource from "../pages/UploadResource/index.jsx"
 import CreatePost from "../pages/CreatPost/index.jsx"
 import PostDetail from "../pages/PostDetail/index.jsx"
 

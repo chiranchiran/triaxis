@@ -21,7 +21,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReviewSearchVO implements Serializable {
     private UserBO user;
+    private UserBO replyTo;
     private Integer id;
+    private Integer parentId;
+    private Integer rootId;
     private Integer rate;
     private String content="";
     @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss", timezone = "GMT+8")

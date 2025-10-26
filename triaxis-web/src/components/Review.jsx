@@ -145,13 +145,13 @@ const Review = ({ targetType, targetId }) => {
             onChange={(e) => content = e}
             placeholder={`回复 @${username}...`}
             rows={3}
-            className="mb-2 !text-base"
+            className="mb-2 !text-base resize-none border border-main rounded transition-colors"
           />
           <div className="flex justify-end gap-2 pt-2">
             <MyButton size="small" type="gray" onClick={cancelReply}>取消</MyButton>
             <MyButton
               size="small"
-              type="gray"
+              type="blue"
               onClick={() => submitReply(id)}
               disabled={!replyContent.content.trim()}
             >
@@ -291,7 +291,10 @@ const Review = ({ targetType, targetId }) => {
                                     publishTime: replyPublishTime,
                                     likeCount: replyLikeCount,
                                     isLiked: replyIsLiked,
-                                    user: replyUser = {}
+                                    parentId,
+                                    rootId,
+                                    user: replyUser = {},
+                                    replyTo = {}
                                   } = reply;
                                   const {
                                     avatar: replyAvatar,
@@ -301,6 +304,10 @@ const Review = ({ targetType, targetId }) => {
                                     grade: replyGrade,
                                     major: replyMajor
                                   } = replyUser || {}
+                                  const {
+                                    uerId: replyToId,
+                                    username: replyToUsername = "匿名用户"
+                                  } = replyTo || {}
                                   return (
                                     <div key={replyId} className="flex space-x-3 flex-1 min-w-0 pl-3 py-2">
                                       {/* 回复用户头像 */}
@@ -322,9 +329,11 @@ const Review = ({ targetType, targetId }) => {
                                         </div>
                                         {/* 回复标注：@主评论用户 */}
                                         <div className='py-2'>
-
-                                          <span className="text-main text-base">回复</span>
-                                          <span className="text-secondary cursor-pointer text-base"> @{username}：</span>
+                                          {parentId !== rootId &&
+                                            <>
+                                              <span className="text-main text-base">回复</span>
+                                              <span className="text-secondary cursor-pointer text-base"> @{replyToUsername}：</span>
+                                            </>}
                                           <span className="text-main text-base leading-relaxed py-2">
                                             {replyContent}
                                           </span>

@@ -1,65 +1,25 @@
-.find .ant-input-search-large .ant-input-search-button {
-  height: 3rem;
-  font-size: 16px;
-  padding: 0px 15px;
-  border-radius: 15px;
+/* 所有按钮统一设置：保持原背景色，hover时通过滤镜加深 */
+button {
+  /* 禁止覆盖原始背景色（确保按钮用自己的颜色） */
+  /* 过渡动画：让加深效果平滑 */
+  transition: filter 0.2s ease !important;
 }
-.find .ant-input-search-large .ant-input-affix-wrapper {
-  height: 3rem;
-  font-size: 16px;
-  padding: 0px 15px;
+/* 普通按钮 hover：亮度降低10%（原色基础上加深） */
+button:hover:not(.bg-dark) {
+  filter: brightness(0.8) contrast(1.2) saturate(1.3) !important;
+  color: var(--text) !important;
+  /* 基于自身颜色加深 */
 }
-.find .ant-input-lg {
-  padding: 12px 20px;
-  font-size: 16px;
-  height: 3rem;
-  line-height: 1.57142857;
-  border-radius: 15px 0 0 15px !important;
+/* 深色按钮 hover：亮度降低20%（深色加深更明显，基于自身颜色） */
+button.bg-dark:hover {
+  background-color: var(--bg-dark) !important;
+  filter: brightness(0.85) contrast(1.15) !important;
+  color: var(--text-light) !important;
+  /* 深色自身基础上更深 */
 }
-.find .ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child) {
-  border-start-start-radius: 15px;
-  border-end-start-radius: 15px;
-}
-.find .ant-input-affix-wrapper .ant-input-clear-icon {
-  font-size: medium;
-}
-.check {
-  margin-top: -7rem;
-  /* 调整丝带文字样式 */
-}
-.check .ant-card .ant-card-body {
-  padding: 5px 14px 14px !important;
-  border-radius: 0 0 8px 8px;
-}
-.check .ant-ribbon .ant-ribbon-text {
-  color: inherit;
-  background: inherit;
-}
-.check .ant-ribbon.ant-ribbon-placement-end {
-  inset-inline-end: -12px;
-  border-end-end-radius: 0;
-}
-.check .ant-ribbon {
-  top: 12px;
-  width: 4.5rem;
-  text-align: center;
-  padding: 4px 15px;
-}
-.check .ant-ribbon-text {
-  font-size: 14px;
-  line-height: 1.5;
-}
-.check .ant-ribbon-corner {
-  width: 12px;
-  -background-clip: text;
-  height: 12px;
-  background: transparent;
-  border: 6px solid;
-  border-color: inherit;
-  filter: brightness(0.8);
-}
-.check .large-ribbon .ant-ribbon {
-  width: 150px;
+/* 保留原有的宽度和间距规则 */
+button.my-button.w-40 {
+  gap: 1rem !important;
 }
 .semi-radio-addon-buttonRadio-checked {
   font-weight: 600 !important;

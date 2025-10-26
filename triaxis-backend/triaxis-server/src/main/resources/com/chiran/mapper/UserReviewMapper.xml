@@ -11,6 +11,8 @@
         <result column="like_count" property="likeCount"/>
         <result column="is_liked" property="isLiked"/>
         <result column="reply_count" property="replyCount"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="root_id" property="rootId"/>
 
         <!-- 嵌套映射评论用户信息（UserBO） -->
         <association property="user" javaType="com.chiran.bo.UserBO">
@@ -20,6 +22,11 @@
             <result column="school" property="school"/>
             <result column="grade" property="grade"/>
             <result column="major" property="major"/>
+        </association>
+        <!-- 嵌套映射评论用户信息（UserBO） -->
+        <association property="replyTo" javaType="com.chiran.bo.UserBO">
+            <result column="reply_to_user_id" property="userId"/>
+            <result column="reply_to_username" property="username"/>
         </association>
     </resultMap>
 
@@ -39,36 +46,29 @@
         WHERE ul.target_id = r.id AND ul.target_type = 4
         AND ul.user_id = #{userId} AND ul.deleted = 0
         ) AS is_liked,
-        -- 匿名评论：隐藏userId和username（设为null），非匿名则正常返回
-        CASE
-        WHEN r.is_anonymous = 1 THEN NULL
-        ELSE u.id
-        END AS user_id,
-        CASE
-        WHEN r.is_anonymous = 1 THEN NULL
-        ELSE u.username
-        END AS username,
-        u.avatar,
-        u.school,
-        u.grade,
-        u.major
+        -- 匿名处理：所有用户属性均为null（包括avatar、school等）
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.id END AS user_id,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.username END AS username,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.avatar END AS avatar,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.school END AS school,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.grade END AS grade,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.major END AS major
         FROM
         user_reviews r
         -- 关联评论用户信息（users表）
-        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
+        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0 AND r.is_anonymous = 0
         WHERE
         r.deleted = 0 -- 只查未删除的评论
         AND r.status = 1 -- 只查审核通过的评论
         AND ISNULL(parent_id)
-        <!-- 动态条件：targetType和targetId必传（非空时生效） -->
-        <if test="targetType != null">AND r.target_type = #{targetType}</if>
-        <if test="targetId != null">AND r.target_id = #{targetId}</if>
+AND r.target_type = #{targetType}
+AND r.target_id = #{targetId}
 
         ORDER BY
         <choose>
             <when test="orderBy == 1">r.publish_time DESC</when>
             <when test="orderBy == 2">r.like_count DESC</when>
-            <when test="orderBy == 2">r.reply_count DESC</when>
+            <when test="orderBy == 3">r.reply_count DESC</when>
             <otherwise>r.publish_time DESC</otherwise>
         </choose>
     </select>
@@ -83,6 +83,8 @@
         r.publish_time,
         r.like_count,
         r.reply_count,
+        r.parent_id,
+        r.root_id,
         -- 判断当前用户是否点赞
         EXISTS(
         SELECT 1 FROM user_likes ul
@@ -90,26 +92,44 @@
         AND ul.user_id = #{userId} AND ul.deleted = 0
         ) AS is_liked,
         -- 匿名处理：隐藏userId和username
+        -- 回复用户信息（匿名时所有属性为null）
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.id END AS user_id,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.username END AS username,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.avatar END AS avatar,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.school END AS school,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.grade END AS grade,
+        CASE WHEN r.is_anonymous = 1 THEN NULL ELSE u.major END AS major,
+        -- 若被回复的评论是匿名的，或parent_id=root_id（直接回复主评论），则为null
         CASE
-        WHEN r.is_anonymous = 1 THEN NULL
-        ELSE u.id
-        END AS user_id,
+        WHEN r.parent_id != r.root_id AND r_parent.is_anonymous = 0
+        THEN r_parent.user_id
+        ELSE NULL
+        END AS reply_to_user_id,
         CASE
-        WHEN r.is_anonymous = 1 THEN NULL
-        ELSE u.username
-        END AS username,
-        u.avatar,
-        u.school,
-        u.grade,
-        u.major
+        WHEN r.parent_id != r.root_id AND r_parent.is_anonymous = 0
+        THEN u_parent.username
+        ELSE NULL
+        END AS reply_to_username
         FROM
         user_reviews r
-        LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
+        -- 关联回复用户表（非匿名才关联）
+        LEFT JOIN users u
+        ON r.user_id = u.id
+        AND u.deleted = 0
+        AND r.is_anonymous = 0
+        -- 关联parent_id对应的评论（获取被回复的评论信息）
+        LEFT JOIN user_reviews r_parent
+        ON r.parent_id = r_parent.id
+        AND r_parent.deleted = 0
+        AND r_parent.status = 1  <!-- 被回复的评论需审核通过 -->
+        -- 关联被回复评论的用户表（获取replyTo的username）
+        LEFT JOIN users u_parent
+        ON r_parent.user_id = u_parent.id
+        AND u_parent.deleted = 0
         WHERE
         r.deleted = 0
         AND r.status = 1 -- 审核通过
-        AND r.parent_id = #{parentId}
-        <if test="rootId != null">AND r.root_id = #{rootId}</if>
-        ORDER BY r.publish_time DESC
+        AND r.root_id = #{rootId}
+        ORDER BY r.publish_time ASC
     </select>
 </mapper>

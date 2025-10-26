@@ -217,12 +217,6 @@ const Resource = () => {
                         {publishTime}
                       </span>
                     )}
-                    {publishTime !== updateTime && updateTime && (
-                      <span className="flex items-center">
-                        <SyncOutlined className="mr-1" />
-                        {updateTime}
-                      </span>
-                    )}
                   </div>
 
                   {/* 统计信息 */}

@@ -1,6 +1,8 @@
 import React from 'react'
 import './index.less'
 import { Button } from 'antd';
+import { RadioGroup, Radio } from '@douyinfe/semi-ui';
+import { Space } from '@douyinfe/semi-ui';
 
 const MyButton = ({ size = 'small', loading = false, onClick, type, children, icon, className }) => {
 
@@ -52,5 +54,27 @@ const FilterButton = ({ item, isSelected, onClick }) => {
     </button>
   );
 };
+const OrderButton = ({ handleSortChange, list, value }) => {
+  return (
+    <div className="flex items-center space-x-2">
+      <Space vertical="true" spacing='loose' align='start'>
+        <RadioGroup
+          onChange={(e) => handleSortChange(e.target.value)}
+          type='button'
+          buttonSize='large'
+          value={value}
+          aria-label="单选组合示例"
+          name="demo-radio-large"
+        >
+          {list.map((item, index) => (
+            <Radio key={item.id} value={item.id}>
+              {item.name}
+            </Radio>
+          ))}
+        </RadioGroup>
+      </Space>
+    </div>)
+}
 
-export { MyButton, FilterButton }
+
+export { MyButton, FilterButton, OrderButton }

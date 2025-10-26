@@ -284,16 +284,12 @@ const ResourceDetail = () => {
                     {username}
                   </div>
                   <div className='flex text-secondary justify-start flex-wrap'>
-                    <span>{school}</span>
-                    {school && <span className="mx-1 separator">/</span>}
-                    <span>{major}</span>
-                    {major && <span className="mx-1 separator">/</span>}
-                    <span>{grade}</span>
+                    {[school, major, grade].filter(Boolean).join(" / ")}
                   </div>
                 </div>
               </div>
               {/* 统计信息 */}
-              <div className="grid grid-cols-4 gap-3 text-center bg-main rounded-lg">
+              <div className="grid grid-cols-4 gap-3 text-center bg-orange-light rounded-lg">
                 <Statis count={downloadCount} >下载</Statis>
                 <Statis count={likeCount} >点赞</Statis>
                 <Statis count={collectCount} >收藏</Statis>
@@ -316,19 +312,15 @@ const ResourceDetail = () => {
                     className="flex-1"
                   >立即下载</MyButton>
                 </div>
-
-
                 <div className="grid grid-cols-2 gap-3">
                   <MyButton
-                    type="white"
                     icon={<StarOutlined />}
-
+                    type={isCollected ? "black" : "white"}
                     className="flex-1 py-4"
                   >收藏</MyButton>
                   <MyButton
-                    type="white"
+                    type={isLiked ? "black" : "white"}
                     icon={<HeartOutlined />}
-
                     className="flex-1 py-4"
                   >点赞</MyButton>
                 </div>
@@ -337,7 +329,6 @@ const ResourceDetail = () => {
                     size='large'
                     type="white"
                     icon={<ShareAltOutlined />}
-
                     className="flex-1"
                   >立即分享</MyButton>
                 </div>
@@ -352,7 +343,6 @@ const ResourceDetail = () => {
 
               <Form
                 form={reviewForm}
-
                 layout="vertical"
                 className='!pt-4'
               >
@@ -376,7 +366,7 @@ const ResourceDetail = () => {
                     allowClear
                     rows={4}
                     placeholder="输入您对资源的评价..."
-                    className="resize-none border border-light  focus:border-main rounded transition-colors"
+                    className="resize-none border border-main focus:border-main rounded transition-colors"
                   />
                 </Form.Item>
 

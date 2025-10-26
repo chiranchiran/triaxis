@@ -1,13 +1,13 @@
 package com.chiran.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -56,9 +56,13 @@ public class Course implements Serializable {
     /**
      * 视频
      */
-    @TableField("intro_video")
-    private String introVideo;
-
+    @TableField("path")
+    private String path;
+    /**
+     * 总时长分钟
+     */
+    @TableField("duration")
+    private Integer duration;
     /**
      * 上传者ID
      */
@@ -72,92 +76,95 @@ public class Course implements Serializable {
     private Integer categoryId;
 
     /**
-     * 访问权限
+     * 访问权限（1是免费，2是积分兑换，3是VIP专享）
      */
-    @TableField("right_id")
-    private Integer rightId;
+    @TableField(value = "`right`")
+    private Integer right;
 
     /**
      * 专业领域
      */
-    @TableField("field_id")
-    private Integer fieldId;
-
+    @TableField("subject_id")
+    private Integer subjectId;
     /**
-     * 总时长（分钟）
+     * 收藏次数
      */
-    @TableField("total_duration")
-    private Integer totalDuration;
+    @TableField("collect_count")
+    private Integer collectCount;
+    /**
+     * 查看次数
+     */
+    @TableField("view_count")
+    private Integer viewCount;
+    /**
+     * 播放次数
+     */
+    @TableField("watch_count")
+    private Integer watchCount;
+    /**
+     * 点赞次数
+     */
+    @TableField("like_count")
+    private Integer likeCount;
+    /**
+     * 所需积分
+     */
+    @TableField("price")
+    private Integer price;
 
     /**
      * 难度级别：1-初级，2-中级，3-高级
      */
-    @TableField("difficulty_level")
-    private Integer difficultyLevel;
-
+    @TableField("level")
+    private Integer level;
     /**
-     * 浏览人数
-     */
-    @TableField("view_count")
-    private Integer viewCount;
-
-    /**
-     * 点赞数
-     */
-    @TableField("like_count")
-    private Integer likeCount;
-
-    /**
-     * 收藏数
-     */
-    @TableField("favorite_count")
-    private Integer favoriteCount;
-
-    /**
-     * 平均评分
-     */
-    @TableField("average_rating")
-    private BigDecimal averageRating;
-
-    /**
-     * 评价数量
-     */
-    @TableField("review_count")
-    private Integer reviewCount;
-
-    /**
-     * 课程价格（积分）
-     */
-    @TableField("price_points")
-    private Integer pricePoints;
-
-    /**
-     * 1-草稿，2-审核中，3-已发布，4-已下架
+     * 状态（1-草稿，2-审核中，3-已发布，4-已下架）
      */
     @TableField("status")
     private Integer status;
-
     /**
-     * 是否推荐课程
+     * 是否推荐资源（0-不推荐，1-推荐）
      */
-    @TableField("is_featured")
-    private Boolean isFeatured;
+    @TableField("is_recommended")
+    private Boolean isRecommended;
 
     /**
      * 软删除
      */
     @TableField("deleted")
+    @TableLogic
     private Integer deleted;
+
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 
     /**
      * 发布时间
      */
-    @TableField("published_at")
-    private Date publishedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField("publish_time")
+    private LocalDateTime publishTime;
 
-    @TableField("created_at")
-    private Date createdAt;
+    /**
+     * 更新时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 
-    @TableField("updated_at")
-    private Date updatedAt;
+    /**
+     * 审核人ID
+     */
+    @TableField("approve_by")
+    private Integer approveBy;
+
+    /**
+     * 资源详情
+     */
+    @TableField("details")
+    private String details;
 }

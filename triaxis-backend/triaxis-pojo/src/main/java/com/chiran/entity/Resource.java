@@ -53,7 +53,7 @@ public class Resource implements Serializable {
     private String extension;
 
     /**
-     * 权限ID（关联rights表）
+     * 权限ID（1是免费，2是积分兑换，3是VIP专享）
      */
     @TableField(value = "`right`")
     private Integer right;
@@ -93,7 +93,7 @@ public class Resource implements Serializable {
     @TableField("like_count")
     private Integer likeCount;
     /**
-     * 所需积分（0表示免费，-1表示会员专属）
+     * 所需积分
      */
     @TableField("price")
     private Integer price;
