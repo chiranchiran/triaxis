@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Input, Button, Tooltip, Dropdown, Avatar, Menu, Divider, Badge } from 'antd';
+import { Input, Button, Tooltip, Dropdown, Avatar, Menu, Divider, Badge, InputNumber } from 'antd';
 import {
   SearchOutlined, CrownOutlined, GlobalOutlined, UserOutlined, MoonOutlined, SunOutlined, SettingOutlined, BellOutlined, UploadOutlined, FolderOutlined, BookOutlined, StarOutlined, LogoutOutlined
 } from '@ant-design/icons';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Form, NavLink, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import './index.less'
 import { useLogout } from '../../hooks/api/login';
@@ -166,7 +166,7 @@ const Header = () => {
             <Search
               placeholder="搜索资源、课程、帖子..."
               enterButton={<SearchOutlined />}
-              size="large"
+              size="middle"
               className="min-x-10 rounded-lg"
             />
           </div>

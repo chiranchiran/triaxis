@@ -46,14 +46,29 @@ function App() {
   return (
     <ConfigProvider
       theme={{
-        algorithm: [compactAlgorithm],
+        cssVar: true,
+        components: {
+          Input: {
+            // activeBorderColor: 'var(--text-secondary)',
+            // hoverBorderColor: 'var(--text-secondary)',
+            // colorBgBase: 'var(--bg)',
+            // activeShadow: "0 0 0 2px var(--border-active)",
+            inputFontSize: 16,
+          },
+          Button: {
+            contentFontSize: 14,
+            contentFontSizeLG: 16,
+          }
+        },
         token: {
           colorPrimary: 'var(--primary)',
           colorText: 'var(--text)',
           colorTextSecondary: 'var(--text-secondary)',
           colorBgBase: 'var(--bg)',
           colorBgContainer: 'var(--bg)',
-          contentFontSize: '16px'
+          contentFontSize: 16,
+          fontSize: 16,
+          colorBorder: 'var(--bg-hover)',
         },
       }}
     >

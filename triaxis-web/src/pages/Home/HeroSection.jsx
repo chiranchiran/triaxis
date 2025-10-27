@@ -1,6 +1,6 @@
 // components/Banner/HeroSection.jsx
 import React from 'react';
-import { Button } from 'antd';
+import { Button, Form, InputNumber } from 'antd';
 import { ArrowRightOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import UrbanPlanningKnowledgeGraph from './KnowledgeGraph';
@@ -17,14 +17,13 @@ const HeroSection = () => {
         <div className="space-y-8">
           <div className="left space-y-3">
             <Logo size="xl" title="三轴线" />
-            <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+            <p className="text-xl text-main dark:text-gray-300 leading-relaxed">
               服务于各高校的城乡规划专业知识平台，汇聚最新资源、专业课程和行业动态。
             </p>
           </div>
-
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
             <MyButton
-              size='middle'
+              size='large'
               onClick={() => navigate('/courses')}
               type="black"
             >

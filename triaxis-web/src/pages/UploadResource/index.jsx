@@ -19,7 +19,8 @@ import {
   Mentions,
   Cascader,
   DatePicker,
-  Anchor
+  Anchor,
+  Typography
 } from 'antd';
 import {
   UploadOutlined,
@@ -33,6 +34,16 @@ import {
 import MDEditor from '@uiw/react-md-editor';
 import ImgCrop from 'antd-img-crop';
 import { CustomCard } from '../../components/DetailCard';
+import { DndContext, PointerSensor, useSensor } from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import DraggableUploadListItem from '../../components/DraggableUploadListItem';
+
+const { Text } = Typography;
+
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -104,6 +115,7 @@ const UploadResource = () => {
   const imageUploadProps = {
     listType: "picture-card",
     beforeUpload: () => false,
+    maxCount: 1,
     showUploadList: true
   };
 
@@ -123,7 +135,39 @@ const UploadResource = () => {
     console.log('提交数据:', formData);
     message.success('上传成功！');
   };
+  const [fileList, setFileList] = useState([]);
 
+  // 拖拽传感器配置（不变）
+  const sensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: 10 },
+  });
+
+  // 拖拽排序结束时更新文件顺序（对多文件同样适用）
+  const onDragEnd = ({ active, over }) => {
+    if (active.id !== over?.id) {
+      setFileList(prev => {
+        const activeIndex = prev.findIndex(item => item.uid === active.id);
+        const overIndex = prev.findIndex(item => item.uid === over?.id);
+        return arrayMove(prev, activeIndex, overIndex);
+      });
+    }
+  };
+
+  // 多文件上传状态变化时更新列表（自动处理新增的多个文件）
+  const onChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
+
+  // 自定义上传区域提示文字（说明支持多文件拖拽）
+  const uploadTip = (
+    <div style={{ marginTop: 8 }}>
+      <Text type="secondary">
+        支持拖拽多个文件到此处，或点击按钮选择多个文件（最多5个）
+      </Text>
+      <br />
+      <Text type="secondary">格式支持：图片、文档等（可通过accept限制）</Text>
+    </div>
+  );
   // 构建分类树数据
   const categoryTreeData = useMemo(() => {
     const mockSecondary = {
@@ -134,577 +178,384 @@ const UploadResource = () => {
     };
 
     return types.categoriesFirst?.map(category => ({
-      title: category.name,
-      value: category.id,
-      key: category.id,
+      label: category.name, // TreeSelect 的 title → Cascader 的 label
+      value: category.id,   // 保持 value 不变
+      key: category.id,     // 保持 key 不变
       children: mockSecondary[category.id]?.map(sub => ({
-        title: sub.name,
+        label: sub.name,    // 子节点同样转换 title → label
         value: sub.id,
         key: sub.id
       }))
     })) || [];
   }, [types.categoriesFirst]);
-
-  // 锚点导航
-  const scrollToSection = (sectionId) => {
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+  // 选中变化事件（与 TreeSelect 类似，返回选中的 value 数组和选项数组）
+  const handleChange = (value, selectedOptions) => {
+    console.log('选中的值：', value);
+    console.log('选中的选项详情：', selectedOptions);
   };
 
+
   return (
-    <div className="max-w-7xl mx-auto py-8">
-      <CustomCard className="flex gap-8">
-        {/* 左侧时间线导航 */}
-        <Anchor
-          affix={false}
-          items={[
-            {
-              key: '1',
-              href: '#anchor-demo-basic',
-              title: 'Basic demo',
-            },
-            {
-              key: '2',
-              href: '#anchor-demo-static',
-              title: 'Static demo',
-            },
-            {
-              key: '3',
-              href: '#api',
-              title: 'API',
-              children: [
-                {
-                  key: '4',
-                  href: '#anchor-props',
-                  title: 'Anchor Props',
-                },
-                {
-                  key: '5',
-                  href: '#link-props',
-                  title: 'Link Props',
-                },
-              ],
-            },
-          ]}
-        />
-        {/* <div className="w-56 flex-shrink-0">
-            <div className="sticky top-4">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold mb-3">上传内容</h2>
-                <Radio.Group
-                  value={resourceType}
-                  onChange={(e) => setResourceType(e.target.value)}
-                  size="small"
-                  buttonStyle="solid"
-                >
-                  <Radio.Button value="resource">资源</Radio.Button>
-                  <Radio.Button value="course">课程</Radio.Button>
-                </Radio.Group>
-              </div>
+    <div className="max-w-6xl mx-auto bg-card py-4">
 
-              <Timeline>
-                <Timeline.Item dot={<FileTextOutlined className="text-blue-500" />}>
-                  <button
-                    onClick={() => scrollToSection('basic-info')}
-                    className="text-left hover:text-blue-600 transition-colors"
-                  >
-                    基本信息
-                  </button>
-                </Timeline.Item>
-                <Timeline.Item dot={<FolderOutlined className="text-green-500" />}>
-                  <button
-                    onClick={() => scrollToSection('category-info')}
-                    className="text-left hover:text-green-600 transition-colors"
-                  >
-                    分类设置
-                  </button>
-                </Timeline.Item>
-                <Timeline.Item dot={<PaperClipOutlined className="text-purple-500" />}>
-                  <button
-                    onClick={() => scrollToSection('file-upload')}
-                    className="text-left hover:text-purple-600 transition-colors"
-                  >
-                    文件上传
-                  </button>
-                </Timeline.Item>
-                <Timeline.Item dot={<InboxOutlined className="text-orange-500" />}>
-                  <button
-                    onClick={() => scrollToSection('submit-section')}
-                    className="text-left hover:text-orange-600 transition-colors"
-                  >
-                    提交确认
-                  </button>
-                </Timeline.Item>
-              </Timeline>
-            </div>
-          </div> */}
-
-        {/* 右侧表单内容 */}
-        <div className="flex-1">
-          <Form
-            form={form}
-            variant="outlined"
-            style={{ maxWidth: 600 }}
-          >
-
-            <Form.Item label="Input" name="Input" rules={[{ required: true, message: 'Please input!' }]}>
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="InputNumber"
-              name="InputNumber"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <InputNumber style={{ width: '100%' }} />
-            </Form.Item>
-
-            <Form.Item
-              label="TextArea"
-              name="TextArea"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <Input.TextArea />
-            </Form.Item>
-
-            <Form.Item
-              label="Mentions"
-              name="Mentions"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <Mentions />
-            </Form.Item>
-
-            <Form.Item
-              label="Select"
-              name="Select"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <Select />
-            </Form.Item>
-
-            <Form.Item
-              label="Cascader"
-              name="Cascader"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <Cascader />
-            </Form.Item>
-
-            <Form.Item
-              label="TreeSelect"
-              name="TreeSelect"
-              rules={[{ required: true, message: 'Please input!' }]}
-            >
-              <TreeSelect />
-            </Form.Item>
-
-            <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-            <Form.Item label="上传类型">
-              <Radio.Group>
-                <Radio value="资源"> 资源 </Radio>
-                <Radio value="课程"> 课程 </Radio>
+      <Form
+        labelCol={{ span: 3 }}
+        wrapperCol={{ span: 20 }}
+        form={form}
+        layout="horizontal"
+        onFinish={onFinish}
+        className="space-y-8"
+      >
+        {/* 分类设置 */}
+        <Row gutter={16}>
+          <Col span={24}>
+            {/* <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <FileTextOutlined className="mr-2" />
+                  基本信息
+                </h3>
+                <h3 className="text-xl font-semibold mb-4 flex items-center">
+                  <FolderOutlined className="mr-2" />
+                  分类设置
+                </h3> */}
+            <Form.Item label="类型" name="type" layout="horizontal"
+              rules={[{ required: true, message: '请选择上传的类型' }]}>
+              <Radio.Group size="large" defaultValue={1}>
+                <Radio value={1}> 资源 </Radio>
+                <Radio value={2}> 课程 </Radio>
               </Radio.Group>
             </Form.Item>
-          </Form>
 
-
-
-
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-            className="space-y-8"
-          >
-            {/* 基本信息 */}
-            <section id="basic-info" className="scroll-mt-8">
-              <h3 className="text-xl font-semibold mb-4 flex items-center">
-                <FileTextOutlined className="mr-2" />
-                基本信息
-              </h3>
-
-              <Row gutter={16}>
-                <Col span={24}>
-
-                  <Form.Item label="上传类型" name="type" layout="horizontal"
-                    rules={[{ required: true, message: '请选择上传的类型' }]}>
-                    <Radio.Group size="large" defaultValue={1}>
-                      <Radio value={1}> 资源 </Radio>
-                      <Radio value={2}> 课程 </Radio>
-                    </Radio.Group>
-                  </Form.Item>
-
+            <Form.Item
+              name="title" label="标题" layout="horizontal"
+              rules={[{ required: true, message: '请输入15字以内的标题' },
+              { max: 15, message: '标题不能超过15字' }
+              ]}
+            >
+              <Input placeholder="请输入15字以内的资源标题" className='max-w-120' />
+            </Form.Item>
+            <Form.Item
+              name="description"
+              label="描述"
+              layout="horizontal"
+              rules={[
+                { required: true, message: '请输入描述' },
+                { max: 50, message: '描述不能超过50字' }
+              ]}
+            >
+              <TextArea
+                rows={3}
+                placeholder="简要描述内容特点和使用方法（最多50字）"
+                showCount
+                maxLength={50}
+              />
+            </Form.Item>
+            {resourceType === 'course' && (
+              <Form.Item
+                name="subtitle"
+                label="副标题"
+              >
+                <Input placeholder="请输入副标题" />
+              </Form.Item>
+            )}
+            <Form.Item
+              name="right"
+              label="访问权限"
+              layout="horizontal"
+              rules={[{ required: true, message: '请选择访问权限' }]}
+            >
+              <Select placeholder="选择访问权限" className='max-w-40'>
+                <Option value={1}>免费</Option>
+                <Option value={2}>积分兑换</Option>
+                <Option value={3}>VIP专享</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, current) => prev.right !== current.right}
+            >
+              {({ getFieldValue }) =>
+                getFieldValue('right') === 2 && (
                   <Form.Item
-                    name="title"
-                    label="标题"
-                    rules={[{ required: true, message: '请输入标题' }]}
+                    name="price"
+                    label="所需积分"
+                    rules={[{ required: true, message: '请输入积分' }]}
                   >
-                    <Input placeholder="请输入资源标题" />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              {resourceType === 'course' && (
-                <Row gutter={16}>
-                  <Col span={24}>
-                    <Form.Item
-                      name="subtitle"
-                      label="副标题"
-                    >
-                      <Input placeholder="请输入副标题" />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              )}
-
-              <Row gutter={16}>
-                <Col span={24}>
-                  <Form.Item
-                    name="description"
-                    label="描述"
-                    rules={[
-                      { required: true, message: '请输入描述' },
-                      { max: 50, message: '描述不能超过50字' }
-                    ]}
-                  >
-                    <TextArea
-                      rows={3}
-                      placeholder="简要描述内容特点和使用方法（最多50字）"
-                      showCount
-                      maxLength={50}
+                    <InputNumber
+                      size='middle'
+                      changeOnWheel
+                      defaultValue={1}
+                      controls
+                      min={1}
+                      placeholder="输入积分数量"
+                      className="w-full overflow-hidden max-w-40"
                     />
                   </Form.Item>
-                </Col>
-              </Row>
+                )
+              }
+            </Form.Item>
+            <Form.Item
+              name="subjectId"
+              label="学科分类"
+              layout="horizontal"
+              rules={[{ required: true, message: '请选择学科分类' }]}
+            >
+              <Select placeholder="选择学科分类" className='max-w-40'>
+                {types.subjects?.map(subject => (
+                  <Option key={subject.id} value={subject.id}>
+                    {subject.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-              <Row gutter={16}>
-                <Col span={24}>
-                  <Form.Item
-                    name="details"
-                    label="资源详情"
+
+            {resourceType === 'resource' && (
+              <>
+                <Form.Item
+                  name="toolIds"
+                  label="工具分类"
+                  rules={[{ required: true, message: '请选择工具分类' }]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="选择工具"
+                    className="w-auto"
                   >
-                    <MDEditor
-                      height={200}
-                      preview="edit"
-                      data-color-mode="light"
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
+                    {types.tools?.map(tool => (
+                      <Option key={tool.id} value={tool.id}>
+                        {tool.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
 
-              <Form.Item label="标签">
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {tags.map(tag => (
-                    <Tag
-                      key={tag}
-                      closable
-                      onClose={() => handleTagRemove(tag)}
-                      className="px-2 py-1"
-                    >
-                      {tag}
-                    </Tag>
-                  ))}
-                </div>
-                {inputVisible ? (
-                  <Input
-                    size="small"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onBlur={handleInputConfirm}
-                    onPressEnter={handleInputConfirm}
-                    style={{ width: 120 }}
+                <Form.Item
+                  name="categories"
+                  label="资源分类"
+                  rules={[{ required: true, message: '请选择资源分类' }]}
+                >
+                  <Cascader
+                    options={categoryTreeData}       // 级联数据（转换后的 options）
+                    placeholder="选择资源分类"       // 与原 TreeSelect 占位符一致
+                    mode="multiple"                 // 支持多选（对应 TreeSelect 的 treeCheckable）
+                    showCheckedItems                // 展示所有选中项（对应 TreeSelect 的 SHOW_ALL）
+                    onChange={handleChange}         // 选中变化事件
+                    // 可选：添加搜索功能（与原 TreeSelect 功能对齐）
+                    showSearch={{
+                      filter: (inputValue, path) =>
+                        path.some(option => option.label.toLowerCase().includes(inputValue.toLowerCase()))
+                    }}
+                    multiple
+                    maxTagCount="responsive"
                   />
-                ) : (
-                  <Button
-                    size="small"
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    onClick={() => setInputVisible(true)}
+                </Form.Item>
+              </>
+            )}
+
+            <Form.Item label="标签">
+              <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map(tag => (
+                  <Tag
+                    key={tag}
+                    closable
+                    onClose={() => handleTagRemove(tag)}
+                    className="px-2 py-1"
                   >
-                    添加标签
-                  </Button>
-                )}
-              </Form.Item>
-            </section>
-
-            <Divider />
-
-            {/* 分类设置 */}
-            <section id="category-info" className="scroll-mt-8">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <FolderOutlined className="text-green-500 mr-2" />
-                分类设置
-              </h3>
-
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    name="subjectId"
-                    label="学科分类"
-                    rules={[{ required: true, message: '请选择学科分类' }]}
-                  >
-                    <Select placeholder="选择学科分类">
-                      {types.subjects?.map(subject => (
-                        <Option key={subject.id} value={subject.id}>
-                          {subject.name}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item
-                    name="right"
-                    label="访问权限"
-                    rules={[{ required: true, message: '请选择访问权限' }]}
-                  >
-                    <Select placeholder="选择访问权限">
-                      <Option value={1}>免费</Option>
-                      <Option value={2}>积分兑换</Option>
-                      <Option value={3}>VIP专享</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item
-                noStyle
-                shouldUpdate={(prev, current) => prev.right !== current.right}
-              >
-                {({ getFieldValue }) =>
-                  getFieldValue('right') === 2 && (
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        <Form.Item
-                          name="price"
-                          label="所需积分"
-                          rules={[{ required: true, message: '请输入积分' }]}
-                        >
-                          <InputNumber
-                            min={1}
-                            placeholder="输入积分数量"
-                            className="w-full"
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  )
-                }
-              </Form.Item>
-
-              {resourceType === 'resource' && (
-                <>
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="toolIds"
-                        label="工具分类"
-                      >
-                        <Select
-                          mode="multiple"
-                          placeholder="选择工具"
-                        >
-                          {types.tools?.map(tool => (
-                            <Option key={tool.id} value={tool.id}>
-                              {tool.name}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Form.Item
-                    name="categories"
-                    label="资源分类"
-                  >
-                    <TreeSelect
-                      treeData={categoryTreeData}
-                      placeholder="选择分类"
-                      treeCheckable
-                      showCheckedStrategy={TreeSelect.SHOW_ALL}
-                    />
-                  </Form.Item>
-                </>
-              )}
-
-              {resourceType === 'course' && (
-                <>
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="categoryId"
-                        label="课程分类"
-                      >
-                        <Select
-                          mode="multiple"
-                          placeholder="选择课程分类"
-                        >
-                          {types.categoriesFirst?.map(cat => (
-                            <Option key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        name="level"
-                        label="难度级别"
-                      >
-                        <Radio.Group>
-                          <Radio value={1}>初级</Radio>
-                          <Radio value={2}>中级</Radio>
-                          <Radio value={3}>高级</Radio>
-                        </Radio.Group>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="duration"
-                        label="课程时长（分钟）"
-                      >
-                        <InputNumber
-                          min={1}
-                          placeholder="输入时长"
-                          className="w-full"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </>
-              )}
-            </section>
-
-            <Divider />
-
-            {/* 文件上传 */}
-            <section id="file-upload" className="scroll-mt-8">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <PaperClipOutlined className="text-purple-500 mr-2" />
-                文件上传
-              </h3>
-
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    label="封面图片"
-                    rules={[{ required: true, message: '请上传封面' }]}
-                  >
-                    <ImgCrop aspect={16 / 9} rotationSlider>
-                      <Upload
-                        {...imageUploadProps}
-                        maxCount={1}
-                      >
-                        <div>
-                          <PlusOutlined />
-                          <div style={{ marginTop: 8 }}>上传封面</div>
-                        </div>
-                      </Upload>
-                    </ImgCrop>
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item label="预览图片">
-                    <ImgCrop aspect={16 / 9} rotationSlider>
-                      <Upload
-                        {...imageUploadProps}
-                        maxCount={5}
-                      >
-                        <div>
-                          <PlusOutlined />
-                          <div style={{ marginTop: 8 }}>上传预览图</div>
-                        </div>
-                      </Upload>
-                    </ImgCrop>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Form.Item
-                label={resourceType === 'course' ? '课程文件' : '资源文件'}
-                rules={[{ required: true, message: '请上传文件' }]}
-              >
-                <Dragger
-                  {...fileUploadProps(resourceType === 'resource')}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">
-                    点击或拖拽文件到此处上传
-                  </p>
-                  <p className="ant-upload-hint">
-                    {resourceType === 'course'
-                      ? '支持视频格式，单个文件不超过2GB'
-                      : '支持多种格式，可上传多个文件'
-                    }
-                  </p>
-                </Dragger>
-              </Form.Item>
-            </section>
-
-            <Divider />
-
-            {/* 提交确认 */}
-            <section id="submit-section" className="scroll-mt-8">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <InboxOutlined className="text-orange-500 mr-2" />
-                提交确认
-              </h3>
-
-              <div className="bg-gray-50 p-4 rounded mb-4">
-                <h4 className="font-medium mb-2">上传须知</h4>
-                <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-                  <li>请确保内容符合相关法律法规</li>
-                  <li>请勿上传侵权内容</li>
-                  <li>审核通常需要1-3个工作日</li>
-                  <li>通过审核后将在平台展示</li>
-                </ul>
+                    {tag}
+                  </Tag>
+                ))}
               </div>
-
-              <Form.Item>
-                <Checkbox
-                  checked={agreement}
-                  onChange={(e) => setAgreement(e.target.checked)}
-                >
-                  我已阅读并同意
-                  <Button type="link" size="small">《资源上传协议》</Button>
-                  和
-                  <Button type="link" size="small">《版权声明》</Button>
-                </Checkbox>
-              </Form.Item>
-
-              <Form.Item>
+              {inputVisible ? (
+                <Input
+                  size="small"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onBlur={handleInputConfirm}
+                  onPressEnter={handleInputConfirm}
+                  style={{ width: 120 }}
+                />
+              ) : (
                 <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  disabled={!agreement}
-                  className="w-full"
+                  size="small"
+                  type="dashed"
+                  icon={<PlusOutlined />}
+                  onClick={() => setInputVisible(true)}
                 >
-                  提交{resourceType === 'resource' ? '资源' : '课程'}
+                  添加标签
                 </Button>
-              </Form.Item>
-            </section>
-          </Form>
-        </div>
+              )}
+            </Form.Item>
+            {resourceType === 'course' && (
+              <>
 
-      </CustomCard>
-    </div>
+                <Form.Item
+                  name="categoryId"
+                  label="课程分类"
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="选择课程分类"
+                  >
+                    {types.categoriesFirst?.map(cat => (
+                      <Option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+
+
+                <Form.Item
+                  name="level"
+                  label="难度级别"
+                >
+                  <Radio.Group>
+                    <Radio value={1}>初级</Radio>
+                    <Radio value={2}>中级</Radio>
+                    <Radio value={3}>高级</Radio>
+                  </Radio.Group>
+                </Form.Item>
+
+
+                <Form.Item
+                  name="duration"
+                  label="课程时长（分钟）"
+                >
+                  <InputNumber
+                    min={1}
+                    placeholder="输入时长"
+                    className="w-full"
+                  />
+                </Form.Item>
+
+              </>
+            )}
+            <Form.Item
+              label={resourceType === 'course' ? '课程文件' : '资源文件'}
+              name="file"
+              rules={[{ required: true, message: '请上传文件' }]}
+
+            >
+              <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
+                <SortableContext
+                  items={fileList.map(item => item.uid)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {/* 使用你的Dragger组件作为上传区域 */}
+                  <Dragger
+                    className='w-40'
+                    {...fileUploadProps(resourceType === 'resource')} // 保留原有的Upload配置
+                    fileList={fileList}
+                    onChange={onChange}
+                    // 自定义文件项渲染（绑定排序功能）
+                    itemRender={(originNode, file) => (
+                      <DraggableUploadListItem originNode={originNode} file={file} />
+                    )}
+                  >
+                    {/* 保留你原来的上传区域内容 */}
+                    <p className="ant-upload-drag-icon">
+                      <InboxOutlined />
+                    </p>
+                    <p className="text-base">
+                      点击或拖拽文件到此处上传
+                    </p>
+                    <p className="text-xs text-secondary">
+                      {resourceType === 'course'
+                        ? '支持视频格式，单个文件不超过2GB'
+                        : '支持多种格式，可上传多个文件'
+                      }
+                    </p>
+                  </Dragger>
+                </SortableContext>
+              </DndContext>
+            </Form.Item>
+            <Form.Item
+              label="封面图片" name="coverImage"
+              className='cover'
+
+            >
+              <ImgCrop aspect={16 / 9} rotationSlider>
+                <Upload
+                  {...imageUploadProps}
+
+                  maxCount={1}
+                >
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>上传封面</div>
+                  </div>
+                </Upload>
+              </ImgCrop>
+            </Form.Item>
+            <Form.Item label="预览图片">
+              <ImgCrop aspect={16 / 9} rotationSlider>
+                <Upload
+                  {...imageUploadProps}
+                  maxCount={4}
+                >
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>上传预览图</div>
+                  </div>
+                </Upload>
+              </ImgCrop>
+
+            </Form.Item>
+            <Form.Item
+              name="details"
+              label="资源详情"
+              rules={[
+                { required: true, message: '请输入10字以上详情描述' },
+                { min: 10, message: '描述不能少于10字' },
+                { max: 5000, message: '描述不能超过5000字' }
+              ]}
+            >
+              <MDEditor
+                enableScroll={false}
+                preview="edit"
+                style={{ fontSize: '16px' }}
+                data-color-mode="light"
+              />
+            </Form.Item>
+            <div className="bg-orange-light p-4 rounded my-4">
+              <h4 className="font-medium mb-2">上传须知</h4>
+              <ul className="text-sm text-main space-y-1 list-disc list-inside">
+                <li>请确保内容符合相关法律法规</li>
+                <li>请勿上传侵权内容</li>
+                <li>审核通常需要1-3个工作日</li>
+                <li>通过审核后将在平台展示</li>
+              </ul>
+            </div>
+            <Form.Item>
+              <Checkbox
+                checked={agreement}
+                onChange={(e) => setAgreement(e.target.checked)}
+              >
+                我已阅读并同意
+                <Button type="link" size="small">《资源上传协议》</Button>
+                和
+                <Button type="link" size="small">《版权声明》</Button>
+              </Checkbox>
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                disabled={!agreement}
+                className="w-full"
+              >
+                提交{resourceType === 'resource' ? '资源' : '课程'}
+              </Button>
+            </Form.Item>
+            <Divider className="bg-gray" />
+          </Col>
+
+        </Row>
+      </Form>
+
+    </div >
   );
 };
 

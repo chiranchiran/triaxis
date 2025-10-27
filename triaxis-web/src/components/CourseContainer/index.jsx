@@ -150,7 +150,7 @@ const CourseContainer = ({
               className="pt-10 pb-20"
             >
               <MyButton
-                size="large"
+                size="middle"
                 type="black"
                 onClick={() => {
                   setSearchParams({

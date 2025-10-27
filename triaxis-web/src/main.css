@@ -1,0 +1,60 @@
+/* 行列以及单选框文字大小 */
+.ant-col,
+.ant-row,
+.ant-radio-wrapper {
+  font-size: var(--text-base);
+}
+
+/* 必选框文字和输入框文字对齐 */
+.ant-form-item .ant-form-item-label>label {
+  display: block;
+}
+
+/* 必选前面小红点对齐 */
+.ant-form-item .ant-form-item-label>label.ant-form-item-required::before {
+  margin-inline-end: 6px;
+  font-size: var(--text-sm);
+}
+
+/* 输入框字体和边框等的调整 */
+.ant-form-item .ant-input,
+.ant-form-item input,
+textarea,
+.ant-input-affix-wrapper,
+.ant-input-number .ant-input-number-input,
+.ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector {
+  background: var(--bg-elevated);
+  font-size: var(--text-base);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--bg-hover);
+}
+
+/* 输入框字体和边框hover等的调整 */
+.ant-form-item .ant-input:focus,
+.ant-form-item input:focus {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--text-secondary);
+}
+
+/* 输入框label和后面的Input文字对齐 */
+.ant-form-item-label {
+  margin-right: 0.3rem;
+  padding: 3px 0;
+}
+
+/* 单选框labe和文字对齐 */
+.ant-form-item .ant-radio-group {
+  padding: 4px 0;
+}
+
+/* 单选框之间的距离 */
+.ant-radio-wrapper {
+  margin-right: 1rem;
+}
+
+/* 选择框边距调整 */
+.ant-select-single .ant-select-selector .ant-select-selection-search {
+  padding: 6px 7px;
+}

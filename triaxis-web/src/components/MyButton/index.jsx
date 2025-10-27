@@ -9,8 +9,8 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
   const getCurrentSize = (size) => {
     switch (size) {
       case 'small': return ""
-      case 'middle': return "h-12 w-32 px-8"
-      case 'large': return "h-12 w-40 px-8"
+      case 'middle': return "h-12 w-32 px-4"
+      case 'large': return "h-12 w-40 px-4"
       case 'long': return "!h-7 "
     }
   }
@@ -30,7 +30,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
   return (
     <Button
       type="text"
-      size={size === 'long' ? 'middle' : 'large'}
+      size={size === 'long' || size === 'large' ? 'large' : 'middle'}
       onClick={onClick}
       disabled={loading}
       icon={icon}
