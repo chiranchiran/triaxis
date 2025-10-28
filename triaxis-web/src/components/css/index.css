@@ -1,16 +1,66 @@
-header .nav-top a:not([aria-current]):hover {
-  background-color: var(--bg-hover) !important;
-  color: inherit;
+.background {
+  position: fixed;
+  height: 100vh;
+  background: url(../../assets/login4.png) no-repeat fixed center / cover;
 }
-header .nav-top a[aria-current]:hover {
-  color: var(--text-light);
+.background .container {
+  position: fixed;
+  left: 50%;
+  transform: translate(-50%, 0);
 }
-header input.ant-input-outlined,
-header .ant-input-search-button {
-  font-size: medium;
-  border-color: var(--bg-dark);
-  border-radius: 8px;
+.background .container a:hover {
+  color: var(--text-green);
 }
-header button.change {
-  margin-right: 0;
+.background .container .ant-pro-form-login-container {
+  padding-block-end: 0.5rem;
+}
+.background .container input:hover {
+  border: none;
+  box-shadow: none;
+}
+.background .container .ant-tabs-top > .ant-tabs-nav::before,
+.background .container .ant-tabs-bottom > .ant-tabs-nav::before,
+.background .container .ant-tabs-top > div > .ant-tabs-nav::before,
+.background .container .ant-tabs-bottom > div > .ant-tabs-nav::before {
+  border-bottom: 0;
+}
+.background .container .ant-space-gap-col-small {
+  column-gap: var(--text-base);
+}
+.background .container .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
+  width: 8rem !important;
+  background-color: var(--text-green);
+}
+.background .container .ant-tabs-tab-active {
+  background-color: var(--accent-green-light);
+}
+.background .container .ant-tabs .ant-tabs-tab {
+  padding: 12px 1.2rem;
+  font-size: var(--text-sm);
+}
+.background .container .ant-pro-form-login-container {
+  padding-inline: 32px;
+  padding-block: 12px;
+}
+.background .container .otherLogin svg:hover {
+  color: var(--bg-dark);
+}
+.background .container .ant-form-item {
+  margin-bottom: var(--text-base);
+}
+.background .container .otherLogin .ant-divider-horizontal.ant-divider-with-text {
+  margin: 0.8rem 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: var(--text-sm);
+}
+.background .container .ant-form-item .ant-form-item-explain,
+.background .container .ant-form-item .ant-form-item-extra {
+  clear: both;
+  color: var(--ant-color-text-description);
+  font-size: var(--text-xs);
+  line-height: var(--text-base);
+}
+.background .container .ant-form-item-additional {
+  min-height: var(--text-base) !important;
 }

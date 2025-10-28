@@ -16,7 +16,6 @@ import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
 import { useCaptcha } from '../../hooks/api/login';
 import { useRegisterByCount, useRegisterByMobile } from '../../hooks/api/register';
-import { useMessage } from "../../hooks/common/useMessage"
 import LoginBase from '../../components/LoginBase';
 import { Link } from 'react-router-dom';
 
@@ -28,7 +27,6 @@ function Register() {
   //倒计时
   const [count, setCount] = useState(60);
   const [isTiming, setIsTiming] = useState(false)
-  const messageApi = useMessage()
 
   //注册方式0：账号密码，1：手机号，
   const [registerType, setRegisterType] = useState(0);
@@ -94,54 +92,27 @@ function Register() {
 
   //提交表单
   const onFinish = (values) => {
-    if (!values.agreement) {
-      messageApi.error("请先同意用户协议！")
-      return
-    }
     //账号注册
     if (registerType === 0) {
-      const { username, password, confirmPassword } = values
-
-      // 确认密码校验
-      if (password !== confirmPassword) {
-        logger.debug("密码不一致")
-        form.setFields([
-          {
-            name: 'confirmPassword',
-            errors: ['两次输入的密码不一致'],
-          },
-        ]);
-        return;
-      }
-
+      const { username, password } = values
       logger.debug("开始注册", { username, password })
       countRegister({ username, password })
       //手机号注册
     } else {
-      const { phone, captcha, password, confirmPassword } = values
-
-      // 确认密码校验
-      if (password !== confirmPassword) {
-        logger.debug("密码不一致")
-        form.setFields([
-          {
-            name: 'confirmPassword',
-            errors: ['两次输入的密码不一致'],
-          },
-        ]);
-        return;
-      }
-
+      const { phone, captcha, password } = values
       logger.debug("开始注册", { phone, captcha, password })
       phoneRegister({ phone, captcha, password })
     }
   }
 
   return (
-    <LoginBase>
+    <LoginBase isRegister>
       <LoginForm
         form={form}
         onFinish={onFinish}
+        defaultValue={{
+          agreement: true,
+        }}
         submitter={{
           searchConfig: {
             submitText: '注册',
@@ -222,6 +193,7 @@ function Register() {
               fieldProps={{ size: 'large', prefix: <LockOutlined className={'prefixIcon'} />, autoComplete: "new-password" }}
               placeholder={'确认密码'}
               validateFirst={true}
+              dependencies={["password"]}
               rules={[
                 { required: true, message: '请确认密码！' },
                 // 新增：对比密码字段
@@ -328,16 +300,22 @@ function Register() {
             />
           </>
         )}
-        <div
-          style={{
-            marginBlockEnd: 24,
-          }}
-        >
-          <ProFormCheckbox noStyle name="agreement">
+        <div className='mb-2' >
+          <ProFormCheckbox name="agreement"
+            rules={[
+              {
+                validator: (_, value) =>
+                  value ? Promise.resolve() : Promise.reject(new Error('请同意《用户协议》和《隐私政策》！')),
+              },
+            ]}
+            initialValue={true}
+            valuePropName="checked"
+            validateFirst={true}
+          >
             <span className='text-sm text-main'>我已阅读并同意</span>
-            <Link to='' className=' text-sm text-green'> 用户协议 </Link>
+            <Link to='' className=' text-sm text-green'>《用户协议》</Link>
             <span className='text-sm text-main'>和</span>
-            <Link to='' className='text-sm text-green'> 隐私政策 </Link>
+            <Link to='' className='text-sm text-green'>《隐私政策》</Link>
           </ProFormCheckbox>
         </div>
       </LoginForm>

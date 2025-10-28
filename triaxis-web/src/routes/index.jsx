@@ -3,7 +3,6 @@ import { Button, Result } from "antd"
 import Home from "../pages/Home/index.jsx"
 import { useSelector } from "react-redux"
 import { useEffect } from "react"
-import { useNotification } from "../hooks/common/useMessage.jsx"
 import Resource from "../pages/Resource/index.jsx"
 import Course from "../pages/Course/index.jsx"
 import NotFound from "../pages/NotFound/index.jsx"
@@ -19,6 +18,8 @@ import CourseDetail from "../pages/CourseDetail/index.jsx"
 import UploadResource from "../pages/UploadResource/index.jsx"
 import CreatePost from "../pages/CreatPost/index.jsx"
 import PostDetail from "../pages/PostDetail/index.jsx"
+import { useNotification } from "../components/AppProvider.jsx"
+
 
 //路由守卫组件
 function Protect({ children }) {

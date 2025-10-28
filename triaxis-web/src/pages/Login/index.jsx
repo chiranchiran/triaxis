@@ -198,6 +198,7 @@ const Login = () => {
                 }
               ]}
             />
+
             <ProFormText.Password
               name="password"
               fieldProps={{
@@ -275,11 +276,7 @@ const Login = () => {
             />
           </>
         )}
-        <div
-          style={{
-            marginBlockEnd: 24,
-          }}
-        >
+        <div className='mb-2' >
           <ProFormCheckbox noStyle name="autoLogin" >
             <p className='text-sm text-main'>自动登录</p>
           </ProFormCheckbox>

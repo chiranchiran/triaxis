@@ -16,12 +16,12 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
   }
   const getType = (type) => {
     switch (type) {
-      case 'black': return 'bg-dark text-light text-base'
-      case 'blue': return 'bg-primary text-main text-base'
-      case 'green': return 'bg-green text-main text-base'
-      case 'orange': return 'bg-orange text-main text-base'
-      case 'gray': return 'bg-gray border-main text-main text-base'
-      case 'white': return 'bg-card text-main border-dark text-base'
+      case 'black': return 'bg-dark text-light'
+      case 'blue': return 'bg-primary text-main'
+      case 'green': return 'bg-green text-main'
+      case 'orange': return 'bg-orange text-main'
+      case 'gray': return 'bg-gray border-main text-main'
+      case 'white': return 'bg-card text-main border-dark'
     }
   }
 
@@ -54,10 +54,10 @@ const FilterButton = ({ item, isSelected, onClick }) => {
     </button>
   );
 };
-const OrderButton = ({ handleSortChange, list, value }) => {
+const OrderButton = ({ handleSortChange, list = [], value, className }) => {
   return (
     <div className="flex items-center space-x-2">
-      <Space vertical="true" spacing='loose' align='start'>
+      <Space spacing='loose' align='start' >
         <RadioGroup
           onChange={(e) => handleSortChange(e.target.value)}
           type='button'
@@ -65,6 +65,7 @@ const OrderButton = ({ handleSortChange, list, value }) => {
           value={value}
           aria-label="单选组合示例"
           name="demo-radio-large"
+          className={className}
         >
           {list.map((item, index) => (
             <Radio key={item.id} value={item.id}>

@@ -1,5 +1,14 @@
-.preview:hover {
-  border-color: var(--primary);
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+.uploadResource .semi-radioGroup.semi-radioGroup-buttonRadio {
+  background: var(--bg-gray);
+  border-radius: calc(var(--semi-border-radius-large)*1.2);
+  font-weight: 400;
+  font-size: var(--text-lg);
+}
+.uploadResource .semi-radio-addon-buttonRadio-large {
+  font-size: var(--text-base);
+  padding: 6px 16px;
+  border-radius: var(--semi-border-radius-large);
+}
+.tag-container {
+  border-radius: var(--ant-border-radius);
 }

@@ -13,6 +13,7 @@ import { ReactFlowProvider } from 'reactflow'
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn'
 
+
 function App() {
   const { defaultAlgorithm, darkAlgorithm, compactAlgorithm } = theme;
   const { mutate } = useAutoLogin()
@@ -44,45 +45,17 @@ function App() {
     dayjs.locale('zh-cn');
   }, [])
   return (
-    <ConfigProvider
-      theme={{
-        cssVar: true,
-        components: {
-          Input: {
-            // activeBorderColor: 'var(--text-secondary)',
-            // hoverBorderColor: 'var(--text-secondary)',
-            // colorBgBase: 'var(--bg)',
-            // activeShadow: "0 0 0 2px var(--border-active)",
-            inputFontSize: 16,
-          },
-          Button: {
-            contentFontSize: 14,
-            contentFontSizeLG: 16,
-          }
-        },
-        token: {
-          colorPrimary: 'var(--primary)',
-          colorText: 'var(--text)',
-          colorTextSecondary: 'var(--text-secondary)',
-          colorBgBase: 'var(--bg)',
-          colorBgContainer: 'var(--bg)',
-          contentFontSize: 16,
-          fontSize: 16,
-          colorBorder: 'var(--bg-hover)',
-        },
-      }}
-    >
-      <div className="min-h-screen bg-main">
-        <Header />
-        <main className="pt-20 relative">
-          <ReactFlowProvider>
-            <Element />
-          </ReactFlowProvider>
-          <Sidebar />
-        </main>
-        <SiteFooter />
-      </div>
-    </ConfigProvider>
+
+    <div className="min-h-screen bg-main">
+      <Header />
+      <main className="pt-20 relative">
+        <ReactFlowProvider>
+          <Element />
+        </ReactFlowProvider>
+        <Sidebar />
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
 

@@ -5,7 +5,6 @@
 
   .container {
     position: fixed;
-    top: 20%;
     left: 50%;
     transform: translate(-50%, 0);
 
@@ -14,56 +13,76 @@
     }
 
     .ant-pro-form-login-container {
-      padding-block-end: 0.6rem;
+      padding-block-end: 0.5rem;
     }
 
-    .ant-pro-form-login-desc {
-      margin-block-end: 20px;
+    input:hover {
+      border: none;
+      box-shadow: none;
     }
 
+    // 底部横线
     .ant-tabs-top>.ant-tabs-nav::before,
     .ant-tabs-bottom>.ant-tabs-nav::before,
     .ant-tabs-top>div>.ant-tabs-nav::before,
     .ant-tabs-bottom>div>.ant-tabs-nav::before {
-
       border-bottom: 0;
-
     }
 
-    .ant-form-item {
-      margin-top: 0.4rem;
-    }
-
-    .ant-tabs-tab-btn {
-      font-size: 0.875rem;
-      text-align: center;
-    }
-
-    .ant-tabs .ant-tabs-tab+.ant-tabs-tab {
-      margin: 0 0 0 1.3rem;
-    }
 
     .ant-space-gap-col-small {
-      column-gap: 16px;
+      column-gap: var(--text-base);
     }
 
+    // 选中登录方式的横线
     .ant-tabs-top>.ant-tabs-nav .ant-tabs-ink-bar {
       width: 8rem !important;
       background-color: var(--text-green);
     }
 
     .ant-tabs-tab-active {
-      // border-radius: 15% 15% 0 0;
       background-color: var(--accent-green-light);
     }
 
     .ant-tabs .ant-tabs-tab {
       padding: 12px 1.2rem;
+      font-size: var(--text-sm);
     }
 
-    .otherLogin svg:hover {
-      color: var(--bg-dark);
+    .ant-pro-form-login-container {
+      padding-inline: 32px;
+      padding-block: 12px;
     }
 
+    .otherLogin {
+      svg:hover {
+        color: var(--bg-dark);
+      }
+    }
+
+    .ant-form-item {
+
+      margin-bottom: var(--text-base);
+
+    }
+
+    .otherLogin .ant-divider-horizontal.ant-divider-with-text {
+      margin: 0.8rem 0;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: var(--text-sm);
+    }
+
+    .ant-form-item .ant-form-item-explain,
+    .ant-form-item .ant-form-item-extra {
+      clear: both;
+      color: var(--ant-color-text-description);
+      font-size: var(--text-xs);
+      line-height: var(--text-base);
+    }
+
+    .ant-form-item-additional {
+      min-height: var(--text-base) !important;
+    }
   }
 }

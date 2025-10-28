@@ -191,7 +191,7 @@ html[data-theme='dark'] {
 
 
 .border-main {
-  border-color: var(--border);
+  border-color: var(--bg-hover);
 
 }
 
@@ -210,6 +210,7 @@ html[data-theme='dark'] {
 .border-primary-dark {
   border-color: var(--primary-dark);
 }
+
 
 .shadow-card {
   box-shadow: var(--shadow);
@@ -279,7 +280,7 @@ html[data-theme='dark'] {
 
 /* 渐变蓝背景 */
 .bg-gradient-to-white {
-  background-image: linear-gradient(to bottom, var(--primary-50), var(--bg-elevated));
+  background-image: linear-gradient(to bottom, var(--primary-50), var(--bg));
   background-size: 100% 100%;
 }
 
@@ -389,6 +390,10 @@ select {
 
 input:focus,
 input.ant-input-outlined:focus,
+.ant-input-outlined:hover,
+.ant-input-group .ant-input-affix-wrapper:not(:last-child):hover,
+.ant-input-affix-wrapper-lg:hover,
+.ant-input-affix-wrapper-lg:focus,
 .ant-input-number.ant-input-number-outlined:focus-within,
 .ant-input-number.ant-input-number-outlined:hover,
 .ant-input-textarea-affix-wrapper.ant-input-outlined:focus-within,
@@ -404,6 +409,12 @@ select:hover {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* 多选输入框 */
+.ant-select-show-search.ant-select:not(.ant-select-customize-input) .ant-select-selector input:focus {
+  border: none;
+  box-shadow: none;
+}
+
 /* 下拉框 */
 .ant-select-dropdown {
   background-color: var(--bg-elevated);
@@ -413,6 +424,10 @@ select:hover {
 .ant-cascader-dropdown .ant-cascader-menu-item-active:not(.ant-cascader-menu-item-disabled):hover,
 .ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   background-color: var(--bg-gray);
+}
+
+.ant-cascader-dropdown .ant-cascader-menu {
+  height: 100%;
 }
 
 /* 数字框小箭头 */
@@ -480,4 +495,25 @@ select:hover {
   border-radius: var(--ant-border-radius-lg);
   cursor: pointer;
   transition: border-color var(--ant-motion-duration-slow);
+}
+
+/* tag标签 */
+.ant-tag {
+  display: flex;
+  align-self: start;
+  border: 0;
+  height: 1.5rem;
+  max-width: 100%;
+  line-height: calc(1.5rem - var(--ant-line-width) * 2);
+  margin-right: 8px;
+  font-size: var(--text-base);
+  background-color: var(--accent-green-ribbon);
+}
+
+/* 大号按钮 */
+.ant-btn-lg {
+  font-size: var(--ant-button-content-font-size-lg);
+  height: calc(var(--ant-button-content-font-size-lg) * 2);
+  padding: 0px var(--ant-button-padding-inline-lg);
+  border-radius: var(--ant-border-radius-lg);
 }

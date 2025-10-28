@@ -2,11 +2,11 @@ import { getApiConfig } from "../../api/config"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import queryClient from "../../utils/api/queryClient"
 import { logger } from "../../utils/logger"
-import { useMessage, useNotification } from "./useMessage"
 import { handlePromiseError } from "../../utils/error/errorHandler"
 import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { useEffect } from "react"
+import { useMessage, useNotification } from "../../components/AppProvider"
 export const useApi = (apiFunc, {
   queryKey = [],
   config,

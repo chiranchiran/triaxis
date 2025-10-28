@@ -15,7 +15,7 @@ import { useDispatch } from 'react-redux';
 import Logo from '../../components/Logo';
 
 
-const LoginBase = ({ children }) => {
+const LoginBase = ({ children, isRegister = false }) => {
   const { token } = theme.useToken()
   const dispatch = useDispatch()
 
@@ -31,17 +31,17 @@ const LoginBase = ({ children }) => {
 
   //其他登录功能
   return (
-    <div className="background w-full py-20">
+    <div className={`background w-full ${isRegister ? 'py-10' : 'py-28'} `}>
       <ProConfigProvider hashed={false}>
-        <div className="container max-w-105 overflow-hidden rounded-2xl shadow-2xl" style={{ backgroundColor: token.colorBgContainer }}>
-          <div className="w-full flex flex-col justify-between items-center gap-3 mt-8 mb-2">
+        <div className="container max-w-100 overflow-hidden rounded-2xl shadow-2xl bg-card">
+          <div className="w-full flex flex-col justify-between items-center gap-1 mt-6">
             <Logo size="large" />
             <p className='text-secondary text-sm'>城乡规划专业交流平台</p>
           </div>
           {children}
-          <div className="px-15 mb-8 mt-6">
-            <Divider className="border-divider">其他登录方式</Divider>
-            <Space className='w-full otherLogin flex justify-center space-x-4 mt-1'>
+          <div className="otherLogin px-15 mb-6 -mt-3">
+            <Divider className="border-divider text-sm !text-secondary">其他登录方式</Divider>
+            <Space className='w-full  flex justify-center space-x-4'>
               <WechatFilled style={iconStyles} />
               <AppleFilled style={iconStyles} />
               <AlipayCircleOutlined style={iconStyles} />
