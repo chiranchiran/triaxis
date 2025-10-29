@@ -179,11 +179,11 @@ public class CourseReviewServiceImpl extends ServiceImpl<CourseReviewMapper, Cou
                     .orElse(0.0);
 
             // 更新课程评分
-            courseService.lambdaUpdate()
-                    .set(Course::getAverageRating, BigDecimal.valueOf(avgRating))
-                    .set(Course::getReviewCount, reviews.size())
-                    .eq(Course::getId, courseId)
-                    .update();
+//            courseService.lambdaUpdate()
+//                    .set(Course::getR, BigDecimal.valueOf(avgRating))
+//                    .set(Course::getReviewCount, reviews.size())
+//                    .eq(Course::getId, courseId)
+//                    .update();
         }
     }
 

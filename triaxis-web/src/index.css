@@ -517,3 +517,13 @@ select:hover {
   padding: 0px var(--ant-button-padding-inline-lg);
   border-radius: var(--ant-border-radius-lg);
 }
+
+/* notification */
+.ant-notification .ant-notification-notice-wrapper,
+.ant-message .ant-message-notice-wrapper .ant-message-notice-content {
+  margin-bottom: var(--ant-margin);
+  margin-inline-start: auto;
+  background: var(--bg-elevated);
+  border-radius: var(--ant-border-radius-lg);
+  box-shadow: var(--ant-box-shadow);
+}

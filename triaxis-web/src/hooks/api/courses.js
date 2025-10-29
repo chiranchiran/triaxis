@@ -3,6 +3,7 @@ import { addCourseReview, getCourse, getCourseReviews, getCourses, getCourseType
 import { useDelete, useGet, useUpdate, useUpload } from "../common/useData"
 
 export const useGetCourseTypes = (options) => useGet(getCourseTypes, ['Courses', 'types'], null, options)
+export const useUploadCourse = (params, options) => useUpload(uploadCourse, params, options)
 // export const useSearchCourse = useGet(getCourses, params, options)
 // export const useGetCourse = useGet(getCourse, params, options)
 // export const useUploadCourse = useUpload(uploadCourse, params, options)

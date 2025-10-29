@@ -6,7 +6,7 @@ const queryClient = new QueryClient({
       staleTime: 60 * 1000,
       cacheTime: 5 * 60 * 1000,
 
-      retry: 1,
+      retry: false,
       retryDelay: (retryAttempt) => {
         // 指数退指数退避策略：1s, 2s, 4s...（避免过 10s）
         return Math.min(1000 * Math.pow(2, retryAttempt), 10000);
@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
       refetchInterval: false,
     },
     mutations: {
-      retry: 1
+      retry: false
     },
   },
   logger: {

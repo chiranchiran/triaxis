@@ -50,8 +50,8 @@ public class ResourceController {
     /**
      * 获取二级分类
      */
-    @PostMapping("/categories")
-    public Result<List<CategoryBO>> getCategories(@RequestBody ResourceCategorySecondaryDTO categoryDTO) {
+    @GetMapping("/categories")
+    public Result<List<CategoryBO>> getCategories( ResourceCategorySecondaryDTO categoryDTO) {
         log.debug("获取资源二级分类");
         List<CategoryBO> category = resourceTypesService.getCategorySecondary(categoryDTO.getSubjectId(), categoryDTO.getParentId());
         return Result.success(category);
@@ -82,10 +82,10 @@ public class ResourceController {
      * 上传资源
      */
     @PostMapping
-    public Result<Boolean> addResource(@RequestBody ResourceDTO dto) {
-        log.debug("上传资源，是{}",dto);
-        Boolean success = resourceService.addResource(dto);
-        return Result.success(success);
+    public Result addResource() {
+
+//        Boolean success = resourceService.addResource(dto);
+        return Result.success();
     }
 
     /**

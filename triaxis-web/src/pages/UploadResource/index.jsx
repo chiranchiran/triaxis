@@ -1,5 +1,5 @@
 // UploadResource.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Form,
   Input,
@@ -48,66 +48,125 @@ import './index.less'
 import { MyButton, OrderButton } from '../../components/MyButton';
 import { Link } from 'react-router-dom';
 import { logger } from '../../utils/logger';
-import { CancelConfirmButton, ResetConfirmButton, SubmitConfirmButton, useToggleConfirm } from '../../components/Mymodal';
-import { useMessage } from '../../components/AppProvider';
-import useModal from 'antd/es/modal/useModal';
-import { useGetResourceTypes, useGetSecondaryCategory } from '../../hooks/api/resources';
-import { useGetCourseTypes } from '../../hooks/api/courses';
+import { ResetConfirmButton, SubmitConfirmButton, useToggleConfirm } from '../../components/Mymodal';
+import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from '../../hooks/api/resources';
+import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
+import { useQueryClient } from '@tanstack/react-query';
+import { getUserData } from '../../utils/localStorage';
 
 const { Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 const { Dragger } = Upload;
 
-// 模拟分类数据
-const data1 = {
-  subjects: [
-    { id: 1, name: '城乡规划' },
-    { id: 2, name: '建筑设计' },
-    { id: 3, name: '风景园林' },
-    { id: 4, name: '地理信息' }
-  ],
-  tools: [
-    { id: 1, name: 'AutoCAD' },
-    { id: 2, name: 'SketchUp' },
-    { id: 3, name: 'Revit' },
-    { id: 4, name: 'Photoshop' }
-  ],
-  categoriesFirst: [
-    { id: 1, name: '参考图库' },
-    { id: 2, name: '设计素材' },
-    { id: 3, name: '图纸与作品' },
-    { id: 4, name: '课程资源' }
-  ]
-}
-
-
 const UploadResource = () => {
+  // const { isAuthenticated } = getUserData();
+  // if(!isAuthenticated)  
   const [form] = Form.useForm();
+  const queryClient = useQueryClient();
   const toggleModal = useToggleConfirm();
-
-  //state管理
+  const { mutate: doUploadResource, isSuccess: resourceSuccess } = useUploadResource()
+  const { mutate: doUploadCourse, isSuccess: courseSuccess } = useUploadCourse()
+  /**
+   *  state管理
+   */
   const [type, setType] = useState(1);
+  const [fileList, setFileList] = useState([]);
   const [tagState, setTagState] = useState({
     tags: [],
     inputValue: ''
   });
-
   const { tags, inputValue } = tagState;
-  //获取数据
+
+  const [selectedTypes, setSelectedTypes] = useState({
+    subjectId: null,
+    parentId: null
+  })
+
+  /**
+ *  获取数据
+ */
   //获取资源数据学科、工具、一级分类
-  const { data: resourceTypes = data1, isError: resourceTypesError } = type === 1 ? useGetResourceTypes() : { data: null, isLoading: false, isError: false };
-  const { sujects: resourceSubjects = [], tools = [], categoriesFirst = [] } = resourceTypes || {}
+  const { data: resourceTypes, isError: resourceTypesError } = type === 1 ? useGetResourceTypes() : { data: null, isLoading: false, isError: false };
+  const { subjects: resourceSubjects = [], tools = [], categoriesFirst = [] } = resourceTypes || {}
   //根据资源学科和一级分类获取二级分类
-  const { data: categoriesSecondaryData, isError: secondaryError } = type === 1 ? useGetSecondaryCategory({
-    subjectId: form.getFieldsValue("subjectId"),
-    parentId: form.getFieldsValue("categoryFirst")
-  }, { enabled: !!form.getFieldsValue("subjectId") && !!form.getFieldsValue("categoryFirst") })
-    : { data: null, isLoading: false, isError: false };
+  const { data: categoriesSecondaryData, isError: secondaryError, } = type === 1 ? useGetSecondaryCategory({
+    subjectId: selectedTypes.subjectId,
+    parentId: selectedTypes.parentId
+  }) : { data: null, isLoading: false, isError: false };
   //获取课程学科、难度、分类
   const { data: courseTypes, isError: courseError } = type === 2 ? useGetCourseTypes() : { data: null, isLoading: false, isError: false };
-  const { sujects: courseSubjects = [], level = [], categories = [] } = courseTypes || {}
+  const { sujects: courseSubjects = [], categories = [] } = courseTypes || {}
 
+  /**
+   * 数据处理
+   */
+
+  //级联选择数据
+  const categoryTreeData = useMemo(() => {
+    if (type === 1) {
+      return categoriesFirst.map(firstCat => {
+        // 从 queryClient 缓存中获取该一级分类的二级数据
+        // logger.debug("构建二级分类数据", firstCat.id)
+        const cachedSecondaryData = queryClient.getQueryData(['resources', 'categories', selectedTypes.subjectId, firstCat.id]);
+
+        return {
+          label: firstCat.name,
+          value: firstCat.id,
+          // disabled: !cachedSecondaryData,
+          children: cachedSecondaryData ? cachedSecondaryData.map(secondCat => ({
+            label: secondCat.name,
+            value: secondCat.id,
+          })) : []
+        };
+      });
+    } else {
+      return categories.map(cat => ({
+        label: cat.name,
+        value: cat.id,
+      }));
+    }
+  }, [type, categoriesFirst, categories, queryClient, categoriesSecondaryData, selectedTypes.subjectId]);
+
+  /**
+   * 字段变化处理函数
+   */
+
+  // 处理学科选择变化
+  const handleSubjectChange = (subjectId) => {
+    setSelectedTypes(prev => ({ ...prev, subjectId }));
+    // 清空分类选择
+    form.setFieldsValue({
+      categoriyIds: null
+    });
+  };
+
+  /**
+   * 级联选择器处理
+   */
+
+  //处理二级分类加载慢的问题,点击选择后再加载
+  const handleCascaderChange = (values) => {
+    logger.debug("选中的值", values);
+    const newValues = values.filter((item) => {
+      if (item.length === 1) {
+        const cachedSecondaryData = queryClient.getQueryData(['resources', 'categories', selectedTypes.subjectId, item[0]]);
+        if (!cachedSecondaryData) {
+          setSelectedTypes(pre => ({ ...pre, parentId: item[0] }));
+          logger.debug("没有二级分类")
+          return false;
+        }
+      }
+      return true;
+    })
+    logger.debug("values", newValues)
+
+    form.setFieldsValue({ categoryIds: newValues });
+  }
+
+  /**
+   * 标签处理
+   */
   // 处理标签输入
   const handleInputConfirm = () => {
     if (inputValue && !tags.includes(inputValue)) {
@@ -125,6 +184,9 @@ const UploadResource = () => {
     });
   };
 
+  /**
+ * 上传处理
+ */
   // 文件上传配置
   const fileUploadProps = (multiple = true) => ({
     multiple,
@@ -137,89 +199,58 @@ const UploadResource = () => {
     },
     showUploadList: true
   });
-
+  //文件上传
+  const handleFileChange = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+    form.setFieldValue("file", newFileList)
+  };
   // 图片上传配置
   const imageUploadProps = {
     listType: "picture-card",
     beforeUpload: () => false,
     maxCount: 1,
-    showUploadList: true
+    showUploadList: true,
   };
-
-  // 提交表单
-  const onFinish = (values) => {
-    values()
-    logger.debug("上传表单数据", values())
-    const { } = values
-
-    const formData = {
-      ...values,
-      tags,
-      type: type
-    };
-
-    console.log('提交数据:', formData);
-    message.success('上传成功！');
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
-  const [fileList, setFileList] = useState([]);
+  //图片处理函数
+  const imagesChange = (info) => {
+    const { fileList = [] } = info;
+    form.setFieldValue("images", fileList);
+  }
+  const coverImageChange = (info) => {
+    const { fileList = [] } = info;
+    form.setFieldValue("coverImage", fileList);
+  }
 
-  // 拖拽传感器配置（不变）
+
+  /**
+   * 拖拽处理
+   */
+  // 拖拽传感器配置
   const sensor = useSensor(PointerSensor, {
     activationConstraint: { distance: 10 },
   });
-
-  // 拖拽排序结束时更新文件顺序（对多文件同样适用）
-  const onDragEnd = ({ active, over }) => {
+  ;
+  // 拖拽排序结束时更新文件顺序
+  const onDragEnd = useCallback(({ active, over }) => {
     if (active.id !== over?.id) {
-      setFileList(prev => {
-        const activeIndex = prev.findIndex(item => item.uid === active.id);
-        const overIndex = prev.findIndex(item => item.uid === over?.id);
+      setFileList((prev) => {
+        const activeIndex = prev.findIndex((item) => item.uid === active.id);
+        const overIndex = prev.findIndex((item) => item.uid === over?.id);
         return arrayMove(prev, activeIndex, overIndex);
       });
     }
-  };
+  }, []);
 
-  // 多文件上传状态变化时更新列表（自动处理新增的多个文件）
-  const onChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-  };
+  /**
+   * 表单事件处理
+   */
 
-  // 自定义上传区域提示文字（说明支持多文件拖拽）
-  const uploadTip = (
-    <div style={{ marginTop: 8 }}>
-      <Text type="secondary">
-        支持拖拽多个文件到此处，或点击按钮选择多个文件（最多5个）
-      </Text>
-      <br />
-      <Text type="secondary">格式支持：图片、文档等（可通过accept限制）</Text>
-    </div>
-  );
-  // 构建分类树数据
-  const categoryTreeData = useMemo(() => {
-    const mockSecondary = {
-      1: [{ id: 11, name: '参考图' }, { id: 12, name: '分析图' }],
-      2: [{ id: 21, name: 'PS素材' }, { id: 22, name: '贴图材质' }],
-      3: [{ id: 31, name: '建筑图纸' }, { id: 32, name: '规划图纸' }],
-      4: [{ id: 41, name: '规划课程' }, { id: 42, name: '建筑课程' }]
-    };
-
-    return categoriesFirst?.map(category => ({
-      label: category.name, // TreeSelect 的 title → Cascader 的 label
-      value: category.id,   // 保持 value 不变
-      key: category.id,     // 保持 key 不变
-      children: mockSecondary[category.id]?.map(sub => ({
-        label: sub.name,    // 子节点同样转换 title → label
-        value: sub.id,
-        key: sub.id
-      }))
-    })) || [];
-  }, [resourceTypes.categoriesFirst]);
-  // 选中变化事件（与 TreeSelect 类似，返回选中的 value 数组和选项数组）
-  const handleChange = (value, selectedOptions) => {
-    console.log('选中的值：', value);
-    console.log('选中的选项详情：', selectedOptions);
-  };
-  //事件处理函数
   //类型切换
   const toggleType = value => {
     toggleModal(() => {
@@ -228,13 +259,118 @@ const UploadResource = () => {
     })
   }
   //提交
-  //保存
+  const onFinish = (isSave = false) => {
+    form.validateFields().then(() => {
+      const processedValues = form.getFieldsValue();
+      logger.debug("初始数据", processedValues);
+      // 处理分类数据
+      const formData = new FormData();
+
+      // 添加文本字段
+      formData.append('status', isSave ? 2 : 1);
+      formData.append('title', processedValues.title);
+      formData.append('description', processedValues.description);
+      formData.append('right', processedValues.right);
+      formData.append('subjectId', processedValues.subjectId);
+      formData.append('categoryIds', JSON.stringify(processCategoryIds(processedValues.categoryIds)));
+      formData.append('tags', JSON.stringify(tags));
+      formData.append('details', processedValues.details);
+
+      // 处理价格
+      if (processedValues.right === 2) {
+        formData.append('price', processedValues.price);
+      }
+
+      // 资源特有字段
+      if (type === 1) {
+        formData.append('toolIds', JSON.stringify(processedValues.toolIds || []));
+      }
+
+      // 课程特有字段
+      if (type === 2) {
+        formData.append('subtitle', processedValues.subtitle);
+        formData.append('level', processedValues.level);
+      }
+
+      // 添加封面图片文件
+      if (processedValues.coverImage && processedValues.coverImage.length > 0) {
+        const coverFile = processedValues.coverImage[0].originFileObj || processedValues.coverImage[0];
+        formData.append('coverImage', coverFile);
+      }
+
+      // 添加预览图片文件
+      if (processedValues.images && processedValues.images.length > 0) {
+        processedValues.images.forEach((file, index) => {
+          const imageFile = file.originFileObj || file;
+          formData.append(`images`, imageFile);
+        });
+      }
+
+      // 添加资源文件
+      fileList.forEach((file, index) => {
+        const resourceFile = file.originFileObj || file;
+        formData.append(`files`, resourceFile);
+      });
+
+      logger.debug('formData 准备提交');
+
+      if (type === 1) doUploadResource(formData);
+      if (type === 2) doUploadCourse(formData);
+
+    }).catch((error) => {
+      logger.error('表单验证失败:', error);
+    });
+  };
+  //处理成功的表单清除
+  useEffect(() => {
+    if (resourceSuccess || courseSuccess) {
+      formReset();
+    }
+
+  }, [resourceSuccess, courseSuccess])
+
+  // 处理分类ID的函数
+  const processCategoryIds = (cascaderValues) => {
+    if (!cascaderValues || cascaderValues.length === 0) {
+      return [];
+    }
+
+    if (type === 1) {
+      // 资源类型：处理级联选择
+      const secondaryIds = new Set();
+      cascaderValues.forEach(valuePath => {
+        if (valuePath.length === 2) {
+          secondaryIds.add(valuePath[1]);
+        } else if (valuePath.length === 1) {
+          // 处理只选了一级分类的情况
+          const secondaryIdsForFirstCat = getSecondaryIdsByFirstCategory(valuePath[0]);
+          secondaryIdsForFirstCat.forEach(id => secondaryIds.add(id));
+        }
+      });
+      return Array.from(secondaryIds);
+    } else {
+      // 课程类型：直接返回选择的值
+      return cascaderValues.flat();
+    }
+  };
+
+  const getSecondaryIdsByFirstCategory = (id) => {
+    const cachedSecondaryData = categoryTreeData.find(i => i.value === id);
+    return cachedSecondaryData.children.map((i) => i.value)
+  }
   //重置
   const formReset = () => {
     form.resetFields();
-  }
-
-
+    setFileList([]);
+    setTagState({
+      tags: [],
+      inputValue: ''
+    });
+    setSelectedTypes({
+      subjectId: null,
+      parentId: null
+    });
+  };
 
   return (
     <section>
@@ -342,22 +478,23 @@ const UploadResource = () => {
                     )
                   }
                 </Form.Item>
-                <Form.Item
-                  name="subjectId"
-                  label="学科分类"
-                  layout="horizontal"
-                  rules={[{ required: true, message: '请选择学科分类' }]}
-                >
-                  <Select placeholder="选择学科分类" className='max-w-40'>
-                    {resourceSubjects && resourceSubjects.map(subject => (
-                      <Option key={subject.id} value={subject.id}>
-                        {subject.name}
-                      </Option>
-                    ))}
-                  </Select>
-                </Form.Item>
+
                 {type === 1 && (
                   <>
+                    <Form.Item
+                      name="subjectId"
+                      label="学科分类"
+                      layout="horizontal"
+                      rules={[{ required: true, message: '请选择学科分类' }]}
+                    >
+                      <Select placeholder="选择学科分类" className='max-w-40' onChange={handleSubjectChange}>
+                        {resourceSubjects && resourceSubjects.map(subject => (
+                          <Option key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
                     <Form.Item
                       name="toolIds"
                       label="工具分类"
@@ -377,20 +514,21 @@ const UploadResource = () => {
                     </Form.Item>
 
                     <Form.Item
-                      name="categoriyIds"
+                      name="categoryIds"
                       label="资源分类"
                       rules={[{ required: true, message: '请选择资源分类' }]}
                     >
                       <Cascader
                         options={categoryTreeData}
                         placeholder="选择资源分类"
-                        mode="multiple"
-                        onChange={handleChange}
+                        onChange={handleCascaderChange}
+                        // onOpenChange={handleDropdownVisibleChange}
                         showSearch={{
                           filter: (inputValue, path) =>
                             path.some(option => option.label.toLowerCase().includes(inputValue.toLowerCase()))
                         }}
                         multiple
+                        disabled={type === 1 && !selectedTypes.subjectId}
                         maxTagCount="responsive"
                       />
                     </Form.Item>
@@ -398,6 +536,20 @@ const UploadResource = () => {
                 )}
                 {type === 2 && (
                   <>
+                    <Form.Item
+                      name="subjectId"
+                      label="学科分类"
+                      layout="horizontal"
+                      rules={[{ required: true, message: '请选择学科分类' }]}
+                    >
+                      <Select placeholder="选择学科分类" className='max-w-40'>
+                        {courseSubjects && courseSubjects.map(subject => (
+                          <Option key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
                     <Form.Item
                       name="level"
                       label="难度级别"
@@ -410,7 +562,7 @@ const UploadResource = () => {
                       </Radio.Group>
                     </Form.Item>
                     <Form.Item
-                      name="categoryId"
+                      name="categoryIds"
                       label="课程分类"
                       rules={[{ required: true, message: '请选择课程分类' }]}
                     >
@@ -461,6 +613,7 @@ const UploadResource = () => {
                 <Form.Item
                   label={type === 2 ? '课程文件' : '资源文件'}
                   name="file"
+                  valuePropName="fileList"
                   rules={[{ required: true, message: '请上传文件' }]}
 
                 >
@@ -473,7 +626,7 @@ const UploadResource = () => {
                         className='w-40'
                         {...fileUploadProps(type === 1)}
                         fileList={fileList}
-                        onChange={onChange}
+                        onChange={handleFileChange}
                         itemRender={(originNode, file) => (
                           <DraggableUploadListItem originNode={originNode} file={file} />
                         )}
@@ -497,30 +650,34 @@ const UploadResource = () => {
                 <Form.Item
                   label="封面图片" name="coverImage"
                   className='cover'
+                  valuePropName="fileList"
+                  getValueFromEvent={normFile}
                 >
                   <ImgCrop aspect={16 / 9} rotationSlider>
                     <Upload
-                      {...imageUploadProps}
                       maxCount={1}
+                      {...imageUploadProps}
+                      onChange={coverImageChange}
                     >
                       <div>
                         <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>上传封面</div>
+                        <div className='mt-2'>上传封面</div>
                       </div>
                     </Upload>
                   </ImgCrop>
                 </Form.Item>
                 {type === 1 && (
-                  <Form.Item label="预览图片">
+                  <Form.Item label="预览图片" name="images" valuePropName="fileList" getValueFromEvent={normFile}>
                     <ImgCrop aspect={16 / 9} rotationSlider>
                       <Upload
                         {...imageUploadProps}
                         maxCount={4}
                         multiple
+                        onChange={imagesChange}
                       >
                         <div>
                           <PlusOutlined />
-                          <div style={{ marginTop: 8 }}>上传预览图</div>
+                          <div className='mt-2'>上传预览图</div>
                         </div>
                       </Upload>
                     </ImgCrop>
@@ -573,26 +730,29 @@ const UploadResource = () => {
                   </Checkbox>
                 </Form.Item>
                 {/* 表单按钮 */}
-                <Form.Item>
-                  <Space>
+
+                <div className='flex justify-between mb-10'>
+                  <div className='flex gap-4'>
                     <SubmitConfirmButton onConfirm={onFinish}
                     >
                       提交
                     </SubmitConfirmButton>
-                    <MyButton type='gray' htmltype="submit"
+                    <MyButton type='gray' htmltype="submit" onClick={() => onFinish(true)}
                     >
                       保存为草稿
                     </MyButton>
-                    <ResetConfirmButton onConfirm={formReset}
-                    >
-                      重置
-                    </ResetConfirmButton>
-                    {/* <CancelConfirmButton
+                  </div>
+
+                  <ResetConfirmButton onConfirm={formReset}
+                  >
+                    重置
+                  </ResetConfirmButton>
+                  {/* <CancelConfirmButton
                     >
                       取消
                     </CancelConfirmButton> */}
-                  </Space>
-                </Form.Item>
+                </div>
+
               </div>
             </Col>
           </Row>

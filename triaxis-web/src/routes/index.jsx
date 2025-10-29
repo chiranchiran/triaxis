@@ -19,27 +19,29 @@ import UploadResource from "../pages/UploadResource/index.jsx"
 import CreatePost from "../pages/CreatPost/index.jsx"
 import PostDetail from "../pages/PostDetail/index.jsx"
 import { useNotification } from "../components/AppProvider.jsx"
+import { logger } from "../utils/logger.js"
 
 
 //路由守卫组件
-function Protect({ children }) {
+const Protect = ({ children }) => {
+  logger.debug("路由组件")
   //检查token是否有效
   const notification = useNotification()
   const { isAuthenticated } = useSelector(state => state.auth)
   const navigate = useNavigate()
   useEffect(() => {
-    if (!isAuthenticated) {
+    //暂时都放行
+    if (isAuthenticated) {
       navigate('/login')
-      notification.info({ message: "请先登录!" })
+      notification.info({ message: "请先登录!", description: "登录后才能进行操作" })
     }
-
   }, [isAuthenticated])
 
   return children
 }
 
 //路由配置
-function Element() {
+const Element = () => {
   return useRoutes([
     {
       path: "/",
@@ -74,7 +76,7 @@ function Element() {
     },
     {
       path: '/upload',
-      element: <UploadResource />
+      element: <Protect><UploadResource /></Protect>
     },
     {
       path: '/register',
@@ -94,7 +96,7 @@ function Element() {
     },
     {
       path: '/community/posts/:id',
-      element: <PostDetail />
+      element: <Protect><PostDetail /></Protect>
     },
     {
       path: '/community/create',
@@ -102,64 +104,12 @@ function Element() {
     },
     {
       path: '/user/userinfo',
-      element: <UserCenter />
+      element: <Protect> <UserCenter /></Protect>
     },
     {
       path: '/user/feedback',
       element: <FeedbackDisplay />
     },
-    // {
-    //   element: <Protect><Main /></Protect>,
-    //   children: [{
-    //     path: "/login",
-    //     element: <Login />
-    //   }, {
-    //     path: "/register",
-    //     element: <Login />
-    //   },
-    //   {
-    //     path: '/coureses',
-    //     element: < />
-    //   }, , {
-    //     path: '/coureses/:id',
-    //     element: < />
-    //   }, {
-    //     path: '/resources',
-    //     element: < />
-    //   }, {
-    //     path: '/resources/:id',
-    //     element: < />
-    //   }, {
-    //     path: '/community',
-    //     element: < />
-    //   }, {
-    //     path: '/community/posts/:id',
-    //     element: < />
-    //   }, {
-    //     path: '/about',
-    //     element: < />
-    //   }, {
-    //     path: '/user',
-    //     element: < />
-    //   }, {
-    //     path: '/message',
-    //     element: < />
-    //   }, {
-    //     path: '/upload',
-    //     element: < />
-    //   }, {
-    //     path: '/introduce/vip',
-    //     element: < />
-    //   }, {
-    //     path: '/introduce/feedback',
-    //     element: < />
-    //   }, {
-    //     path: '/introduce/privacypolicy',
-    //     element: < />
-    //   }, {
-    //     path: '/introduce/userpolicy',
-    //     element: < />
-    //   },
     {
       path: "*",
       element: <NotFound />

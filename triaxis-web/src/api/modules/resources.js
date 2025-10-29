@@ -5,8 +5,8 @@ export const getResourceTypes = () => {
   return service.get('/resources/types')
 }
 //获取二级分类
-export const getCategorySecondary = (data) => {
-  return service.post('/resources/categories', data)
+export const getCategorySecondary = (params) => {
+  return service.get('/resources/categories', { params })
 }
 //搜索
 export const getResources = (params) => {
@@ -18,7 +18,7 @@ export const getResource = (id) => {
 }
 //上传某个资源
 export const uploadResource = (data) => {
-  return service.post('/resources', data)
+  return service.post('/resources', data, { headers: { 'Content-Type': 'multipart/form-data' } });
 }
 //修改某个资源
 export const updateResource = (data) => {
