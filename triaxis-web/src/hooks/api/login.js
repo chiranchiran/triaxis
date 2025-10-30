@@ -1,5 +1,6 @@
 import { apiConfigs } from "../../api/config"
-import { getCaptcha, loginCount, loginMobile, logout, validate } from "../../api/modules/login"
+import { getCaptcha } from "../../api/modules/common"
+import { loginCount, loginMobile, logout, validate } from "../../api/modules/login"
 import { getLoginData } from "../../utils/localStorage"
 import { useApi } from "../common/useApi"
 
@@ -45,12 +46,3 @@ export const useAutoLogin = (params, options = {}) => {
   })
 }
 
-//获取手机号
-export const useCaptcha = (params, options = {}) => {
-  return useApi(getCaptcha, {
-    config: apiConfigs.auth.captcha,
-    params,
-    isMutation: true,
-    ...options
-  })
-}

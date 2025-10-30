@@ -43,7 +43,6 @@ const SiteFooter = () => {
               城乡规划专业交流平台，连接规划师的智慧。
             </p>
           </div>
-          {/* 二维码区域 - 与logo垂直居中对齐 */}
           <div className="flex-shrink-0 px-13">
             <div className="bg-main rounded-lg p-3 inline-block mb-2 border border-main">
               <div className="w-32 h-32 bg-gray flex items-center justify-center text-muted rounded">
@@ -54,7 +53,6 @@ const SiteFooter = () => {
           </div>
         </div>
 
-        {/* 右侧：链接区域（占5列） */}
         <div className="lg:col-span-6 px-10 grid grid-cols-2 md:grid-cols-3 gap-x-15 gap-y-6 mt-8 lg:mt-0">
           {footerSections.map((section, index) => (
             <div key={index} className="space-y-4">

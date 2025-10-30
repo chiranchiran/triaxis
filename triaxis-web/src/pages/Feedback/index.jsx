@@ -117,7 +117,7 @@ const FeedbackPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray">
+    <div className="min-h-screen bg-main">
       <div className="max-w-3xl mx-auto p-6">
         {/* 页面标题 */}
         <div className="text-center mb-10 pt-6">

@@ -227,7 +227,7 @@ const Community = () => {
 
         setHotRanking(mockHotRanking);
         setPosts(mockPosts);
-        setTotal(12345);
+        setTotal(14);
         setLoading(false);
       }, 800);
     } catch (error) {

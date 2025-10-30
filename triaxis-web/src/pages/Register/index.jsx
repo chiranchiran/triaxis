@@ -14,10 +14,10 @@ import { Tabs } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
-import { useCaptcha } from '../../hooks/api/login';
 import { useRegisterByCount, useRegisterByMobile } from '../../hooks/api/register';
 import LoginBase from '../../components/LoginBase';
 import { Link } from 'react-router-dom';
+import { useCaptcha } from '../../hooks/api/common';
 
 function Register() {
   const [form] = useForm()
@@ -196,7 +196,6 @@ function Register() {
               dependencies={["password"]}
               rules={[
                 { required: true, message: '请确认密码！' },
-                // 新增：对比密码字段
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('password') === value) {
@@ -266,11 +265,17 @@ function Register() {
               }}
               placeholder={'确认密码'}
               validateFirst={true}
+              dependencies={["password"]}
               rules={[
-                {
-                  required: true,
-                  message: '请确认密码！',
-                }
+                { required: true, message: '请确认密码！' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('两次输入的密码不一致'));
+                  },
+                }),
               ]}
             />
             <ProFormCaptcha
@@ -280,7 +285,7 @@ function Register() {
               }}
               captchaProps={{
                 size: 'large',
-                style: { width: '7rem' },
+                style: { width: '8rem', height: '39.7px' },
                 disabled: isTiming
               }}
               placeholder={'请输入验证码'}

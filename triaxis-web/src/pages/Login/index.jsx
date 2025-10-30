@@ -20,13 +20,14 @@ import { Divider, Space, Tabs, theme, } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
-import { useCaptcha, useLoginByCount, useLoginByMobile } from '../../hooks/api/login';
+import { useLoginByCount, useLoginByMobile } from '../../hooks/api/login';
 import { getUserData } from '../../utils/localStorage';
 import { useDispatch } from 'react-redux';
 import { setAutoLogin } from '../../store/slices/authSlice';
 import Logo from '../../components/Logo';
 import { Link } from 'react-router-dom';
 import LoginBase from '../../components/LoginBase';
+import { useCaptcha } from '../../hooks/api/common';
 
 const Login = () => {
   const [form] = useForm()
@@ -256,7 +257,7 @@ const Login = () => {
               }}
               captchaProps={{
                 size: 'large',
-                style: { width: '7rem' },
+                style: { width: '8rem', height: '39.7px' },
                 disabled: isTiming
               }}
               placeholder={'请输入验证码'}

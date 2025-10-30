@@ -13,7 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
-        <!-- 自定义stater -->
+        <!-- 自定义的stater -->
         <dependency>
             <groupId>com.chiran</groupId>
             <artifactId>myUtils-spring-boot-starter</artifactId>

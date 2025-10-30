@@ -83,7 +83,7 @@ const handleNetworkError = (error, originalRequest) => {
 
   let networkError;
 
-  // 1. 请求超时
+  // 请求超时
   if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
     networkError = ErrorFactory.network('TIMEOUT_ERROR', `请求超时（${originalRequest?.timeout}ms）`, {
       ...errorInfo,
@@ -91,7 +91,7 @@ const handleNetworkError = (error, originalRequest) => {
     });
     logger.warn('请求超时', networkError);
   }
-  // 2. 网络断开
+  // 网络断开
   else if (error.code === 'NETWORK_ERROR' || !navigator.onLine) {
     networkError = ErrorFactory.network('NETWORK_OFFLINE', undefined, {
       ...errorInfo,
@@ -99,7 +99,7 @@ const handleNetworkError = (error, originalRequest) => {
     });
     logger.error('网络断开', networkError);
   }
-  // 3. CORS 跨域错误
+  // CORS 跨域错误
   else if (error.code === 'ERR_NETWORK' && error.message.includes('CORS')) {
     networkError = ErrorFactory.network('CORS_ERROR', undefined, {
       ...errorInfo,
@@ -107,7 +107,7 @@ const handleNetworkError = (error, originalRequest) => {
     });
     logger.error('跨域错误', networkError);
   }
-  // 4. 服务器无法连接（域名解析失败、服务器宕机等）
+  // 服务器无法连接（域名解析失败、服务器宕机等）
   else if (error.code === 'ERR_NETWORK' || error.code === 'ECONNREFUSED') {
     networkError = ErrorFactory.network('SERVER_UNREACHABLE', undefined, {
       ...errorInfo,
@@ -115,7 +115,7 @@ const handleNetworkError = (error, originalRequest) => {
     });
     logger.error('服务器无法连接', networkError);
   }
-  // 5. 其他未知网络错误
+  // 其他未知网络错误
   else {
     networkError = ErrorFactory.network('UNKNOWN_NETWORK_ERROR', '网络错误，请检查网络连接', errorInfo);
     logger.error('未知网络错误', networkError);
@@ -124,7 +124,7 @@ const handleNetworkError = (error, originalRequest) => {
   return Promise.reject(networkError);
 };
 
-//处理HTTP错误（有响应但状态码错误）
+//处理HTTP错误
 const handleHttpError = (error, originalRequest) => {
   const { status, data } = error.response;
   const errorInfo = {

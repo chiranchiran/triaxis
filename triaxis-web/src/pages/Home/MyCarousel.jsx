@@ -8,7 +8,7 @@ function MyCarousel({ imgList, textList = null, path, description }) {
   const { Title, Paragraph } = Typography;
   const style = {
     width: '100%',
-    height: '40rem',
+    height: '30rem',
   };
 
   const titleStyle = {

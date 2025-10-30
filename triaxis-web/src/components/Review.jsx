@@ -99,23 +99,11 @@ const Review = ({ targetType, targetId }) => {
       content: ""
     });
   };
-  // 回复提交（需对接新增回复的Hook，此处预留逻辑）
+  // 回复提交
   const submitReply = async (id) => {
     setReplyContent((pre) => ({ ...pre, content }))
     if (!replyContent.trim()) return;
     try {
-      // 1. 调用新增回复的Hook（需项目提供，示例代码）
-      // const addReplyRes = await doAddReply({
-      //   parentId: id,
-      //   rootId: id,
-      //   targetType,
-      //   targetId,
-      //   content: replyContent,
-      //   isAnonymous: false // 可加匿名开关
-      // });
-      // 2. 提交成功后刷新回复列表
-      // refetchReplies();
-      // 3. 清空输入
       cancelReply();
     } catch (error) {
       console.error("回复失败：", error);

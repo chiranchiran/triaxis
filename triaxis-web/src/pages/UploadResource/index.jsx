@@ -53,6 +53,7 @@ import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from 
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { getUserData } from '../../utils/localStorage';
+import { uploadFile } from '../../api/modules/common';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -60,8 +61,6 @@ const { Option } = Select;
 const { Dragger } = Upload;
 
 const UploadResource = () => {
-  // const { isAuthenticated } = getUserData();
-  // if(!isAuthenticated)  
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const toggleModal = useToggleConfirm();
@@ -87,15 +86,15 @@ const UploadResource = () => {
  *  获取数据
  */
   //获取资源数据学科、工具、一级分类
-  const { data: resourceTypes, isError: resourceTypesError } = type === 1 ? useGetResourceTypes() : { data: null, isLoading: false, isError: false };
+  const { data: resourceTypes = {}, isError: resourceTypesError } = useGetResourceTypes({ enabled: type === 1 });
   const { subjects: resourceSubjects = [], tools = [], categoriesFirst = [] } = resourceTypes || {}
   //根据资源学科和一级分类获取二级分类
-  const { data: categoriesSecondaryData, isError: secondaryError, } = type === 1 ? useGetSecondaryCategory({
+  const { data: categoriesSecondaryData = [], isError: secondaryError, } = useGetSecondaryCategory({
     subjectId: selectedTypes.subjectId,
     parentId: selectedTypes.parentId
-  }) : { data: null, isLoading: false, isError: false };
+  }, { enabled: !!selectedTypes.subjectId && !!selectedTypes.parentId && type == 1 });
   //获取课程学科、难度、分类
-  const { data: courseTypes, isError: courseError } = type === 2 ? useGetCourseTypes() : { data: null, isLoading: false, isError: false };
+  const { data: courseTypes = {}, isError: courseError } = useGetCourseTypes({ enabled: type === 2 });
   const { sujects: courseSubjects = [], categories = [] } = courseTypes || {}
 
   /**
@@ -121,10 +120,11 @@ const UploadResource = () => {
         };
       });
     } else {
+      logger.debug("构建课程分类数据", categories);
       return categories.map(cat => ({
         label: cat.name,
         value: cat.id,
-      }));
+      }))
     }
   }, [type, categoriesFirst, categories, queryClient, categoriesSecondaryData, selectedTypes.subjectId]);
 
@@ -264,58 +264,55 @@ const UploadResource = () => {
       const processedValues = form.getFieldsValue();
       logger.debug("初始数据", processedValues);
       // 处理分类数据
-      const formData = new FormData();
-
-      // 添加文本字段
-      formData.append('status', isSave ? 2 : 1);
-      formData.append('title', processedValues.title);
-      formData.append('description', processedValues.description);
-      formData.append('right', processedValues.right);
-      formData.append('subjectId', processedValues.subjectId);
-      formData.append('categoryIds', JSON.stringify(processCategoryIds(processedValues.categoryIds)));
-      formData.append('tags', JSON.stringify(tags));
-      formData.append('details', processedValues.details);
-
-      // 处理价格
-      if (processedValues.right === 2) {
-        formData.append('price', processedValues.price);
-      }
-
-      // 资源特有字段
-      if (type === 1) {
-        formData.append('toolIds', JSON.stringify(processedValues.toolIds || []));
-      }
-
-      // 课程特有字段
-      if (type === 2) {
-        formData.append('subtitle', processedValues.subtitle);
-        formData.append('level', processedValues.level);
-      }
-
-      // 添加封面图片文件
-      if (processedValues.coverImage && processedValues.coverImage.length > 0) {
-        const coverFile = processedValues.coverImage[0].originFileObj || processedValues.coverImage[0];
-        formData.append('coverImage', coverFile);
-      }
-
-      // 添加预览图片文件
-      if (processedValues.images && processedValues.images.length > 0) {
-        processedValues.images.forEach((file, index) => {
-          const imageFile = file.originFileObj || file;
-          formData.append(`images`, imageFile);
-        });
-      }
-
-      // 添加资源文件
-      fileList.forEach((file, index) => {
+      fileList.forEach(async (file, index) => {
+        const formData = new FormData();
         const resourceFile = file.originFileObj || file;
-        formData.append(`files`, resourceFile);
+        formData.append(`file`, resourceFile);
+        const url = await uploadFile(formData);
+        console.log(url);
       });
+      // 添加文本字段
+      // formData.append('status', isSave ? 1 : 2);
+      // formData.append('title', processedValues.title);
+      // formData.append('description', processedValues.description);
+      // formData.append('right', processedValues.right);
+      // formData.append('subjectId', processedValues.subjectId);
+      // formData.append('categoryIds', JSON.stringify(processCategoryIds(processedValues.categoryIds)));
+      // formData.append('tags', JSON.stringify(tags));
+      // formData.append('details', processedValues.details);
+      // // 处理价格
+      // if (processedValues.right === 2) {
+      //   formData.append('price', processedValues.price);
+      // }
+      // // 资源特有字段
+      // if (type === 1) {
+      //   formData.append('toolIds', JSON.stringify(processedValues.toolIds || []));
+      // }
+      // // 课程特有字段
+      // if (type === 2) {
+      //   formData.append('subtitle', processedValues.subtitle);
+      //   formData.append('level', processedValues.level);
+      // }
 
-      logger.debug('formData 准备提交');
+      // if (processedValues.coverImage && processedValues.coverImage.length > 0) {
+      //   const coverFile = processedValues.coverImage[0].originFileObj || processedValues.coverImage[0];
+      //   formData.append('coverImage', coverFile);
+      // }
+      // if (processedValues.images && processedValues.images.length > 0) {
+      //   processedValues.images.forEach((file, index) => {
+      //     const imageFile = file.originFileObj || file;
+      //     formData.append(`images`, imageFile);
+      //   });
+      // }
+      // fileList.forEach((file, index) => {
+      //   const resourceFile = file.originFileObj || file;
+      //   formData.append(`files`, resourceFile);
+      // });
 
-      if (type === 1) doUploadResource(formData);
-      if (type === 2) doUploadCourse(formData);
+      // logger.debug('formData 准备提交');
+
+      // if (type === 1) doUploadResource(formData);
+      // if (type === 2) doUploadCourse(formData);
 
     }).catch((error) => {
       logger.error('表单验证失败:', error);

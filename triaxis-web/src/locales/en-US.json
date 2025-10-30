@@ -1,0 +1,11 @@
+{
+  "home": "Home",
+  "resources": "Resources",
+  "courses": "Courses",
+  "community": "Community",
+  "about": "About",
+  "admin": "Admin",
+  "welcome": "Welcome!",
+  "userProfile": "User Profile",
+  "greeting": "Hello, {{name}}!"
+}

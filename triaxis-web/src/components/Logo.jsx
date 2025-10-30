@@ -10,7 +10,7 @@ export default function Logo({ size, title, onClick, isNav = false }) {
         return [12, 'text-3xl'];
       case 'xl':
         return [20, "text-6xl"];
-      default: // 默认尺寸
+      default:
         return [10, 'text-2xl'];
     }
   }

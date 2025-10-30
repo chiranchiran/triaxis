@@ -12,6 +12,10 @@ spring:
       minimum-idle: 5        # 最小空闲连接
       idle-timeout: 300000   # 空闲连接超时时间（5分钟）
       connection-timeout: 20000  # 连接超时时间（20秒）
+  servlet:
+    multipart:
+      max-file-size: 100MB  # 单个文件最大大小
+      max-request-size: 200MB  # 单次请求总大小
   # Redis配置
   data:
     redis:
@@ -83,5 +87,7 @@ jwt:
       code: "captcha:code:"
       interval: "captcha:interval:"
 
-
-
+#alioss配置
+#alioss:
+#  endpoint: oss-cn-beijing.aliyuncs.com
+#  bucket-name: triaxis

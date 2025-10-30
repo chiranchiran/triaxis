@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+html[data-theme='light'] {
+  /* 小清新主色系 */
+  --primary: #9dc6f1;
+  --primary-50: rgba(157, 198, 241, 0.4);
+  --primary-light: #e6f4ff;
+  --primary-dark: #0958d9;
+  --primary-border: #91caff;
+
+  --accent-green-ribbon: #c0ead9;
+  --accent-green-border: #b7eb8f;
+  --accent-green-dark: #389e0d;
+  --accent-green: #aedbc9;
+  --accent-green-50: rgba(168, 236, 209, 0.4);
+  --accent-green-light: #e0f4e59f;
+  --accent-orange-border: #f7c575;
+  --accent-orange-dark: #d36b09;
+  --accent-orange-ribbon: #f8c187;
+  --accent-orange: #f7e59d;
+  --accent-orange-50: rgba(247, 229, 157, 0.4);
+  --accent-orange-light: #fcf3df;
+
+  --bg: #f9fafb;
+  --bg-light: #eff7fe;
+  --bg-elevated: #ffffff;
+  --bg-gray: #e5e7eb;
+  --bg-gray-light: #f5f6f7;
+  --bg-dark: #1e2939;
+  --bg-dark-hover: #1e2939;
+  --bg-hover: #d0d1d4;
+
+
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-light: #ffffff;
+  --text-green: rgb(119, 212, 154);
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-active: #dfdfdf;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --black: #292727;
+  --blue: #4298f4;
+
+  --bg-like: #f6dede;
+  --text-like: #da5c5c;
+  --bg-score: #f3ede0;
+  --text-score: #af9b02;
+  --text-rate: #fadb14;
+}
+
+html[data-theme='dark'] {
+  --primary: #93c8ff;
+  --primary-light: #1e3a5f;
+  --primary-dark: #7bb2f5;
+  --accent-green: #7adfb8;
+  --accent-green-light: #064e3b;
+  --accent-orange: #ffd470;
+  --accent-orange-light: #78350f;
+  --bg: #0f172a;
+  --bg-elevated: #1e293b;
+  --bg-gray: #1e293b;
+  --text: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+
+  --border-light: #1e293b;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
+  --black: #e2e8f0;
+  --blue: #60a5fa;
+}

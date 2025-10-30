@@ -15,7 +15,7 @@ const onAutoError = (error, dispatch, navigate) => {
   dispatch(logout())
 }
 const onCaptcha = (data, dispatch, navigate) => {
-  config.captcha.success.description = data
+  authconfig.captcha.success.description = data
 }
 const onRegister = (data, dispatch, navigate) => {
   navigate('/login')

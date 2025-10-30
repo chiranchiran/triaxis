@@ -30,8 +30,7 @@ const Protect = ({ children }) => {
   const { isAuthenticated } = useSelector(state => state.auth)
   const navigate = useNavigate()
   useEffect(() => {
-    //暂时都放行
-    if (isAuthenticated) {
+    if (!isAuthenticated) {
       navigate('/login')
       notification.info({ message: "请先登录!", description: "登录后才能进行操作" })
     }

@@ -8,33 +8,35 @@ import { useSelector } from 'react-redux';
 import './index.less'
 import { useLogout } from '../../hooks/api/login';
 import Logo from '../Logo';
-import { usePrefernce } from '../../hooks/usePreference';
+import { usePreference } from '../usePreference';
 import { MyButton } from '../MyButton';
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
+  const { t } = useTranslation()
   const { Search } = Input;
   const navigate = useNavigate()
-  const { isDark, isEnglish, changeLanguage, changeTheme } = usePrefernce()
+  const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
   const { mutate: doLogout } = useLogout()
   const { username, isAuthenticated, role } = useSelector(state => state.auth);
 
   const unreadMessageCount = 3;
 
   //导航栏选项，普通用户role为0，管理员role为1，会显示管理的选项
-  const navs = role !== 0 ? [
-    { name: '首页', path: '/' },
-    { name: '资源', path: '/resources' },
-    { name: '课程', path: '/courses' },
-    { name: '社区', path: '/community' },
-    { name: '关于', path: '/about' }
+  const navKeys = role !== 0 ? [
+    { key: 'home', path: '/' },
+    { key: 'resources', path: '/resources' },
+    { key: 'courses', path: '/courses' },
+    { key: 'community', path: '/community' },
+    { key: 'about', path: '/about' }
   ] : [
-    { name: '首页', path: '/' },
-    { name: '资源', path: '/resources' },
-    { name: '课程', path: '/courses' },
-    { name: '社区', path: '/community' },
-    { name: '关于', path: '/about' },
-    { name: '管理', path: '/admin' }
-  ]
+    { key: 'home', path: '/' },
+    { key: 'resources', path: '/resources' },
+    { key: 'courses', path: '/courses' },
+    { key: 'community', path: '/community' },
+    { key: 'about', path: '/about' },
+    { key: 'admin', path: '/admin' }
+  ];
 
   // 处理下拉菜单点击事件，转跳不同的页面
   const handleMenuClick = ({ key }) => {
@@ -143,19 +145,16 @@ const Header = () => {
           <div className="flex items-center md:space-x-6 lg:spaca-x-20">
             <Logo size="default" isNav={true} />
             <nav className="nav-top md:flex">
-              {navs.map((item) => (
+              {navKeys.map((item) => (
                 <NavLink
-                  key={item.name}
+                  key={item.key}
                   to={item.path}
                   className={({ isActive }) => [
                     "py-7 px-5 transition-all duration-300 text-title",
-                    // 活跃状态样式
-                    isActive ? "bg-dark text-light " :
-                      // 非活跃状态样式
-                      "text-main"
+                    isActive ? "bg-dark text-light" : "text-main"
                   ].join(' ')}
                 >
-                  {item.name}
+                  {t(item.key)}
                 </NavLink>
               ))}
             </nav>

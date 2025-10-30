@@ -60,7 +60,7 @@ public class LoginController {
     @PostMapping("/validate")
     public Result<UserLoginVO> loginAuto(@RequestHeader(value = "Authorization", required = false) String token) {
         log.info("用户自动登录");
-        if(token == null){
+        if (token == null) {
             throw new JwtException("没有accessToken");
         }
         Integer id = Integer.parseInt(jwtUtil.getSubjectFromAccessTokenHeader(token));
@@ -94,15 +94,4 @@ public class LoginController {
         return Result.success(userInfoLoginVO);
     }
 
-    /**
-     * 获取验证码
-     */
-    @PostMapping("/captcha")
-    public Result<String> sendCode(@RequestBody UserGetCaptchaDTO userGetCaptchaDTO) {
-        String phone = userGetCaptchaDTO.getPhone();
-        log.debug("获取验证码，手机号是{}", phone);
-        String captcha = CaptchaUtil.getInt(6);
-        jwtUtil.saveCaptcha(phone, captcha);
-        return Result.success(captcha);
-    }
 }

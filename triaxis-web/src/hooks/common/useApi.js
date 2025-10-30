@@ -84,20 +84,16 @@ export const useApi = (apiFunc, {
 
     ? useMutation({
       mutationFn: (params) => apiFunc(params),
-      onSuccess: handleSuccess,
-      onError: handleError
     })
     : useQuery({
       queryKey,
       queryFn: () => apiFunc(params),
       enabled,
-      onSuccess: handleSuccess,
-      onError: handleError,
       keepPreviousData: true
     });
 
 
-  // 主要的错误和成功处理通过 useEffect
+  // useQuery通过 useEffect
   useEffect(() => {
     if (requestResult.isError && requestResult.error) {
       handleError(requestResult.error);

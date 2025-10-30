@@ -1,0 +1,221 @@
+/* 基础工具类 */
+.bg-main {
+  background-color: var(--bg) !important;
+}
+
+.bg-gray {
+  background-color: var(--bg-gray) !important;
+}
+
+.bg-gray-light {
+  background-color: var(--bg-gray-light) !important;
+}
+
+
+.bg-card {
+  background-color: var(--bg-elevated) !important;
+}
+
+.bg-dark {
+  background-color: var(--bg-dark) !important;
+}
+
+.bg-light {
+  background-color: var(--bg-light) !important;
+}
+
+.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.bg-primary-50 {
+  background-color: var(--primary-50) !important;
+}
+
+.bg-like {
+  background-color: var(--bg-like) !important;
+  color: var(--text-like);
+}
+
+.bg-score {
+  background-color: var(--bg-score) !important;
+  color: var(--text-score);
+}
+
+.bg-primary-light {
+  background-color: var(--primary-light) !important;
+}
+
+.bg-black-light {
+  background-color: var(--black) !important;
+}
+
+.bg-green {
+  background-color: var(--accent-green) !important;
+}
+
+.bg-green-50 {
+  background-color: var(--accent-green-50) !important;
+}
+
+.bg-green-light {
+  background-color: var(--accent-green-light) !important;
+}
+
+.bg-orange {
+  background-color: var(--accent-orange) !important;
+}
+
+.bg-orange-50 {
+  background-color: var(--accent-orange-50) !important;
+}
+
+.bg-orange-light {
+  background-color: var(--accent-orange-light) !important;
+}
+
+
+.text-main {
+  color: var(--text);
+}
+
+.text-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+.text-green {
+  color: var(--text-green);
+}
+
+.text-orange {
+  color: var(--accent-orange);
+}
+
+.text-light {
+  color: var(--text-light);
+}
+
+.text-rate {
+  color: var(--text-rate);
+}
+
+
+.border-main {
+  border-color: var(--bg-hover);
+
+}
+
+.border-dark {
+  border-color: var(--bg-dark);
+}
+
+.border-divider {
+  border-block-start: var(--text-muted) !important;
+}
+
+.border-light {
+  border-color: var(--border-light);
+}
+
+.border-primary-dark {
+  border-color: var(--primary-dark);
+}
+
+
+.shadow-card {
+  box-shadow: var(--shadow);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.tag-orange {
+  font-size: small !important;
+  color: var(--accent-orange-dark) !important;
+  background: var(--accent-orange-light) !important;
+  border-color: var(--accent-orange-border) !important;
+
+}
+
+.tag-blue {
+  color: var(--primary-dark) !important;
+  font-size: small !important;
+  background: var(--primary-light) !important;
+
+  border-color: var(--primary-border) !important;
+}
+
+.tag-green {
+  font-size: small !important;
+  color: var(--accent-green-dark) !important;
+  background: var(--accent-green-light) !important;
+  border-color: var(--accent-green-border) !important;
+}
+
+.ribbon-orange {
+  color: var(--bg-elevated) !important;
+
+  border-color: var(--accent-orange-ribbon) !important;
+
+  background: var(--accent-orange-ribbon) !important;
+}
+
+.ribbon-green {
+  color: var(--bg-elevated) !important;
+  border-color: var(--accent-green-ribbon) !important;
+  background: var(--accent-green-ribbon) !important;
+}
+
+.ribbon-blue {
+  color: var(--bg-elevated);
+  border-color: var(--primary);
+  background: var(--primary) !important;
+}
+
+
+
+/* 悬停效果 */
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.link-hover {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.link-hover:hover {
+  font-weight: 700;
+  color: var(--blue);
+  transform: translateX(4px);
+}
+
+/* 渐变蓝背景 */
+.bg-gradient-to-white {
+  background-image: linear-gradient(to bottom, var(--primary-50), var(--bg));
+  background-size: 100% 100%;
+}
+
+/* 遮罩层的黑色渐变 */
+.bg-gradient-to-dark {
+  background-image: linear-gradient(to bottom, var(--bg-gray-light), var(--bg-dark));
+  background-size: 100% 100%;
+}

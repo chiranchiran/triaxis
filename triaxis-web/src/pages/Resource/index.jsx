@@ -200,7 +200,7 @@ const Resource = () => {
                     {description}
                   </p>
 
-                  {/* 资源信息 - 发布时间和时长 */}
+                  {/* 资源信息 */}
                   <div className="flex items-center justify-between gap-4 text-xs text-secondary">
                     <span className="flex items-center cursor-pointer" title={username}>
                       <Avatar

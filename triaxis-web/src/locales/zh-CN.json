@@ -1,0 +1,11 @@
+{
+  "home": "首页",
+  "resources": "资源",
+  "courses": "课程",
+  "community": "社区",
+  "about": "关于",
+  "admin": "管理",
+  "welcome": "欢迎！",
+  "userProfile": "用户资料",
+  "greeting": "你好，{{name}}！"
+}

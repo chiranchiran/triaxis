@@ -4,7 +4,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// 可拖拽的上传列表项组件
 const DraggableUploadListItem = memo(({ originNode, file }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: file.uid,

@@ -28,8 +28,5 @@ export const refresh = () => {
       }
     })
 }
-//获取验证码
-export const getCaptcha = (data) => {
-  return service.post('/login/captcha', data)
-}
+
 
