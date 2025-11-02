@@ -1,8 +1,8 @@
+import { useCallback, useState } from "react"
 import { apiConfigs } from "../../api/config"
-import { getCaptcha } from "../../api/modules/common"
+import { getCaptcha, uploadFile } from "../../api/modules/common"
 import { uploadResource } from "../../api/modules/resources"
 import { useApi } from "../common/useApi"
-import { useUpload } from "../common/useData"
 
 export const useLike = (params, options) => {
   return useUpload(uploadResource, ['Resources', 'types'], params, options)
@@ -19,6 +19,16 @@ export const useCaptcha = (params, options = {}) => {
     config: apiConfigs.auth.captcha,
     params,
     isMutation: true,
+    ...options
+  })
+}
+//上传
+export const useUpload = (params, options = {}) => {
+  return useApi(uploadFile, {
+    config: apiConfigs.common.upload,
+    params,
+    isMutation: true,
+    retry: 0,
     ...options
   })
 }

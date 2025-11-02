@@ -21,10 +21,6 @@ public class UserActionServiceImpl implements UserActionService {
     private UserCollectionMapper userCollectionMapper;
     @Autowired
     private UserPurchaseMapper userPurchaseMapper;
-    @Autowired
-    private UserTagMapper userTagMapper;
-    @Autowired
-    private TagMapper tagMapper;
 
     @Override
     public boolean checkIsLiked(Integer userId, Integer targetId, Integer targetType) {
@@ -47,20 +43,6 @@ public class UserActionServiceImpl implements UserActionService {
                         .isCollected(checkIsCollectd(userId,targetId,targetType))
                                 .isPurchased(checkIsPurchased(userId,targetId,targetType)).build();
         return userActionsBO;
-    }
-
-    @Override
-    public List<CategoryBO> selectTags(Integer targetId, Integer targetType) {
-        LambdaQueryWrapper<UserTag> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(UserTag::getTagId).eq(UserTag::getTargetType,targetType)
-                .eq(UserTag::getTargetId,targetId);
-        List<UserTag> ids = userTagMapper.selectList(queryWrapper);
-        if(ids.isEmpty()){
-            return null;
-        }
-        List<Tag> list = tagMapper.selectBatchIds(ids);
-        List<CategoryBO> tags = BeanUtil.copyList(list, CategoryBO::new);
-        return tags;
     }
 
 }

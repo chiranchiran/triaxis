@@ -12,7 +12,7 @@ export const HTTP_ERROR_MAP = {
   403: { type: 'CLIENT_ERROR', level: 'error', message: '权限不足' },
   404: { type: 'CLIENT_ERROR', level: 'error', message: '请求的资源不存在' },
   409: { type: 'CLIENT_ERROR', level: 'error', message: '资源冲突' },
-  429: { type: 'CLIENT_ERROR', level: 'warn', message: '请求过于频繁' },
+  429: { type: 'CLIENT_ERROR', level: 'warning', message: '请求过于频繁' },
 
   // 5xx 
   500: { type: 'SERVER_ERROR', level: 'error', message: '服务器出现错误，请稍后重试' },
@@ -71,7 +71,7 @@ export const BUSINESS_ERROR_MAP = {
 export const NETWORK_ERROR_MAP = {
   // 基本网络错误
   NETWORK_ERROR: { type: 'NETWORK_ERROR', level: 'error', message: '网络连接错误，请检查网络设置' },
-  TIMEOUT_ERROR: { type: 'NETWORK_ERROR', level: 'warn', message: '请求超时，请稍后重试' },
+  TIMEOUT_ERROR: { type: 'NETWORK_ERROR', level: 'error', message: '请求超时，请稍后重试' },
 
   // 具体网络错误类型
   NETWORK_OFFLINE: { type: 'NETWORK_ERROR', level: 'error', message: '网络连接已断开，请检查网络设置' },

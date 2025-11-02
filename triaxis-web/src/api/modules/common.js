@@ -6,6 +6,12 @@ export const getCaptcha = (data) => {
 }
 
 //上传
-export const uploadFile = (data) => {
-  return service.post('/common/upload', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+export const uploadFile = ({ formData, onProgress }) => {
+  return service.post('/common/upload', formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: onProgress,
+      timeout: 3600000,
+    }
+  )
 }

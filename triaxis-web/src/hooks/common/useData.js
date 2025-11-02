@@ -38,7 +38,7 @@ export const useAdd = (fn, queryKey, params, options = {}) => {
     ...options
   })
 }
-export const useUpload = (fn, queryKey, params, options = {}) => {
+export const useUpload = (fn, queryKey = null, params, options = {}) => {
   return useApi(fn, {
     queryKey,
     config: apiConfigs.common.upload,

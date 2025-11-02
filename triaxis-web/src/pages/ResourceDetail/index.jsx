@@ -197,7 +197,7 @@ const ResourceDetail = () => {
                         className="preview w-20 h-20 bg-card rounded border border-main cursor-pointer hover:border-primary-dark transition-colors"
                       >
                         <img
-                          src={img.name}
+                          src={img.path}
                           title={`预览图 ${index + 1}`}
                           alt="预览图暂时无法加载"
                           className="w-full h-full object-cover"

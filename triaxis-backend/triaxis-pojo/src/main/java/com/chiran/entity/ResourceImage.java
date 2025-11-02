@@ -30,8 +30,14 @@ public class ResourceImage implements Serializable {
     @TableField("resource_id")
     private Integer resourceId;
 
-    @TableField("path")
+    @TableField("name")
     private String name;
+    @TableField("path")
+    private String path;
+    @TableField("size")
+    private Long size;
+    @TableField("type")
+    private String type;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)

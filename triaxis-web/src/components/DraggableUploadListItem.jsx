@@ -4,7 +4,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const DraggableUploadListItem = memo(({ originNode, file }) => {
+const DraggableUploadListItem = ({ originNode, file }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: file.uid,
   });
@@ -28,6 +28,6 @@ const DraggableUploadListItem = memo(({ originNode, file }) => {
       {file.status === 'error' && isDragging ? originNode.props.children : originNode}
     </div>
   );
-});
+};
 
 export default DraggableUploadListItem;

@@ -82,9 +82,10 @@ public class ResourceController {
      * 上传资源
      */
     @PostMapping
-    public Result addResource() {
-
-//        Boolean success = resourceService.addResource(dto);
+    public Result addResource(@RequestBody ResourceDTO resourceDTO, HttpServletRequest request) {
+        log.debug("上传资源");
+        resourceDTO.setUserId((Integer)request.getAttribute("userId"));
+        Boolean success = resourceService.addResource(resourceDTO);
         return Result.success();
     }
 
@@ -92,30 +93,33 @@ public class ResourceController {
      * 修改资源
      */
     @PutMapping
-    public Result<Boolean> updateResource(@RequestBody ResourceDTO dto) {
-        log.debug("修改资源，是{}",dto);
-        Boolean flag = resourceService.updateResource(dto);
-        return Result.success(flag);
+    public Result updateResource(@RequestBody ResourceDTO resourceDTO, HttpServletRequest request) {
+        log.debug("修改资源，是{}",resourceDTO);
+        resourceDTO.setUserId((Integer)request.getAttribute("userId"));
+        Boolean flag = resourceService.updateResource(resourceDTO);
+        return Result.success();
     }
 
     /**
      * 删除某个资源
      */
     @DeleteMapping("/{id}")
-    public Result<Boolean> removeResource(@PathVariable Integer id) {
+    public Result removeResource(@PathVariable Integer id, HttpServletRequest request) {
         log.debug("删除某个资源，id是{}",id);
-        Boolean flag = resourceService.removeResource(id);
-        return Result.success(flag);
+        Integer userId = (Integer)request.getAttribute("userId");
+        Boolean flag = resourceService.removeResource(id,userId);
+        return Result.success();
     }
 
     /**
      * 批量删除资源
      */
     @DeleteMapping("/batch")
-    public Result<Boolean> removeResources(@RequestBody List<Integer> ids) {
-        log.debug("删除某个资源，id是{}",ids);
-        Boolean success = resourceService.removeResources(ids);
-        return Result.success(success);
+    public Result removeResources(@RequestBody List<Integer> ids, HttpServletRequest request) {
+        log.debug("删除某些资源，id是{}",ids);
+        Integer userId = (Integer)request.getAttribute("userId");
+        Boolean success = resourceService.removeResources(ids,userId);
+        return Result.success();
     }
 
 }

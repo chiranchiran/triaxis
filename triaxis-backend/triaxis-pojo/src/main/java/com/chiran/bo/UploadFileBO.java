@@ -12,8 +12,10 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryBO implements Serializable {
-    private Integer id;
+public class UploadFileBO implements Serializable {
+    private Integer uid;
     private String name;
     private String path;
+    private String type;
+    private Long size;
 }

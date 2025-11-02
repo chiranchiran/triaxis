@@ -1,5 +1,5 @@
 // UploadResource.jsx
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   Form,
   Input,
@@ -8,42 +8,17 @@ import {
   Tag,
   Row,
   Col,
-  message,
   InputNumber,
-  TreeSelect,
   Radio,
-  Timeline,
-  Button,
   Divider,
   Checkbox,
-  Mentions,
   Cascader,
-  DatePicker,
-  Anchor,
   Typography,
-  Segmented,
-  Space
 } from 'antd';
 import {
-  UploadOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-  InboxOutlined,
-  FileTextOutlined,
   FolderOutlined,
-  PaperClipOutlined,
-  ExclamationCircleFilled
 } from '@ant-design/icons';
 import MDEditor from '@uiw/react-md-editor';
-import ImgCrop from 'antd-img-crop';
-import { CustomCard } from '../../components/DetailCard';
-import { DndContext, PointerSensor, useSensor } from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import DraggableUploadListItem from '../../components/DraggableUploadListItem';
 import './index.less'
 import { MyButton, OrderButton } from '../../components/MyButton';
 import { Link } from 'react-router-dom';
@@ -52,20 +27,18 @@ import { ResetConfirmButton, SubmitConfirmButton, useToggleConfirm } from '../..
 import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from '../../hooks/api/resources';
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
-import { getUserData } from '../../utils/localStorage';
-import { uploadFile } from '../../api/modules/common';
+import { UploadFiles } from '../../components/UploadFiles';
 
 const { Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
-const { Dragger } = Upload;
 
 const UploadResource = () => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const toggleModal = useToggleConfirm();
-  const { mutate: doUploadResource, isSuccess: resourceSuccess } = useUploadResource()
-  const { mutate: doUploadCourse, isSuccess: courseSuccess } = useUploadCourse()
+  const { mutate: doUploadResource, isSuccess: resourceSuccess } = useUploadResource();
+  const { mutate: doUploadCourse, isSuccess: courseSuccess } = useUploadCourse();
   /**
    *  state管理
    */
@@ -81,7 +54,6 @@ const UploadResource = () => {
     subjectId: null,
     parentId: null
   })
-
   /**
  *  获取数据
  */
@@ -183,70 +155,12 @@ const UploadResource = () => {
       tags: tags.filter(tag => tag !== removedTag)
     });
   };
-
-  /**
- * 上传处理
- */
-  // 文件上传配置
-  const fileUploadProps = (multiple = true) => ({
-    multiple,
-    beforeUpload: (file) => {
-      if (!multiple) {
-        message.info('课程只能上传一个文件');
-        return Upload.LIST_IGNORE;
-      }
-      return false;
-    },
-    showUploadList: true
-  });
-  //文件上传
-  const handleFileChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList);
-    form.setFieldValue("file", newFileList)
-  };
-  // 图片上传配置
-  const imageUploadProps = {
-    listType: "picture-card",
-    beforeUpload: () => false,
-    maxCount: 1,
-    showUploadList: true,
-  };
   const normFile = (e) => {
     if (Array.isArray(e)) {
       return e;
     }
     return e?.fileList;
   };
-  //图片处理函数
-  const imagesChange = (info) => {
-    const { fileList = [] } = info;
-    form.setFieldValue("images", fileList);
-  }
-  const coverImageChange = (info) => {
-    const { fileList = [] } = info;
-    form.setFieldValue("coverImage", fileList);
-  }
-
-
-  /**
-   * 拖拽处理
-   */
-  // 拖拽传感器配置
-  const sensor = useSensor(PointerSensor, {
-    activationConstraint: { distance: 10 },
-  });
-  ;
-  // 拖拽排序结束时更新文件顺序
-  const onDragEnd = useCallback(({ active, over }) => {
-    if (active.id !== over?.id) {
-      setFileList((prev) => {
-        const activeIndex = prev.findIndex((item) => item.uid === active.id);
-        const overIndex = prev.findIndex((item) => item.uid === over?.id);
-        return arrayMove(prev, activeIndex, overIndex);
-      });
-    }
-  }, []);
-
   /**
    * 表单事件处理
    */
@@ -261,59 +175,47 @@ const UploadResource = () => {
   //提交
   const onFinish = (isSave = false) => {
     form.validateFields().then(() => {
-      const processedValues = form.getFieldsValue();
-      logger.debug("初始数据", processedValues);
-      // 处理分类数据
-      fileList.forEach(async (file, index) => {
-        const formData = new FormData();
-        const resourceFile = file.originFileObj || file;
-        formData.append(`file`, resourceFile);
-        const url = await uploadFile(formData);
-        console.log(url);
-      });
-      // 添加文本字段
-      // formData.append('status', isSave ? 1 : 2);
-      // formData.append('title', processedValues.title);
-      // formData.append('description', processedValues.description);
-      // formData.append('right', processedValues.right);
-      // formData.append('subjectId', processedValues.subjectId);
-      // formData.append('categoryIds', JSON.stringify(processCategoryIds(processedValues.categoryIds)));
-      // formData.append('tags', JSON.stringify(tags));
-      // formData.append('details', processedValues.details);
-      // // 处理价格
-      // if (processedValues.right === 2) {
-      //   formData.append('price', processedValues.price);
-      // }
-      // // 资源特有字段
-      // if (type === 1) {
-      //   formData.append('toolIds', JSON.stringify(processedValues.toolIds || []));
-      // }
-      // // 课程特有字段
-      // if (type === 2) {
-      //   formData.append('subtitle', processedValues.subtitle);
-      //   formData.append('level', processedValues.level);
-      // }
+      const values = form.getFieldsValue();
+      logger.debug("初始数据", values);
+      const submitData = {
+        status: isSave ? 1 : 2,
+        tags: tags,
+        subjectId: values.subjectId,
+        categoryIds: processCategoryIds(values.categoryIds),
+        // 文件路径 - 直接从状态中获取
+        files: getFile(values.file),
+        coverImage: getFile(values.coverImage)[0],
+        images: getFile(values.images),
+        // 其他字段
+        title: values.title,
+        description: values.description,
+        right: values.right,
+        details: values.details,
+      };
+      // 处理价格
+      if (values.right === 2) {
+        submitData.price = values.price;
+      }
 
-      // if (processedValues.coverImage && processedValues.coverImage.length > 0) {
-      //   const coverFile = processedValues.coverImage[0].originFileObj || processedValues.coverImage[0];
-      //   formData.append('coverImage', coverFile);
-      // }
-      // if (processedValues.images && processedValues.images.length > 0) {
-      //   processedValues.images.forEach((file, index) => {
-      //     const imageFile = file.originFileObj || file;
-      //     formData.append(`images`, imageFile);
-      //   });
-      // }
-      // fileList.forEach((file, index) => {
-      //   const resourceFile = file.originFileObj || file;
-      //   formData.append(`files`, resourceFile);
-      // });
+      // 资源特有字段
+      if (type === 1) {
+        submitData.toolIds = values.toolIds || [];
+      }
 
-      // logger.debug('formData 准备提交');
+      // 课程特有字段
+      if (type === 2) {
+        submitData.subtitle = values.subtitle;
+        submitData.level = values.level;
+      }
 
-      // if (type === 1) doUploadResource(formData);
-      // if (type === 2) doUploadCourse(formData);
+      logger.debug('准备提交数据:', submitData);
 
+      // 根据类型调用不同的提交接口
+      if (type === 1) {
+        doUploadResource(submitData);
+      } else if (type === 2) {
+        doUploadCourse(submitData);
+      }
     }).catch((error) => {
       logger.error('表单验证失败:', error);
     });
@@ -350,7 +252,16 @@ const UploadResource = () => {
       return cascaderValues.flat();
     }
   };
-
+  //提取文件上传信息
+  const getFile = (list) => {
+    return list.map(item => ({
+      uid: item.uid,
+      type: item.type,
+      name: item.name,
+      size: item.size,
+      path: item.path
+    }))
+  }
   const getSecondaryIdsByFirstCategory = (id) => {
     const cachedSecondaryData = categoryTreeData.find(i => i.value === id);
     return cachedSecondaryData.children.map((i) => i.value)
@@ -368,7 +279,6 @@ const UploadResource = () => {
       parentId: null
     });
   };
-
   return (
     <section>
       <div className="bg-gradient-to-white h-72 uploadResource">
@@ -611,73 +521,57 @@ const UploadResource = () => {
                   label={type === 2 ? '课程文件' : '资源文件'}
                   name="file"
                   valuePropName="fileList"
-                  rules={[{ required: true, message: '请上传文件' }]}
+                  rules={[
+                    { required: true, message: '请上传文件' },
+                    ({ getFieldValue }) => ({
+                      validator(_, fileList) {
+                        const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
+                        if (hasUnfinishedFile) {
+                          return Promise.reject(new Error('请移除没有上传成功的文件'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                  getValueFromEvent={normFile}
 
                 >
-                  <DndContext sensors={[sensor]} onDragEnd={onDragEnd}>
-                    <SortableContext
-                      items={fileList.map(item => item.uid)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <Dragger
-                        className='w-40'
-                        {...fileUploadProps(type === 1)}
-                        fileList={fileList}
-                        onChange={handleFileChange}
-                        itemRender={(originNode, file) => (
-                          <DraggableUploadListItem originNode={originNode} file={file} />
-                        )}
-                      >
-                        <p className="ant-upload-drag-icon">
-                          <InboxOutlined />
-                        </p>
-                        <p className="text-base">
-                          点击或拖拽文件到此处上传
-                        </p>
-                        <p className="text-xs text-secondary">
-                          {type === 2
-                            ? '支持视频格式，单个文件不超过2GB'
-                            : '支持多种格式，可上传多个文件'
-                          }
-                        </p>
-                      </Dragger>
-                    </SortableContext>
-                  </DndContext>
+                  <UploadFiles fileList={fileList} setFileList={setFileList} type={type} />
                 </Form.Item>
                 <Form.Item
                   label="封面图片" name="coverImage"
                   className='cover'
                   valuePropName="fileList"
                   getValueFromEvent={normFile}
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator(_, fileList) {
+                        console.log(fileList)
+                        const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
+                        if (hasUnfinishedFile) {
+                          return Promise.reject(new Error('请移除没有上传成功的文件'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
                 >
-                  <ImgCrop aspect={16 / 9} rotationSlider>
-                    <Upload
-                      maxCount={1}
-                      {...imageUploadProps}
-                      onChange={coverImageChange}
-                    >
-                      <div>
-                        <PlusOutlined />
-                        <div className='mt-2'>上传封面</div>
-                      </div>
-                    </Upload>
-                  </ImgCrop>
+                  <UploadFiles type={3} />
                 </Form.Item>
                 {type === 1 && (
-                  <Form.Item label="预览图片" name="images" valuePropName="fileList" getValueFromEvent={normFile}>
-                    <ImgCrop aspect={16 / 9} rotationSlider>
-                      <Upload
-                        {...imageUploadProps}
-                        maxCount={4}
-                        multiple
-                        onChange={imagesChange}
-                      >
-                        <div>
-                          <PlusOutlined />
-                          <div className='mt-2'>上传预览图</div>
-                        </div>
-                      </Upload>
-                    </ImgCrop>
+                  <Form.Item label="预览图片" name="images" valuePropName="fileList" getValueFromEvent={normFile}
+                    rules={[
+                      ({ getFieldValue }) => ({
+                        validator(_, fileList) {
+                          const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
+                          if (hasUnfinishedFile) {
+                            return Promise.reject(new Error('请移除没有上传成功的文件'));
+                          }
+                          return Promise.resolve();
+                        },
+                      }),
+                    ]}>
+                    <UploadFiles type={4} />
                   </Form.Item>)}
               </>
               {/* 详情介绍 */}

@@ -16,5 +16,4 @@ public interface UserActionService {
     //检查是否购买
     boolean checkIsPurchased(Integer userId, Integer targetId, Integer targetType);
     UserActionsBO checkAllAction(Integer userId, Integer targetId, Integer targetType);
-    List<CategoryBO> selectTags(Integer targetId, Integer targetType);
 }

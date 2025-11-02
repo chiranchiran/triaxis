@@ -38,7 +38,8 @@ public class CommonController {
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) throws IOException {
         log.info("文件上传：{}", file.getOriginalFilename());
-        String url = aliOssUtil.upload(file.getBytes(), file.getOriginalFilename());
+//        String url = aliOssUtil.upload(file.getBytes(), file.getOriginalFilename());
+        String url = file.getOriginalFilename();
         return Result.success(url);
     }
 

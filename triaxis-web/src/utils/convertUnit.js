@@ -1,5 +1,4 @@
 //将字节数转换为易读的文件大小格式（B/KB/MB/GB/TB/PB）
-
 function converBytes(bytesSize) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
   // 处理输入为非数字的情况，默认转为0

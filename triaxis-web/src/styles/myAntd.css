@@ -177,3 +177,8 @@ select:hover {
   outline: none;
   box-shadow: var(--ant-box-shadow-secondary);
 }
+
+/* 工具提示框 */
+.ant-tooltip {
+  font-size: var(--text-sm);
+}

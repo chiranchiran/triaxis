@@ -18,7 +18,7 @@ export const getResource = (id) => {
 }
 //上传某个资源
 export const uploadResource = (data) => {
-  return service.post('/resources', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+  return service.post('/resources', data);
 }
 //修改某个资源
 export const updateResource = (data) => {

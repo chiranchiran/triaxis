@@ -1,14 +1,12 @@
 package com.chiran.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Date;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -20,8 +18,8 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("resource_tool")
-public class ResourceTool implements Serializable {
+@TableName("resource_paths")
+public class ResourcePath implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -31,8 +29,14 @@ public class ResourceTool implements Serializable {
     @TableField("resource_id")
     private Integer resourceId;
 
-    @TableField("tool_id")
-    private Integer toolId;
+    @TableField("name")
+    private String name;
+    @TableField("path")
+    private String path;
+    @TableField("size")
+    private Long size;
+    @TableField("type")
+    private String type;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)

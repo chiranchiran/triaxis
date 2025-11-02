@@ -88,6 +88,8 @@ jwt:
       interval: "captcha:interval:"
 
 #alioss配置
-#alioss:
-#  endpoint: oss-cn-beijing.aliyuncs.com
-#  bucket-name: triaxis
+alioss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  access-key-id: L
+  access-key-secret: p
+  bucket-name: triaxis

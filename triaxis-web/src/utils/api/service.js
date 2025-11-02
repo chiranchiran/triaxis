@@ -85,7 +85,7 @@ const handleNetworkError = (error, originalRequest) => {
 
   // 请求超时
   if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
-    networkError = ErrorFactory.network('TIMEOUT_ERROR', `请求超时（${originalRequest?.timeout}ms）`, {
+    networkError = ErrorFactory.network('TIMEOUT_ERROR', undefined, {
       ...errorInfo,
       timeout: originalRequest?.timeout
     });

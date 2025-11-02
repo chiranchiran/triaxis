@@ -32,11 +32,6 @@ public class Resource implements Serializable {
     @TableField("description")
     private String description;
 
-    /**
-     * 文件存储路径
-     */
-    @TableField("path")
-    private String path;
 
     @TableField("cover_image")
     private String coverImage;

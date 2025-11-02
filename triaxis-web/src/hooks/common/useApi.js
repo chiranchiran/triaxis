@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { useEffect } from "react"
 import { useMessage, useNotification } from "../../components/AppProvider"
-export const useApi = (apiFunc, {
+export function useApi(apiFunc, {
   queryKey = [],
   config,
   enabled = true,
@@ -15,10 +15,10 @@ export const useApi = (apiFunc, {
   onError: apiOnError,
   params = null,
   isMutation = false
-}) => {
+}) {
   //获取api配置
   const messageApi = useMessage()
-  const notification = useNotification()
+  const notificationApi = useNotification()
   const navigate = useNavigate();
   const dispatch = useDispatch()
   const successConfig = getApiConfig(config, 'success')
@@ -37,7 +37,7 @@ export const useApi = (apiFunc, {
     //提示成功消息
     if (successConfig.showMessage) {
       if (successConfig.description) {
-        notification.success({ message: successConfig.message, description: successConfig.description })
+        notificationApi.success({ message: successConfig.message, description: successConfig.description })
       } else {
         messageApi.success(successConfig.message)
       }
@@ -51,7 +51,7 @@ export const useApi = (apiFunc, {
   //默认错误处理
   const defaultOnError = (error) => {
     //根据拦截器返回的自定义error分别处理
-    handlePromiseError(error, !errorConfig.noDetail, notification, messageApi, navigate)
+    handlePromiseError(error, !errorConfig.noDetail, notificationApi, messageApi, navigate)
     //配置文件handler
     const handler = errorConfig.handler
     if (handler && typeof handler === 'function') {
@@ -84,6 +84,7 @@ export const useApi = (apiFunc, {
 
     ? useMutation({
       mutationFn: (params) => apiFunc(params),
+      cancelPrevious: false,
     })
     : useQuery({
       queryKey,

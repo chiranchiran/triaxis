@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chiran.bo.CategoryBO;
 import com.chiran.bo.ResourceCategoryBO;
 import com.chiran.bo.ResourceSearchBO;
+import com.chiran.bo.UploadFileBO;
 import com.chiran.dto.ResourceDTO;
 import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.entity.*;
@@ -43,6 +44,16 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     private UserService userService;
     @Autowired
     private ResourceImageMapper resourceImageMapper;
+    @Autowired
+    private  UserTagService userTagService;
+    @Autowired
+    private TagMapper tagMapper;
+    @Autowired
+    private ResourceCategoryMapper resourceCategoryMapper;
+    @Autowired
+    private ResourcePathMapper resourcePathMapper;
+    @Autowired
+    private ResourceToolMapper resourceToolMapper;
 
     @Override
     public PageResult<ResourceVO> getResources(ResourceSearchDTO dto) {
@@ -80,12 +91,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         BeanUtils.copyProperties(resource, resourceSearchBO);
 //查询相关的的缩略图
         LambdaQueryWrapper<ResourceImage> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(ResourceImage::getId, ResourceImage::getName).eq(ResourceImage::getResourceId, id).orderByAsc(ResourceImage::getCreateTime);
+        queryWrapper.select(ResourceImage::getId, ResourceImage::getPath).eq(ResourceImage::getResourceId, id).orderByAsc(ResourceImage::getCreateTime);
         List<ResourceImage> list = resourceImageMapper.selectList(queryWrapper);
         List<CategoryBO> images = BeanUtil.copyList(list, CategoryBO::new);
         //查询分类信息
 
-        ResourceCategoryBO resourceCategoryBO =resourceTypesService.selectAllCategories(id);
+        ResourceCategoryBO resourceCategoryBO = resourceTypesService.selectAllCategories(id);
         resourceCategoryBO.setRight(resource.getRight());
         resourceCategoryBO.setSubject(resourceTypesService.getSubjectName(resource.getSubjectId()));
         resourceCategoryBO.setTools(resourceTypesService.getTools(resource.getId()));
@@ -95,7 +106,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
                 .uploader(userService.selectUploader(resource.getUserId()))
                 .userActions(userActionService.checkAllAction(userId, id, 1))
                 .images(images)
-                .tags(userActionService.selectTags(id, 1))
+                .tags(userTagService.selectTags(id, 1))
                 .category(resourceCategoryBO)
                 .build();
 
@@ -107,27 +118,65 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addResource(ResourceDTO dto) {
-//        // 转换为Entity
-//        Resource resource = convertToEntity(dto);
+        //修改文件大小
+        Long size =0L;
+        for(UploadFileBO uploadFileBO:dto.getFiles()){
+            size+=uploadFileBO.getSize();
+        }
+        dto.setSize(size);
+        Resource resource = new Resource();
+        BeanUtils.copyProperties(dto, resource);
+        this.save(resource);
+        Integer resourceId = resource.getId();
+        //插入tag标签分类和关系
+        for (String s:dto.getTags()){
+            Tag tag = new Tag();
+            tag.setName(s);
+            tag.setCreateBy(dto.getUserId());
+            tagMapper.insert(tag);
+            Integer tagId = tag.getId();
+            UserTag userTag = new UserTag();
+            userTag.setTagId(tagId);
+            userTag.setUserId(dto.getUserId());
+            userTag.setTargetType(1);
+            userTag.setTargetId(resourceId);
+            userTagService.save(userTag);
+        }
+        //插入资源和分类的关系
+        for(Integer id:dto.getCategoryIds()){
+            ResourceCategory resourceCategory = new ResourceCategory();
+            resourceCategory.setCategoryId(id);
+            resourceCategory.setResourceId(resourceId);
+            resourceCategoryMapper.insert(resourceCategory);
+        }
+        //插入文件路径的关系
+        for (UploadFileBO uploadFileBO:dto.getFiles()){
+            ResourcePath resourcePath = new ResourcePath();
+            resourcePath.setResourceId(resourceId);
+            resourcePath.setSize(uploadFileBO.getSize());
+            resourcePath.setType(uploadFileBO.getType());
+            resourcePath.setName(uploadFileBO.getName());
+            resourcePath.setPath(uploadFileBO.getPath());
+            resourcePathMapper.insert(resourcePath);
+        }
 
-        // 设置默认值
-//        resource.setDownloadCount(0);
-//        resource.setViewCount(0);
-//        resource.setDeleted(0);
-//        resource.setCreatedAt(new Date());
-//        resource.setUpdatedAt(new Date());
-
-//        // 保存资源
-//        boolean saved = this.save(resource);
-//        if (!saved) {
-//            return false;
-//        }
-
-//        // 保存关联的软件工具
-//        if (dto.getToolIds() != null && !dto.getToolIds().isEmpty()) {
-//            saveResourceSoftware(resource.getId(), dto.getToolIds());
-//        }
-
+        //插入文件预览图的关系
+        for (UploadFileBO uploadFileBO:dto.getImages()){
+            ResourceImage resourceImage = new ResourceImage();
+            resourceImage.setResourceId(resourceId);
+            resourceImage.setSize(uploadFileBO.getSize());
+            resourceImage.setType(uploadFileBO.getType());
+            resourceImage.setName(uploadFileBO.getName());
+            resourceImage.setPath(uploadFileBO.getPath());
+            resourceImageMapper.insert(resourceImage);
+        }
+        //插入资源和工具的关系
+        for (Integer id:dto.getToolIds()){
+            ResourceTool resourceTool = new ResourceTool();
+            resourceTool.setResourceId(resourceId);
+            resourceTool.setToolId(id);
+            resourceToolMapper.insert(resourceTool);
+        }
         return true;
     }
 
@@ -172,12 +221,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean removeResource(Integer id) {
+    public Boolean removeResource(Integer id, Integer userId) {
         return false;
     }
 
     @Override
-    public Boolean removeResources(List<Integer> ids) {
+    public Boolean removeResources(List<Integer> ids, Integer userId) {
         return null;
     }
     // 软删除
