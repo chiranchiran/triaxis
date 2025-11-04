@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { isDataValid } from '../utils/error/commonUtil';
+import { addAll, isDataValid } from '../utils/error/commonUtil';
 import { FilterButton } from './MyButton';
+import { SORT_OPTIONS } from '../utils/constant/order';
 
 
 export default function Category({
@@ -9,7 +10,10 @@ export default function Category({
   enableSecondaryCategory,
   getSecondaryCategory,
   selectedFilters,
-  setSelectedFilters
+  setSelectedFilters,
+  setSearchParams = null,
+  hasOrder = false,
+  searchParams = null
 }) {
 
   // 获取学科工具和一级分类数据
@@ -23,21 +27,24 @@ export default function Category({
   }, { enabled: !!selectedFilters.subjectId && !!selectedFilters.categoriesFirst })
     : { data: null, isLoading: false, isError: false };
 
-  const addAll = (type, id = null) => {
-    return isDataValid(type)
-      ? [{ id, name: '全部' }, ...type]
-      : (type || [])
-  };
-  // 为每个分类列表添加"全部"选项
   const enhancedtypes = useMemo(() => {
     if (!types) return {};
-    const enhanced = {
-      right: filterList[0].list,
+    //isTypes标记非二级分类字段，field标记非共有字段
+    // subject都有，但是工具、难度、一级分类、话题都属于各自特有，配置field属性添加
+    const list = filterList.filter(i => i.field && i.isTypes);
+    const enhanced = list.reduce((pre, cur) => {
+      //有right的还需要添加right字段
+      if (cur.list) {
+        pre[cur.type] = cur.list
+        return pre;
+      }
+      pre[cur.type] = types[cur.field]
+      return pre
+    }, {
       subjectId: types.subjects,
-      toolIds: types.tools,
-      categoriesFirst: types.categoriesFirst
-    }
+    })
 
+    // 为每个分类列表添加"全部"选项
     for (const key in enhanced) {
       const config = filterList.find(item => item.type === key);
       if (!config?.isNotAll) {
@@ -57,10 +64,14 @@ export default function Category({
 
     if (Object.keys(enhancedtypes).length === 0) return;
 
-    const hasEnoughData = enhancedtypes.subjectId?.length > 1 && enhancedtypes.toolIds?.length > 1;
+    // const hasEnoughData = enhancedtypes.subjectId?.length > 1 && enhancedtypes.toolIds?.length > 1;
 
-    if (!hasEnoughData) return;
+    // if (!hasEnoughData) return;
     const field = filterList.filter(item => !item.isFirst && item.isTypes).map(i => i.type)
+    //有字段没有获得数据先不初始化
+    for (const i of field) {
+      if (!isDataValid(enhancedtypes[i])) return
+    }
 
     const multiple = filterList.filter(item => item.isMultiple).map(i => i.type)
     const filters = field.reduce((acc, item) => {
@@ -117,28 +128,25 @@ export default function Category({
       const config = filterConfigs.find(item => item.type === type);
 
       if (!config) return prev;
-
+      //单选
       if (!config.isMultiple) {
         newFilters[type] = value;
         if (config.isFirst) {
           newFilters.categoriesSecondary = [];
         }
+        //多选
       } else {
         if (value === null) {
-          if (config.isFirst) {
-            newFilters[type] = null;
-          } else {
-            newFilters[type] = [null];
-          }
+          newFilters[type] = [null];
         } else {
           const withoutNull = currentValues.filter(item => item !== null);
-          if (withoutNull.includes(value)) {
-            newFilters[type] = withoutNull.filter(item => item !== value);
+          if (currentValues.includes(value)) {
+            newFilters[type] = currentValues.filter(item => item !== value);
           } else {
             newFilters[type] = [...withoutNull, value];
           }
           if (newFilters[type].length === 0) {
-            newFilters[type] = [null];
+            newFilters[type] = [];
           }
         }
       }
@@ -176,11 +184,28 @@ export default function Category({
   const isError = typesError || secondaryError;
 
   return (
-    <div className="flex flex-col justify-start gap-5 bg-card rounded-xl shadow-sm p-6 mb-8 border border-main">
+    <div className="flex flex-col justify-start gap-5 bg-card rounded-xl shadow-sm p-6 mb-8">
       {filterConfigs.length > 0 && !isError &&
         filterConfigs.map((config, index) => (
           <TypeSelect key={config.type || index} config={config} />
-        ))
+        ))}
+      {hasOrder && (
+        <div className="flex items-start border-t border-main pt-4">
+          <span className="text-sm font-medium text-main mr-4 text-nowrap mt-1">
+            排序方式：
+          </span>
+          <div className="flex flex-wrap gap-3">
+            {SORT_OPTIONS.map(item => (
+              <FilterButton
+                onClick={() => setSearchParams(pre => ({ ...pre, orderBy: item.id, page: 1 }))}
+                key={item.id}
+                item={item}
+                isSelected={searchParams.orderBy === item.id}
+              />
+            ))}
+          </div>
+        </div>)
+
       }{
         isError && <p className='text-center text-lg'>出现错误，暂无搜索项</p>
       }

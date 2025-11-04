@@ -7,7 +7,7 @@
     border: 2px #f7aeae !important;
   }
 
-  :where(.css-dev-only-do-not-override-1nfvks7).ant-card .ant-card-head {
+  .ant-card .ant-card-head {
     display: flex;
     justify-content: center;
     flex-direction: column;
@@ -22,10 +22,20 @@
     border-radius: 8px 8px 0 0;
   }
 
-  :where(.css-dev-only-do-not-override-1nfvks7).ant-list .ant-list-item {
+  .ant-list .ant-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 0,
+  }
+}
+
+.bounty {
+  a {
+    color: var(--primary-dark);
+  }
+
+  a.postsMore:hover {
+    transform: none;
   }
 }

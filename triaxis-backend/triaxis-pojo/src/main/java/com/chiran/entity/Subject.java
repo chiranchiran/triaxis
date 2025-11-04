@@ -1,10 +1,12 @@
 package com.chiran.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -37,12 +39,12 @@ public class Subject implements Serializable {
     @TableField("is_active")
     private Boolean isActive;
 
-    @TableField("create_time")
-    private Date createTime;
-
-    @TableField("update_time")
-    private Date updateTime;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
     @TableField("create_by")
     private Integer createBy;
     @TableField("update_by")

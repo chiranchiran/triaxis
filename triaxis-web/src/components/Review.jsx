@@ -6,20 +6,13 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { useLike } from '../hooks/api/common';
 import { useGetReviews, useGetReviewReplies } from '../hooks/api/reviews';
 import { Radio, RadioGroup } from '@douyinfe/semi-ui';
-import { MyButton } from './MyButton';
+import { MyButton, OrderButton } from './MyButton';
 import { logger } from '../utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
+import { POST_ORDER } from '../utils/constant/order';
 
 dayjs.extend(relativeTime);
 const { TextArea } = Input;
-
-// 排序选项配置（与后端orderBy参数对应：1=最新发布，2=最多点赞，3=最多回复）
-const SORT_OPTIONS = [
-  { name: "最新发布", id: 1 },
-  { name: "最多点赞", id: 2 },
-  { name: "最多回复", id: 3 }
-];
-
 const Review = ({ targetType, targetId }) => {
   const queryClient = useQueryClient();
   const [expandedReplies, setExpandedReplies] = useState({});
@@ -46,12 +39,11 @@ const Review = ({ targetType, targetId }) => {
     parentId: null,
     rootId: null,
     targetType,
-    targetId,
-    orderBy: 1
+    targetId
   });
   const { isFetching: repliesLoading, refetch: refetchReplies } = useGetReviewReplies(
     replyParams,
-    { enabled: !!replyParams.targetId && !!replyParams.targetType && !!replyParams.orderBy && !!replyParams.parentId });
+    { enabled: !!replyParams.targetId && !!replyParams.targetType && !!replyParams.parentId });
   // const { records: replies = [] } = replyRes;
 
   //处理点赞
@@ -151,29 +143,13 @@ const Review = ({ targetType, targetId }) => {
     )
   }
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-card rounded-lg">
+    <div className="max-w-4xl mx-auto py-6 px-2 bg-card rounded-lg">
       {/* 评论区标题 + 排序 */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <h2 className="text-lg font-bold text-main">全部评论 ({total})</h2>
-        <div className="flex items-center space-x-2">
-          <Space vertical="true" spacing='loose' align='start'>
-            <RadioGroup
-              onChange={(e) => handleOrder(e.target.value)}
-              type='button'
-              MyButtonSize='middle'
-              value={reviewParams.orderBy}
-              aria-label="单选组合示例"
-              name="demo-radio-large"
-              className='!text-sm'
-            >
-              {SORT_OPTIONS.map((item, index) => (
-                <Radio key={item.id} value={item.id}>
-                  {item.name}
-                </Radio>
-              ))}
-            </RadioGroup>
-          </Space>
-        </div>
+        <OrderButton size="middle" list={POST_ORDER} value={reviewParams.orderBy}
+          handleSortChange={handleOrder}
+        />
       </div>
 
       {/* 评论列表 */}

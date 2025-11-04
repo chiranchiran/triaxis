@@ -16,58 +16,9 @@ import { getUserData } from '../../utils/localStorage';
 import { useCollect } from '../../hooks/api/common';
 import { useLike } from '../../hooks/api/common';
 import { MyButton } from '../../components/MyButton';
-import { subUsername } from '../../utils/error/commonUtil';
-const filterList = [
-  {
-    title: "资源权限",
-    type: "right",
-    field: "rights",
-    default: 1,
-    list: [{
-      id: 1,
-      name: "免费"
-    }, {
-      id: 2,
-      name: "积分兑换"
-    }, {
-      id: 3,
-      name: "VIP专享"
-    }],
-    isMultiple: false,
-    isTypes: true
-  },
-  {
-    title: "专业领域",
-    type: "subjectId",
-    default: 0,
-    isMultiple: false,
-    isTypes: true,
-    isNotAll: true
-  },
-  {
-    title: "适用软件",
-    type: "toolIds",
-    default: 0,
-    isMultiple: true,
-    isTypes: true
-  },
-  {
-    title: "资源类型",
-    type: "categoriesFirst",
-    default: 2,
-    isMultiple: false,
-    isFirst: true,
-    isTypes: true,
-    isNotAll: false
-  },
-  {
-    title: "二级分类",
-    type: "categoriesSecondary",
-    default: 0,
-    isMultiple: true,
-    isTypes: false
-  }
-]
+import { filterNull, subUsername } from '../../utils/error/commonUtil';
+import { resourceFilterList } from '../../utils/constant/order';
+
 const Resource = () => {
   const navigate = useNavigate();
   const userData = getUserData();
@@ -90,7 +41,7 @@ const Resource = () => {
     categoriesSecondary: []
   });
 
-  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ ...selectedFilters, ...searchParams }, {
+  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ ...filterNull(selectedFilters), ...searchParams }, {
     enabled: !!selectedFilters.subjectId && (selectedFilters.categoriesSecondary.length > 0 || (selectedFilters.categoriesSecondary.length === 0 && selectedFilters.categoriesFirst === null))
   });
 
@@ -116,7 +67,7 @@ const Resource = () => {
       title="发现优质设计资源"
       description="海量专业资源，助力你的设计创作"
       placeholder="搜索你想要的资源素材..."
-      filterList={filterList}
+      filterList={resourceFilterList}
       useGetTypes={useGetResourceTypes}
       enableSecondaryCategory={true}
       getSecondaryCategory={useGetSecondaryCategory}

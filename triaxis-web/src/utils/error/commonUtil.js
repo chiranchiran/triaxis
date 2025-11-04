@@ -3,12 +3,9 @@ export const isDataValid = (data) => {
 };
 //截断字符串，中间用省略号显示
 export const subUsername = (str, maxLength, ellipsis = '...') => {
-
   if (str.length <= maxLength) {
     return str;
   }
-
-
   if (ellipsis.length >= maxLength) {
     console.warn('省略符号长度不能大于等于最大长度');
     return str.slice(0, maxLength);
@@ -21,6 +18,7 @@ export const subUsername = (str, maxLength, ellipsis = '...') => {
 
   return `${startStr}${ellipsis}${endStr}`;
 }
+
 //提取后缀名
 export const getFileExtension = (filename) => {
   const pureName = filename.split(/[\\/]/).pop();
@@ -28,3 +26,35 @@ export const getFileExtension = (filename) => {
   const match = pureName.match(/\.([^.]+)$/);
   return match ? match[1].toLowerCase() : '';
 }
+
+//过滤数组null,[null]/[undefined]都变成null
+export const filterNull = (obj) => {
+  // 若输入不是对象（或为 null/undefined），直接返回原值
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  const newObj = { ...obj };
+
+  for (const key in newObj) {
+    if (!newObj.hasOwnProperty(key)) continue;
+    const value = newObj[key];
+    // 检查是否为数组，且长度为 1，且元素是 null 或 undefined
+    if (
+      Array.isArray(value) &&
+      value.length === 1 &&
+      (value[0] === null || value[0] === undefined)
+    ) {
+      newObj[key] = null;
+    }
+  }
+
+  return newObj;
+};
+
+//给数组添加全部选项
+export const addAll = (type, id = null) => {
+  return isDataValid(type)
+    ? [{ id, name: '全部' }, ...type]
+    : (type || [])
+};

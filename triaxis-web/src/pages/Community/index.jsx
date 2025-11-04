@@ -26,46 +26,26 @@ import {
   TrophyOutlined,
   CrownOutlined,
   ArrowLeftOutlined,
-  FilterOutlined
+  FilterOutlined,
+  ArrowRightOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './index.less'
+import { MyButton, OrderButton } from '../../components/MyButton';
+import Category from '../../components/Category';
+import { useGetPosts, useGetPostTypes } from '../../hooks/api/community';
+import { BOUNTY_ORDER, communityFilterList, SORT_OPTIONS } from '../../utils/constant/order';
+import { addAll, filterNull } from '../../utils/error/commonUtil';
 
 const { Search } = Input;
 
-// 专业数据
-const PROFESSIONAL_FIELDS = [
-  { id: 1, name: '城乡规划' },
-  { id: 2, name: '建筑设计' },
-  { id: 3, name: '风景园林' },
-  { id: 4, name: '地理信息' },
-  { id: 5, name: '其他' }
-];
-
-// 主题分类
-const TOPIC_CATEGORIES = [
-  { id: 1, name: '学术讨论', icon: '📚', color: 'blue' },
-  { id: 2, name: '技术交流', icon: '💻', color: 'green' },
-  { id: 3, name: '项目互助', icon: '🤝', color: 'orange' },
-  { id: 4, name: '政策解读', icon: '📋', color: 'purple' },
-  { id: 5, name: '求职招聘', icon: '💼', color: 'cyan' },
-  { id: 6, name: '日常聊天', icon: '💬', color: 'pink' },
-  { id: 7, name: '课程交流', icon: '🎓', color: 'red' },
-  { id: 8, name: '吐槽专区', icon: '😤', color: 'volcano' }
-];
-
-const SORT_OPTIONS = [
-  { id: 0, name: '最新发布' },
-  { id: 1, name: '最热内容' },
-  { id: 2, name: '最多回复' },
-  { id: 3, name: '最多收藏' }
-];
 
 const BOUNTY_FILTERS = [
   { id: 'all', name: '全部' },
   { id: 'solved', name: '已解决' },
   { id: 'unsolved', name: '未解决' }
 ];
+
 
 const Community = () => {
   const navigate = useNavigate();
@@ -81,17 +61,22 @@ const Community = () => {
   const [posts, setPosts] = useState([]);
   const [total, setTotal] = useState(0);
   const [searchParams, setSearchParams] = useState({
-    page: 1,
-    pageSize: 10,
-    orderBy: 0, // 默认选择第一个排序方式
-    searchKeyword: ''
+    search: "",
+    bountyCount: 4,
+    normalCount: 3,
+    orderBy: 1,
+    staus: null
   });
 
   const [selectedFilters, setSelectedFilters] = useState({
-    subjectId: 1, // 默认选择第一个专业
-    topicId: 1, // 默认选择第一个主题
-    bountyFilter: 'all'
+    subjectId: null,
+    topicIds: [],
   });
+
+  const { data: post = {}, isFetching: bountyLoading, isError: bountyError } = useGetPosts({ ...filterNull(selectedFilters), ...searchParams }, {
+    enabled: !!selectedFilters.subjectId && !!selectedFilters.topicIds
+  });
+
 
   // 获取数据
   const fetchData = useCallback(async () => {
@@ -122,7 +107,7 @@ const Community = () => {
 
         // 普通帖子数据
         const mockNormalPosts = Array.from({ length: 6 }, (_, index) => {
-          const topic = TOPIC_CATEGORIES[Math.floor(Math.random() * TOPIC_CATEGORIES.length)];
+          const topic = 2;
           const createTime = new Date();
           createTime.setDate(createTime.getDate() - Math.floor(Math.random() * 30));
 
@@ -173,13 +158,13 @@ const Community = () => {
             '行业大咖在线答疑活动预告'
           ][index],
           hotIndex: 1000 - index * 100 + Math.floor(Math.random() * 50),
-          topic: TOPIC_CATEGORIES[index % 8].name,
-          topicColor: TOPIC_CATEGORIES[index % 8].color
+          topic: 1,
+          topicColor: 'blue'
         }));
 
         // 帖子广场数据
         const mockPosts = Array.from({ length: 10 }, (_, index) => {
-          const topic = TOPIC_CATEGORIES[Math.floor(Math.random() * TOPIC_CATEGORIES.length)];
+          const topic = 2;
           const createTime = new Date();
           createTime.setDate(createTime.getDate() - Math.floor(Math.random() * 30));
 
@@ -240,37 +225,6 @@ const Community = () => {
     fetchData();
   }, [fetchData]);
 
-  // 处理搜索
-  const handleSearch = (value) => {
-    setSearchParams(prev => ({
-      ...prev,
-      searchKeyword: value,
-      page: 1
-    }));
-  };
-
-  // 处理筛选条件变化
-  const handleFilterChange = (type, value) => {
-    setSelectedFilters(prev => {
-      const newFilters = { ...prev };
-      newFilters[type] = prev[type] === value ? null : value;
-      return newFilters;
-    });
-
-    setSearchParams(prev => ({
-      ...prev,
-      page: 1
-    }));
-  };
-
-  // 处理排序变化
-  const handleSortChange = (orderBy) => {
-    setSearchParams(prev => ({
-      ...prev,
-      orderBy,
-      page: 1
-    }));
-  };
 
   // 处理分页变化
   const handlePageChange = (page, pageSize) => {
@@ -281,25 +235,26 @@ const Community = () => {
     }));
   };
 
-  // 筛选按钮组件
-  const FilterButton = ({ item, type, isSelected, icon }) => {
-    const handleClick = () => {
-      handleFilterChange(type, item.id);
-    };
-
-    return (
-      <button
-        onClick={handleClick}
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isSelected
-          ? 'bg-gray-200 text-gray-800 border border-gray-300'
-          : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
-          }`}
-      >
-        {icon && <span>{icon}</span>}
-        <span>{item.name}</span>
-      </button>
-    );
+  // 处理搜索
+  const handleSearch = (value) => {
+    setSearchParams(prev => ({
+      ...prev,
+      search: value.trim(),
+      page: 1
+    }));
   };
+
+  const clear = () => {
+    setSearchParams(prev => ({
+      ...prev,
+      search: "",
+      page: 1
+    }));
+  }
+  //处理悬赏贴排序
+  const handleBountyOrder = (value) => {
+    setReviewParams(pre => ({ ...pre, staus: value }))
+  }
 
   // 获取主题颜色类名
   const getTopicColorClass = (color) => {
@@ -347,162 +302,118 @@ const Community = () => {
 
   // 是否有搜索关键词
   const hasSearchKeyword = true
+  const {
+    // total,
+    bounty: {
+      total: bountyTotal = 0,
+      records: bountyPosts = []
+    } = {},
+    normal: {
+      total: normalTotal = 0,
+      records: normalPosts = []
+    } = {}
+
+  } = searchResults || {}
+  const { id, title = "", description = "", content = "", viewCount = 0, replyCount = 0, collectCount = 0, likeCount = 0, publishTime } = bountyPosts
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 顶部搜索区域 */}
-      <div className="bg-gradient-to-b from-sky-100 to-white pt-15 pb-35">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+    <section>
+      {/* 顶部搜索框 */}
+      <div className="bg-gradient-to-white pt-15 pb-35">
+        <div className="find max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold text-main mb-4">
             专业社区交流
           </h1>
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-lg text-main mb-8">
             与同行交流经验，分享知识，共同进步
           </p>
-          <div className="flex justify-around space-x-4 max-w-2xl mx-auto">
-            <Search
-              placeholder="搜索帖子、问题、用户..."
-              enterButton={
-                <Button
-                  type="primary"
-                  size="large"
-                  className="bg-black hover:bg-gray-800 border-black h-full"
-                  icon={<SearchOutlined />}
-                >
-                  搜索
-                </Button>
-              }
-              size="large"
-              onSearch={handleSearch}
-              className="flex-1 h-14 py-1"
-            />
-            <Button
-              type="primary"
-              size="large"
-              onClick={() => navigate('/community/create')}
-              className="bg-blue-500 hover:bg-blue-600 border-blue-500 h-14 px-6 mt-1 ml-8"
-              icon={<PlusOutlined />}
-            >
-              发帖
-            </Button>
-          </div>
+          <Search
+            placeholder="搜索帖子、问题、用户..."
+            enterButton={
+              <Button
+                type="black"
+                size="small"
+                className="bg-black border-black h-full"
+                icon={<SearchOutlined />}
+              >
+                搜索
+              </Button>
+            }
+            allowClear={true}
+            onClear={clear}
+            size="large"
+            // loading={dataLoading}
+            onSearch={handleSearch}
+            className="max-w-2xl mx-auto h-14 py-1 search-btn"
+          />
+          <MyButton
+            type="black"
+            size="large"
+            onClick={() => navigate('/community/create')}
+            className="h-14 px-6 mt-1 ml-8 create"
+            icon={<PlusOutlined />}
+          >
+            发帖
+          </MyButton>
         </div>
       </div>
 
-      {/* 筛选条件区域 */}
-      <div className="check max-w-7xl mx-auto py-8">
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
-          {/* 第一行：专业领域 */}
-          <div className="mb-6">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 mr-4 min-w-[60px]">专业领域：</span>
-              <div className="flex flex-wrap gap-2">
-                {PROFESSIONAL_FIELDS.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="subjectId"
-                    isSelected={selectedFilters.subjectId === item.id}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 第二行：主题分类 */}
-          <div className="mb-4">
-            <div className="flex items-start">
-              <span className="text-sm font-medium text-gray-700 mr-4 min-w-[60px] mt-2">主题分类：</span>
-              <div className="flex flex-wrap gap-2 flex-1">
-                {TOPIC_CATEGORIES.map(item => (
-                  <FilterButton
-                    key={item.id}
-                    item={item}
-                    type="topicId"
-                    isSelected={selectedFilters.topicId === item.id}
-                    icon={item.icon}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 排序选项 */}
-          <div className="mt-6 pt-4 border-t border-gray-100">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 mr-4 min-w-[60px]">排序方式：</span>
-              <div className="flex flex-wrap gap-2">
-                {SORT_OPTIONS.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleSortChange(item.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${searchParams.orderBy === item.id
-                      ? 'bg-gray-200 text-gray-800 border border-gray-300'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
-                      }`}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="check max-w-7xl mx-auto ">
+        {/* 筛选条件区域 */}
+        <Category
+          filterList={communityFilterList}
+          useGetTypes={useGetPostTypes}
+          enableSecondaryCategory={false}
+          selectedFilters={selectedFilters}
+          setSelectedFilters={setSelectedFilters}
+          setSearchParams={setSearchParams}
+          searchParams={searchParams}
+          hasOrder={true}
+        />
 
         {/* 搜索结果区域 */}
         {hasSearchKeyword && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-8">
             {/* 左侧搜索结果 */}
             <div className="lg:col-span-3">
-              <div className="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">搜索结果</h2>
-                  <div className="text-sm text-gray-600">
-                    共找到 <span className="font-bold text-blue-500">{searchResults.total}</span> 条相关结果
-                  </div>
+              <div className="bg-card rounded-xl shadow-sm p-6 mb-6 ">
+                <div className="mb-4 text-xl font-bold text-center">
+                  <span className="text-main">搜索结果（</span>
+                  <span className="text-blue">{total}条</span> ）
                 </div>
 
+                <Divider className='bg-gray' />
+
                 {/* 悬赏贴搜索结果 */}
-                <div className="mb-6">
+                <div className="mb-6 bounty">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <TrophyOutlined className="text-orange-500 text-lg mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-900">悬赏求助</h3>
-                      <span className="text-gray-500 text-sm ml-2">
-                        ({searchResults.bountyCount}条)
+                    {/* 左侧信息 */}
+                    <div className="flex items-center justify-end">
+                      <TrophyOutlined className=" text-lg mr-2" />
+                      <h3 className="text-lg font-semibold text-main">悬赏求助</h3>
+                      <span className="text-secondary text-sm ml-2">
+                        ({bountyTotal}条)
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      {BOUNTY_FILTERS.map(filter => (
-                        <button
-                          key={filter.id}
-                          onClick={() => setSelectedFilters(prev => ({ ...prev, bountyFilter: filter.id }))}
-                          className={`px-3 py-1 rounded-full text-sm transition-all duration-200 ${selectedFilters.bountyFilter === filter.id
-                            ? 'bg-gray-200 text-gray-800 border border-gray-300'
-                            : 'bg-white text-gray-700 border border-gray-200 hover:border-gray-300'
-                            }`}
-                        >
-                          {filter.name}
-                        </button>
-                      ))}
-                      <Button
-                        type="link"
-                        className="text-black p-0"
-                        onClick={() => navigateToDetail('bounty')}
-                      >
-                        查看更多
-                      </Button>
+                    {/* 右侧按钮 */}
+                    <div className='flex gap-6 items-center'>
+                      <OrderButton size="middle" list={addAll(BOUNTY_ORDER)} value={searchParams.staus}
+                        handleSortChange={handleBountyOrder}
+                      />
+                      <Link to='/community/bounty' className='postsMore'>
+                        <ArrowRightOutlined className='mr-2' />查看更多</Link>
                     </div>
+
                   </div>
 
-                  {loading ? (
+                  {bountyLoading ? (
                     <div className="flex justify-center items-center py-8">
                       <Spin />
                     </div>
-                  ) : filteredBountyPosts.length > 0 ? (
+                  ) : bountyPosts.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {filteredBountyPosts.slice(0, 4).map(post => (
-                        <Card
+                      {bountyPosts.map(post => (
+                        <div
                           key={post.id}
                           onClick={() => navigate(`/community/posts/${post.id}`)}
                           className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
@@ -528,7 +439,7 @@ const Community = () => {
 
                             {/* 标题 */}
 
-                            <h3 style={{ fontWeight: 550, fontSize: 16 }} className="text-md font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
+                            <h3 style={{ fontWeight: 550, fontSize: 16 }} className="text-md font-medium text-main mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
                               {post.title}
                             </h3>
 
@@ -538,13 +449,13 @@ const Community = () => {
                             </p>
 
                             {/* 截止时间 */}
-                            <div className="text-xs text-gray-500 flex items-center">
+                            <div className="text-xs text-secondary flex items-center">
                               <ClockCircleOutlined className="mr-1" />
                               截止: {post.deadline}
                             </div>
 
                             {/* 作者信息和统计 */}
-                            <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
+                            <div className="flex items-center justify-between text-xs text-secondary pt-2 border-t border-gray-100">
                               <div className="flex items-center">
                                 <Avatar size={20} src={post.author.avatar} className="mr-2" />
                                 <span>{post.author.name}</span>
@@ -568,7 +479,7 @@ const Community = () => {
                               </div>
                             </div>
                           </div>
-                        </Card>
+                        </div>
                       ))}
                     </div>
                   ) : (
@@ -585,8 +496,8 @@ const Community = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <MessageOutlined className="text-blue-500 text-lg mr-2" />
-                      <h3 className="text-lg font-semibold text-gray-900">普通帖子</h3>
-                      <span className="text-gray-500 text-sm ml-2">
+                      <h3 className="text-lg font-semibold text-main">普通帖子</h3>
+                      <span className="text-secondary text-sm ml-2">
                         ({searchResults.normalCount}条)
                       </span>
                     </div>
@@ -622,7 +533,7 @@ const Community = () => {
                                 )}
                               </div>
 
-                              <h4 style={{ fontWeight: 550 }} className="text-md font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
+                              <h4 style={{ fontWeight: 550 }} className="text-md font-medium text-main mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
                                 {post.title}
                               </h4>
 
@@ -630,7 +541,7 @@ const Community = () => {
                                 {post.content}
                               </p>
 
-                              <div className="flex items-center justify-between text-sm text-gray-500">
+                              <div className="flex items-center justify-between text-sm text-secondary">
                                 <div className="flex items-center space-x-4">
                                   <div className="flex items-center">
                                     <Avatar size={24} src={post.author.avatar} className="mr-2" />
@@ -648,10 +559,10 @@ const Community = () => {
                             <div className="flex-shrink-0 ml-4 text-right">
                               <div className="space-y-2">
                                 <div className="space-y-1">
-                                  <div className="text-xs text-gray-500">浏览</div>
-                                  <div className="text-sm font-medium text-gray-900">{post.viewCount}</div>
+                                  <div className="text-xs text-secondary">浏览</div>
+                                  <div className="text-sm font-medium text-main">{post.viewCount}</div>
                                 </div>
-                                <div className="flex items-center justify-end space-x-3 text-xs text-gray-500">
+                                <div className="flex items-center justify-end space-x-3 text-xs text-secondary">
                                   <span className="flex items-center">
                                     <MessageOutlined className="mr-1" />
                                     {post.replyCount}
@@ -711,10 +622,10 @@ const Community = () => {
                               {item.topic}
                             </Tag>
                           </div> */}
-                          <h4 className="text-sm font-medium text-gray-900 line-clamp-2 leading-5 mb-1">
+                          <h4 className="text-sm font-medium text-main line-clamp-2 leading-5 mb-1">
                             {item.title}
                           </h4>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-secondary">
                             {item.hotIndex} 热度
                           </div>
                         </div>
@@ -732,11 +643,11 @@ const Community = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
               <ClockCircleOutlined className="text-blue-500 text-xl mr-2" />
-              <h2 className="text-xl font-bold text-gray-900">帖子广场</h2>
+              <h2 className="text-xl font-bold text-main">帖子广场</h2>
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                {SORT_OPTIONS.map(item => (
+                {/* {SORT_OPTIONS.map(item => (
                   <button
                     key={item.id}
                     onClick={() => handleSortChange(item.id)}
@@ -747,7 +658,7 @@ const Community = () => {
                   >
                     {item.name}
                   </button>
-                ))}
+                ))} */}
               </div>
             </div>
           </div>
@@ -780,7 +691,7 @@ const Community = () => {
                           )}
                         </div>
 
-                        <h3 className="text-lg font-medium text-gray-900 mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
+                        <h3 className="text-lg font-medium text-main mb-2 hover:text-primary cursor-pointer line-clamp-1 hover:text-primary transition-all duration-300 link-hover block">
                           {post.title}
                         </h3>
 
@@ -788,7 +699,7 @@ const Community = () => {
                           {post.content}
                         </p>
 
-                        <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center justify-between text-sm text-secondary">
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center">
                               <Avatar size={24} src={post.author.avatar} className="mr-2" />
@@ -806,10 +717,10 @@ const Community = () => {
                       <div className="flex-shrink-0 ml-4 text-right">
                         <div className="space-y-20">
                           <div className="space-y-1">
-                            <span className="text-xs text-gray-500">浏览量 </span>
-                            <span className="text-sm font-medium text-gray-900">{post.viewCount}</span>
+                            <span className="text-xs text-secondary">浏览量 </span>
+                            <span className="text-sm font-medium text-main">{post.viewCount}</span>
                           </div>
-                          <div className="flex items-center justify-end space-x-3 text-xs text-gray-500">
+                          <div className="flex items-center justify-end space-x-3 text-xs text-secondary">
                             <span className="flex items-center">
                               <MessageOutlined className="mr-1" />
                               {post.replyCount}
@@ -855,7 +766,7 @@ const Community = () => {
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

@@ -44,45 +44,6 @@ import { useParams } from 'react-router-dom';
 import { useAddReview, useGetReviews } from '../../hooks/api/reviews';
 const { TextArea } = Input;
 
-// 模拟评价数据
-const mockReviews = [
-  {
-    id: 1,
-    user: {
-      name: '设计学院学生',
-      avatar: '/images/avatar-2.jpg',
-      level: '初级用户'
-    },
-    rating: 5,
-    content: '这个资源非常实用，图纸质量很高，对我的课程设计帮助很大！强烈推荐给建筑学的同学们。',
-    createTime: '2023-11-15 14:30',
-    likes: 23
-  },
-  {
-    id: 2,
-    user: {
-      name: '资深建筑师',
-      avatar: '/images/avatar-3.jpg',
-      level: '专家用户'
-    },
-    rating: 4,
-    content: '内容很全面，特别是几个知名项目的分析很到位。建议可以增加更多技术指标的说明。',
-    createTime: '2023-11-10 09:15',
-    likes: 15
-  },
-  {
-    id: 3,
-    user: {
-      name: '城市规划师',
-      avatar: '/images/avatar-4.jpg',
-      level: '高级用户'
-    },
-    rating: 5,
-    content: '非常好的参考资料，商业综合体的流线组织分析特别有帮助，期待作者更多类似资源。',
-    createTime: '2023-11-05 16:45',
-    likes: 18
-  }
-];
 
 const ResourceDetail = () => {
   const { id } = useParams()

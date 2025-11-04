@@ -6,15 +6,9 @@ import MyPagination from '../MyPagination';
 import './index.less'
 import { MyButton, OrderButton } from '../MyButton';
 import Category from '../Category';
+import { SORT_OPTIONS } from '../../utils/constant/order';
 
 const { Search } = Input;
-const SORT_OPTIONS = [
-  { id: 0, name: '最新发布' },
-  { id: 1, name: '收藏量' },
-  { id: 2, name: '下载量' },
-  { id: 3, name: '点赞量' },
-  { id: 4, name: '综合排序' }
-];
 const CourseContainer = ({
   title,
   description,
@@ -82,13 +76,14 @@ const CourseContainer = ({
           <p className="text-lg text-main mb-8">
             {description}
           </p>
+          {/* 内部不能用自己的按钮，否则造成按钮嵌套*/}
           <Search
             placeholder={placeholder}
             enterButton={
               <Button
-                type="primary"
-                size="large"
-                className="bg-black  border-black h-full"
+                type="black"
+                size="small"
+                className="bg-black border-black h-full"
                 icon={<SearchOutlined />}
               >
                 搜索
@@ -99,7 +94,7 @@ const CourseContainer = ({
             size="large"
             loading={dataLoading}
             onSearch={handleSearch}
-            className="max-w-2xl mx-auto h-14 py-1 search-btn"
+            className="max-w-2xl mx-auto h-14 py-1 search-btn text-light"
           />
         </div>
       </div>
@@ -117,7 +112,7 @@ const CourseContainer = ({
         {/* 排序选项和结果统计 */}
         <div className="flex items-center justify-center gap-10 mb-10">
           <div className="text-md text-main">
-            共 <span className="font-bold text-blue-500">{total}</span> 个结果
+            共 <span className="font-bold text-blue">{total}</span> 个结果
           </div>
           <OrderButton handleSortChange={handleSortChange} list={SORT_OPTIONS} value={searchParams.orderBy} />
         </div>

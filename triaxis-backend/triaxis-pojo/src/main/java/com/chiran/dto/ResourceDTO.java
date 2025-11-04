@@ -9,7 +9,9 @@ import java.util.List;
 
 @Data
 public class ResourceDTO {
+    private Integer id;
     private Integer userId;
+    private Integer role;
     private Integer status;
     private List<String> tags;
     private Integer subjectId;

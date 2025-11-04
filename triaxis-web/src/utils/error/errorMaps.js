@@ -32,7 +32,7 @@ export const BUSINESS_ERROR_MAP = {
   // 认证与授权 (11000-11999)
   11000: { type: 'AUTH_ERROR', level: 'error', message: '登录已失效，请重新登录' },
   11001: { type: 'AUTH_ERROR', level: 'error', message: '您还没有登录，无法进行操作' },
-  11002: { type: 'AUTH_ERROR', level: 'error', message: '您没有权限执行此操作' },
+  11002: { type: 'AUTH_ERROR', level: 'warning', message: '您没有权限执行此操作' },
   11003: { type: 'AUTH_ERROR', level: 'error', message: '登录失败次数过多，请30分钟后重试' },
 
   // 用户模块 (12000-12999)
@@ -56,9 +56,9 @@ export const BUSINESS_ERROR_MAP = {
   14002: { type: 'BUSINESS_ERROR', level: 'error', message: '订单已进入配送阶段，无法取消' },
   14003: { type: 'BUSINESS_ERROR', level: 'error', message: '您已提交过相同订单' },
 
-  // 订单模块 (15000-15999)
-  15000: { type: 'ORDER_ERROR', level: 'error', message: '未找到相关订单信息' },
-  15001: { type: 'ORDER_ERROR', level: 'error', message: '支付超时，请重新下单' },
+  // 资源模块 (15000-15999)
+  15000: { type: 'ORDER_ERROR', level: 'error', message: '未找到相关资源信息' },
+  15001: { type: 'ORDER_ERROR', level: 'error', message: '该资源不存在或已经删除' },
   15002: { type: 'ORDER_ERROR', level: 'error', message: '订单状态已更新，请刷新页面' },
 
   // 支付模块 (16000-16999)

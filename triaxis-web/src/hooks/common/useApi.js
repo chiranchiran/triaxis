@@ -83,8 +83,10 @@ export function useApi(apiFunc, {
   const requestResult = isMutation
 
     ? useMutation({
-      mutationFn: (params) => apiFunc(params),
+      mutationFn: apiFunc,
       cancelPrevious: false,
+      onSuccess: handleSuccess,
+      onError: handleError
     })
     : useQuery({
       queryKey,
@@ -96,13 +98,13 @@ export function useApi(apiFunc, {
 
   // useQuery通过 useEffect
   useEffect(() => {
-    if (requestResult.isError && requestResult.error) {
+    if (!isMutation && requestResult.isError && requestResult.error) {
       handleError(requestResult.error);
     }
   }, [requestResult.isError, requestResult.error]);
 
   useEffect(() => {
-    if (requestResult.isSuccess && requestResult.data) {
+    if (!isMutation && requestResult.isSuccess && requestResult.data) {
       handleSuccess(requestResult.data);
     }
   }, [requestResult.isSuccess, requestResult.data]);

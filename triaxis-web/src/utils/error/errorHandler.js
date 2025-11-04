@@ -82,7 +82,8 @@ function handleAuthError(error, showMessage, notification, navigate) {
       navigate('/login')
     }, 1000);
   }
-
+  //11002逻辑
+  if (showMessage) notification.warning({ message: "权限错误！", description: error.message })
   //11003逻辑
   if (showMessage) notification.error({ message: "未知错误！", description: error.message })
 }

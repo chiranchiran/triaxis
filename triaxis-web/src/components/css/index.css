@@ -1,66 +1,52 @@
-.background {
-  position: fixed;
-  height: 100vh;
-  background: url(../../assets/login4.png) no-repeat fixed center / cover;
+/* 所有按钮统一设置：保持原背景色，hover时通过滤镜加深 */
+button {
+  /* 禁止覆盖原始背景色（确保按钮用自己的颜色） */
+  /* 过渡动画：让加深效果平滑 */
+  transition: filter 0.2s ease;
+  z-index: 10;
 }
-.background .container {
-  position: fixed;
-  left: 50%;
-  transform: translate(-50%, 0);
+/* 普通按钮 hover：亮度降低10%（原色基础上加深） */
+button:hover:not(.bg-dark) {
+  filter: brightness(0.8) contrast(1.2) saturate(1.3);
+  color: var(--text);
+  /* 基于自身颜色加深 */
 }
-.background .container a:hover {
-  color: var(--text-green);
+/* 深色按钮 hover：亮度降低20%（深色加深更明显，基于自身颜色） */
+button.bg-dark:hover {
+  background-color: var(--bg-dark);
+  filter: brightness(0.85) contrast(1.15);
+  color: var(--text-light) !important;
+  /* 深色自身基础上更深 */
 }
-.background .container .ant-pro-form-login-container {
-  padding-block-end: 0.5rem;
+/* 保留原有的宽度和间距规则 */
+button.my-button.w-40 {
+  gap: 1rem;
 }
-.background .container input:hover {
-  border: none;
-  box-shadow: none;
+.semi-radio-addon-buttonRadio.semi-radio-addon-buttonRadio-checked.semi-radio-addon-buttonRadio-large {
+  font-weight: 600;
+  background: var(--accent-orange-light);
+  color: var(--accent-orange-dark);
 }
-.background .container .ant-tabs-top > .ant-tabs-nav::before,
-.background .container .ant-tabs-bottom > .ant-tabs-nav::before,
-.background .container .ant-tabs-top > div > .ant-tabs-nav::before,
-.background .container .ant-tabs-bottom > div > .ant-tabs-nav::before {
-  border-bottom: 0;
+.semi-radioGroup.semi-radioGroup-buttonRadio {
+  background: var(--bg-gray);
+  border-radius: var(--semi-border-radius-small);
+  font-weight: 400;
 }
-.background .container .ant-space-gap-col-small {
-  column-gap: var(--text-base);
+.semi-radio-buttonRadioGroup-large {
+  transition: color var(--ant-motion-duration-mid);
 }
-.background .container .ant-tabs-top > .ant-tabs-nav .ant-tabs-ink-bar {
-  width: 8rem !important;
-  background-color: var(--text-green);
-}
-.background .container .ant-tabs-tab-active {
-  background-color: var(--accent-green-light);
-}
-.background .container .ant-tabs .ant-tabs-tab {
-  padding: 12px 1.2rem;
+.semi-radio-content .semi-radio-addon-buttonRadio {
+  text-align: center;
+  border-radius: var(--semi-border-radius-small);
+  font-weight: 550;
+  color: var(--semi-color-text-1);
   font-size: var(--text-sm);
+  padding: 6px 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  transition: background-color var(--semi-transition_duration-none) var(--semi-transition_function-easeIn) var(--semi-transition_delay-none), border var(--semi-transition_duration-none) var(--semi-transition_function-easeIn) var(--semi-transition_delay-none);
 }
-.background .container .ant-pro-form-login-container {
-  padding-inline: 32px;
-  padding-block: 12px;
-}
-.background .container .otherLogin svg:hover {
-  color: var(--bg-dark);
-}
-.background .container .ant-form-item {
-  margin-bottom: var(--text-base);
-}
-.background .container .otherLogin .ant-divider-horizontal.ant-divider-with-text {
-  margin: 0.8rem 0;
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: var(--text-sm);
-}
-.background .container .ant-form-item .ant-form-item-explain,
-.background .container .ant-form-item .ant-form-item-extra {
-  clear: both;
-  color: var(--ant-color-text-description);
-  font-size: var(--text-xs);
-  line-height: var(--text-base);
-}
-.background .container .ant-form-item-additional {
-  min-height: var(--text-base) !important;
+.semi-radio-content .semi-radio-addon-buttonRadio-checked {
+  font-weight: 600;
+  background: var(--accent-orange-light);
+  color: var(--accent-orange-dark);
 }

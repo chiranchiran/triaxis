@@ -96,6 +96,10 @@
   color: var(--primary);
 }
 
+.text-blue {
+  color: var(--blue);
+}
+
 .text-green {
   color: var(--text-green);
 }

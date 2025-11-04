@@ -225,7 +225,6 @@ const UploadResource = () => {
     if (resourceSuccess || courseSuccess) {
       formReset();
     }
-
   }, [resourceSuccess, courseSuccess])
 
   // 处理分类ID的函数
@@ -429,7 +428,6 @@ const UploadResource = () => {
                         options={categoryTreeData}
                         placeholder="选择资源分类"
                         onChange={handleCascaderChange}
-                        // onOpenChange={handleDropdownVisibleChange}
                         showSearch={{
                           filter: (inputValue, path) =>
                             path.some(option => option.label.toLowerCase().includes(inputValue.toLowerCase()))

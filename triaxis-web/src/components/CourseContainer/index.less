@@ -9,10 +9,27 @@
   }
 
   // 搜索按钮
-  .ant-input-search-large .ant-input-search-button {
+  .ant-input-search-large .ant-input-search-button,
+  button {
     height: 3rem;
+    width: 6rem;
     padding: 0px 15px;
     border-radius: 15px;
+    background: var(--bg-dark);
+    font-size: var(--text-base);
+
+  }
+
+  .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button:not(.ant-btn-color-primary):hover {
+    color: var(--text-light);
+  }
+
+  .ant-input-search>.ant-input-group>.ant-input-group-addon:last-child .ant-input-search-button:not(.ant-btn-color-primary) {
+    color: var(--text-light);
+  }
+
+  .create {
+    width: 8rem;
   }
 
   // 左侧输入框
@@ -27,7 +44,7 @@
   .ant-input-group .ant-input-affix-wrapper:not(:last-child):hover {
     border-color: var(--text-secondary);
     width: 100%;
-    box-shadow: 0 0 0 3px var(--border-active);
+    box-shadow: 0 0 0 2px var(--bg-hover);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 }

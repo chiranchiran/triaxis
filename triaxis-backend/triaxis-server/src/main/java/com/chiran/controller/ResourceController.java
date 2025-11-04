@@ -96,6 +96,7 @@ public class ResourceController {
     public Result updateResource(@RequestBody ResourceDTO resourceDTO, HttpServletRequest request) {
         log.debug("修改资源，是{}",resourceDTO);
         resourceDTO.setUserId((Integer)request.getAttribute("userId"));
+        resourceDTO.setRole((Integer)request.getAttribute("role"));
         Boolean flag = resourceService.updateResource(resourceDTO);
         return Result.success();
     }
@@ -107,7 +108,8 @@ public class ResourceController {
     public Result removeResource(@PathVariable Integer id, HttpServletRequest request) {
         log.debug("删除某个资源，id是{}",id);
         Integer userId = (Integer)request.getAttribute("userId");
-        Boolean flag = resourceService.removeResource(id,userId);
+        Integer role = (Integer)request.getAttribute("role");
+        Boolean flag = resourceService.removeResource(id,userId,role);
         return Result.success();
     }
 
@@ -118,7 +120,8 @@ public class ResourceController {
     public Result removeResources(@RequestBody List<Integer> ids, HttpServletRequest request) {
         log.debug("删除某些资源，id是{}",ids);
         Integer userId = (Integer)request.getAttribute("userId");
-        Boolean success = resourceService.removeResources(ids,userId);
+        Integer role = (Integer)request.getAttribute("role");
+        Boolean success = resourceService.removeResources(ids,userId,role);
         return Result.success();
     }
 

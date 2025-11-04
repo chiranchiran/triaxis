@@ -39,11 +39,11 @@ public interface ResourceService extends IService<Resource> {
     /**
      * 删除资源（软删除）
      */
-    Boolean removeResource(Integer id,Integer userId);
+    Boolean removeResource(Integer id,Integer userId,Integer role);
 
     /**
      * 批量删除资源
      */
-    Boolean removeResources(List<Integer> ids,Integer userId);
+    Boolean removeResources(List<Integer> ids,Integer userId,Integer role);
 
 }

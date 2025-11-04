@@ -182,3 +182,8 @@ select:hover {
 .ant-tooltip {
   font-size: var(--text-sm);
 }
+
+/* 卡片 */
+.ant-card {
+  font-size: var(--text-sm);
+}

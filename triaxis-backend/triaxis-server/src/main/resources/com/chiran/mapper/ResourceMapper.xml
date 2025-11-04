@@ -145,19 +145,19 @@
 
         <!-- 排序 -->
         <choose>
-            <when test="dto.orderBy == 0">
+            <when test="dto.orderBy == 1">
                 ORDER BY r.publish_time DESC
             </when>
-            <when test="dto.orderBy == 1">
+            <when test="dto.orderBy == 2">
                 ORDER BY r.collect_count DESC
             </when>
-            <when test="dto.orderBy == 2">
+            <when test="dto.orderBy == 3">
                 ORDER BY r.download_count DESC
             </when>
-            <when test="dto.orderBy == 3">
+            <when test="dto.orderBy == 4">
                 ORDER BY r.like_count DESC
             </when>
-            <when test="dto.orderBy == 4">
+            <when test="dto.orderBy == 5">
                 ORDER BY (r.download_count * 0.3 + r.collect_count * 0.2 + r.like_count * 0.5) DESC
             </when>
             <otherwise>

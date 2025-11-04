@@ -5,10 +5,9 @@ import { getLoginData } from "../../utils/localStorage"
 import { useApi } from "../common/useApi"
 
 //登出
-export const useLogout = (params, options = {}) => {
+export const useLogout = (options = {}) => {
   return useApi(logout, {
     config: apiConfigs.auth.logout,
-    params,
     isMutation: true,
     ...options
   })
@@ -16,31 +15,27 @@ export const useLogout = (params, options = {}) => {
 
 
 //账户登录
-export const useLoginByCount = (params, options = {}) => {
+export const useLoginByCount = (options = {}) => {
   return useApi(loginCount, {
     config: apiConfigs.auth.login,
-    params,
     isMutation: true,
     ...options
   })
 }
 
 //手机号登录
-export const useLoginByMobile = (params, options = {}) => {
+export const useLoginByMobile = (options = {}) => {
   return useApi(loginMobile, {
     config: apiConfigs.auth.login,
-    params,
     isMutation: true,
     ...options
   })
 }
 
 //自动登录
-export const useAutoLogin = (params, options = {}) => {
-  const { accessToken } = getLoginData()
+export const useAutoLogin = (options = {}) => {
   return useApi(validate, {
     config: apiConfigs.auth.auto,
-    params: { accessToken, ...params },
     isMutation: true,
     ...options
   })

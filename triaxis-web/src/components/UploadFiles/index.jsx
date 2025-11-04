@@ -20,41 +20,18 @@ import DraggableUploadListItem from '../../components/DraggableUploadListItem';
 import { logger } from '../../utils/logger';
 import { uploadFile } from '../../api/modules/common';
 import { useMessage } from '../../components/AppProvider';
-import { useUpload } from '../../hooks/api/common';
+import { useUploadFile } from '../../hooks/api/common';
 import { getFileExtension } from '../../utils/error/commonUtil';
+import service from '../../utils/api/service';
+import { useMutation } from '@tanstack/react-query';
+import { fileConfig } from '../../utils/constant/validate';
 const { Dragger } = Upload;
 
 export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
   const form = Form.useFormInstance();
   const messageApi = useMessage();
-  const { mutate: doUpload, handleSuccess, handleError } = useUpload();
-  // 文件类型和大小限制配置
-  const fileConfig = {
-    1: { // 资源文件
-      maxCount: 10,
-      maxSize: 500 * 1024 * 1024, // 500MB
-      accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.psd',
-      types: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'zip', 'rar', 'jpg', 'jpeg', 'png', 'gif', 'psd']
-    },
-    2: { // 课程文件
-      maxCount: 1,
-      maxSize: 2 * 1024 * 1024 * 1024, // 2GB
-      accept: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
-      types: ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']
-    },
-    3: { // 封面图片
-      maxCount: 1,
-      maxSize: 50 * 1024 * 1024,
-      accept: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
-      types: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    },
-    4: { // 预览图片
-      maxCount: 4,
-      maxSize: 50 * 1024 * 1024, // 50MB
-      accept: 'image/*,.jpg,.jpeg,.png,.gif,.webp',
-      types: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    }
-  };
+  const { mutateAsync: doUpload, handleSuccess, handleError } = useUploadFile();
+
   const getType = (type) => {
     switch (type) {
       case 1:
@@ -66,12 +43,6 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
         return 'images';
     }
   }
-  const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
-  };
   // 文件、图片上传校验
   const beforeUploadCustom = (file, type = 1) => {
     // 文件类型校验
@@ -83,8 +54,9 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
       messageApi.error(`不支持的文件格式: ${fileExtension}，请上传 ${config.types.join(', ')} 格式的文件`);
       return Upload.LIST_IGNORE;
     }
-    // 文件数量校验
-    const list = form.getFieldValue(getType(type));
+    // 文件数量校验,注意首次上传的时候fileList是undefined
+    const list = form.getFieldValue(getType(type)) || [];
+    console.log(list);
     if (list.length >= config.maxCount) {
       messageApi.error(`最多只能上传 ${config.maxCount} 个文件`);
       return Upload.LIST_IGNORE;
@@ -103,31 +75,18 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
   //上传单个文件、图片
   const uploadSingleFile = async (file, onProgress) => {
     logger.debug("上传文件或图片", file);
-
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      uploadFile({
-        formData, onProgress: (progressEvent) => {
-          // 修复进度回调格式
-          if (progressEvent.total) {
-            const percent = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            onProgress({ percent }, file);
-          }
+    const formData = new FormData();
+    formData.append('file', file);
+    return doUpload({
+      formData, onProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress({ percent }, file);
         }
-      }).then((data) => {
-        handleSuccess(data)
-        logger.debug('上传成功:', data);
-        resolve(data);
-      }).catch((error) => {
-        handleError(error);
-        logger.error('上传失败:', error);
-        reject(error);
-      })
-
-    });
+      }
+    })
   };
   //文件上传
   const fileCustomRequest = async (options) => {
@@ -149,15 +108,17 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
       form.setFieldValue("file", newFileList);
       onSuccess(updatedFile, file);
     } catch (error) {
+      console.log("失败")
       onError(error);
       messageApi.error(`${file.name} 上传失败`);
     }
-  };
+  }
+
   //文件修改
   const handleFileChange = ({ file, fileList: newFileList, event }) => {
     logger.debug("文件变化:", {
       fileStatus: file.status,
-      fileList
+      newFileList
     });
 
     const filteredFileList = newFileList.map(item => {
@@ -198,9 +159,9 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     progress: {
       strokeColor: {
         '0%': '#e3ece3',
-        '100%': '#87d068',
+        '100%': '#aadbaaff',
       },
-      size: 3,
+      strokeWidth: 3,
       format: (percent) => percent && `${parseFloat(percent.toFixed(2))}%`,
     },
     itemRender: (originNode, file) => (

@@ -54,14 +54,14 @@ const FilterButton = ({ item, isSelected, onClick }) => {
     </button>
   );
 };
-const OrderButton = ({ handleSortChange, list = [], value, className }) => {
+const OrderButton = ({ handleSortChange, list = [], size = 'large', value, className }) => {
   return (
     <div className="flex items-center space-x-2">
       <Space spacing='loose' align='start' >
         <RadioGroup
           onChange={(e) => handleSortChange(e.target.value)}
           type='button'
-          buttonSize='large'
+          buttonSize={size}
           value={value}
           aria-label="单选组合示例"
           name="demo-radio-large"
