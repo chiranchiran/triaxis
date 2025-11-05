@@ -1,19 +1,20 @@
 export const SORT_OPTIONS = [
   { id: 1, name: '最新发布' },
-  { id: 2, name: '收藏量' },
-  { id: 3, name: '下载量' },
-  { id: 4, name: '点赞量' },
+  { id: 2, name: '最多点赞' },
+  { id: 3, name: '最多回复' },
+  { id: 4, name: '最多查看' },
   { id: 5, name: '综合排序' }
 ];
 
 export const POST_ORDER = [
   { id: 1, name: '最新发布' },
   { id: 2, name: '最多点赞' },
-  { id: 3, name: '最多回复' }
+  { id: 3, name: '最多回复' },
+  { id: 4, name: '综合排序' }
 ];
 export const BOUNTY_ORDER = [
-  { id: 1, name: '已解决' },
-  { id: 2, name: '未解决' },
+  { id: true, name: '已解决' },
+  { id: false, name: '未解决' },
 ];
 
 export const resourceFilterList = [

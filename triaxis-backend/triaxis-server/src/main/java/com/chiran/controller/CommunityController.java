@@ -1,10 +1,13 @@
 package com.chiran.controller;
 
 import com.chiran.bo.CategoryBO;
+import com.chiran.dto.CommunitySearchDTO;
 import com.chiran.result.PageResult;
 import com.chiran.result.Result;
 
 import com.chiran.service.CommunityTypesService;
+import com.chiran.service.PostService;
+import com.chiran.vo.CommunitySearchVO;
 import com.chiran.vo.CommunityTypesVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +32,8 @@ public class CommunityController {
 
     @Autowired
     private CommunityTypesService communityTypesService;
+    @Autowired
+    private PostService postService;
 
     /**
      * 获取所有分类
@@ -42,18 +47,18 @@ public class CommunityController {
         return Result.success(types);
     }
 
-//
-//    /**
-//     * 查询资源
-//     */
-//    @GetMapping("/search")
-//    public Result<PageResult> getCommunitys(CommunitySearchDTO communitySearchDTO,HttpServletRequest request) {
-//        communitySearchDTO.setUserId((Integer)request.getAttribute("userId"));
-//        log.debug("搜索资源，参数是{}", communitySearchDTO);
-//        PageResult<CommunityVO> pageResult = communityService.getCommunitys(communitySearchDTO);
-//        return Result.success(pageResult);
-//    }
-//
+
+    /**
+     * 查询资源
+     */
+    @GetMapping("/search")
+    public Result<CommunitySearchVO> getPosts(CommunitySearchDTO communitySearchDTO, HttpServletRequest request) {
+        communitySearchDTO.setUserId((Integer) request.getAttribute("userId"));
+        log.debug("搜索帖子，参数是{}", communitySearchDTO);
+        CommunitySearchVO communitySearchVO = postService.getPosts(communitySearchDTO);
+        return Result.success(communitySearchVO);
+    }
+
 //    /**
 //     * 查看某个资源
 //     */

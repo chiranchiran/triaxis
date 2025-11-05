@@ -3,7 +3,7 @@ import './index.less'
 import { Button } from 'antd';
 import { RadioGroup, Radio } from '@douyinfe/semi-ui';
 import { Space } from '@douyinfe/semi-ui';
-
+import { HeartOutlined, HeartFilled, MessageOutlined, UserOutlined, MoreOutlined, LoadingOutlined, StarOutlined, StarFilled, EyeOutlined } from '@ant-design/icons';
 const MyButton = ({ size = 'small', loading = false, onClick, type, children, icon, className }) => {
 
   const getCurrentSize = (size) => {
@@ -12,6 +12,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
       case 'middle': return "h-12 w-32 px-4"
       case 'large': return "h-12 w-40 px-4"
       case 'long': return "!h-7 "
+      case 'more': return "!h-9"
     }
   }
   const getType = (type) => {
@@ -30,7 +31,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
   return (
     <Button
       type="text"
-      size={size === 'long' || size === 'large' ? 'large' : 'middle'}
+      size={size === 'long' || size === 'large' || size === 'more' ? 'large' : 'middle'}
       onClick={onClick}
       disabled={loading}
       icon={icon}
@@ -76,6 +77,57 @@ const OrderButton = ({ handleSortChange, list = [], size = 'large', value, class
       </Space>
     </div>)
 }
+const ActionButton = ({ config, id, targetType = 1, actionFn, data, gap = 6 }) => {
+  const { hasLike = true, hasCollect = true, hasReply = true, isLiked = false, isCollected = false, isReply = true, hasView = false } = config
+  const { handleLike = null, likeLoading = false, handleCollect = null, collectLoading = false, handleReply = null } = actionFn
+  const { likeCount = 0, collectCount = 0, replyCount = 0, viewCount = 0 } = data
+  return (
+    <div className={`flex items-center gap-${gap}`}>
+      {
+        hasView &&
+        <button
+          className="flex cursor-pointer items-center gap-1 text-secondary transition-colors"
+        >
+          <EyeOutlined />{viewCount}
+        </button>
+      }
+      {
+        hasLike && <button
+          onClick={() => handleLike(id)}
+          disabled={likeLoading}
+          className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-like" : "text-secondary hover:!text-like"
+            }`}
+        >  {isLiked ? <HeartFilled /> : <HeartOutlined />}
+          {likeCount}
+        </button>
+      }
+      {
+        hasCollect &&
+        <button
+          onClick={() => handleCollect(id)}
+          disabled={collectLoading}
+          className={`flex items-center gap-1 cursor-pointer transition-colors ${isCollected ? "text-rate" : "text-secondary hover:!text-like"
+            }`}
+        >  {isLiked ? <StarFilled /> : <StarOutlined />}
+          {collectCount}
+        </button>
+      }{
+        hasReply &&
+        <button
+          onClick={isReply ? () => handleReply(id) : null}
+          className="flex cursor-pointer items-center gap-1 text-secondary transition-colors"
+        >
+          <MessageOutlined />{replyCount}
+        </button>
+      }
 
 
-export { MyButton, FilterButton, OrderButton }
+
+
+      <MoreOutlined className="text-secondary cursor-pointer" />
+    </div>
+  )
+}
+
+
+export { MyButton, FilterButton, OrderButton, ActionButton }

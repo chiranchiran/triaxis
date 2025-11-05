@@ -144,7 +144,7 @@ select:hover {
   max-width: 100%;
   line-height: calc(1.5rem - var(--ant-line-width) * 2);
   margin-right: 8px;
-  font-size: var(--text-base);
+  font-size: small;
   background-color: var(--accent-green-ribbon);
 }
 

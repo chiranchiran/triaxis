@@ -15,7 +15,7 @@ function News({ newsData, topicData }) {
               <List.Item.Meta
                 title={
                   <div className="flex items-center space-x-3">
-                    <Link to={`/community/posts/${item.id}`} className="text-main text-base">{item.title}</Link>
+                    <Link to={`/community/posts/${item.id}`} className="text-main text-base font-medium"># {item.title}</Link>
                     {item.hot && <Tag className="tag-orange">热门</Tag>}
                     <Tag className="tag-blue">{item.tag}</Tag>
                   </div>

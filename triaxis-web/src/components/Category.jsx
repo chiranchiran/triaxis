@@ -189,6 +189,9 @@ export default function Category({
         filterConfigs.map((config, index) => (
           <TypeSelect key={config.type || index} config={config} />
         ))}
+      {
+        isError && <p className='text-center text-lg'>出现错误，暂无搜索项</p>
+      }
       {hasOrder && (
         <div className="flex items-start border-t border-main pt-4">
           <span className="text-sm font-medium text-main mr-4 text-nowrap mt-1">
@@ -206,8 +209,6 @@ export default function Category({
           </div>
         </div>)
 
-      }{
-        isError && <p className='text-center text-lg'>出现错误，暂无搜索项</p>
       }
     </div>
 

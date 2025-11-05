@@ -6,7 +6,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { useLike } from '../hooks/api/common';
 import { useGetReviews, useGetReviewReplies } from '../hooks/api/reviews';
 import { Radio, RadioGroup } from '@douyinfe/semi-ui';
-import { MyButton, OrderButton } from './MyButton';
+import { ActionButton, MyButton, OrderButton } from './MyButton';
 import { logger } from '../utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { POST_ORDER } from '../utils/constant/order';
@@ -216,24 +216,14 @@ const Review = ({ targetType, targetId }) => {
                           </span>
                           <span className="font-semibold text-secondary cursor-pointer" onClick={() => setReplyContent({ content: "", id })}>回复</span>
                         </div>
-                        <div className="flex items-center gap-6">
-                          <button
-                            onClick={() => handleLike(id)}
-                            disabled={likeLoading}
-                            className={`flex items-center gap-1 cursor-pointer transition-colors ${isLiked ? "text-like" : "text-secondary hover:!text-like"
-                              }`}
-                          >  {isLiked ? <HeartFilled /> : <HeartOutlined />}
-                            {likeCount}
-                          </button>
-                          <button
-                            onClick={() => toggleReplies(id)}
-                            className="flex cursor-pointer items-center gap-1 text-secondary transition-colors"
-                          >
-                            <MessageOutlined />{replyCount}
-                          </button>
-
-                          <MoreOutlined className="text-secondary cursor-pointer" />
-                        </div>
+                        <ActionButton id={id} targetType={4} data={{ likeCount, replyCount }}
+                          config={{
+                            hasCollect: false, isLiked
+                          }}
+                          actionFn={{
+                            handleLike, likeLoading, handleReply: toggleReplies
+                          }}
+                        />
                       </div>
                       {/* 回复输入框：当前回复该主评论时显示 */}
                       <Answer id={id} username={username} />

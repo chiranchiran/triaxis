@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.PostMapper">
+
+    <resultMap id="PostSearchVOMap" type="com.chiran.bo.PostSearchBO">
+        <!-- 映射资源详情 -->
+        <association property="postDetail" javaType="com.chiran.bo.PostDetailBO">
+            <id property="id" column="id"/>
+            <result property="title" column="title"/>
+            <result property="description" column="description"/>
+            <result property="urgency" column="urgency"/>
+            <result property="isSolved" column="is_solved"/>
+            <result property="isRecommended" column="is_recommended"/>
+            <result property="price" column="price"/>
+            <result property="viewCount" column="view_count"/>
+            <result property="collectCount" column="collect_count"/>
+            <result property="likeCount" column="like_count"/>
+            <result property="replyCount" column="reply_count"/>
+            <result property="deadline" column="deadline"/>
+            <result property="solvedTime" column="solved_time"/>
+            <result property="publishTime" column="publish_time"/>
+            <result property="updateTime" column="update_time"/>
+            <result column="topic" property="topic"/>
+            <result column="subject" property="subject"/>
+        </association>
+
+        <!-- 映射上传者信息 -->
+        <association property="uploader" javaType="com.chiran.bo.UserBO">
+            <result property="userId" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+            <result column="school" property="school"/>
+            <result column="grade" property="grade"/>
+            <result column="major" property="major"/>
+        </association>
+
+        <!-- 映射用户行为状态 -->
+        <association property="userActions" javaType="com.chiran.bo.UserActionsBO">
+            <result property="isLiked" column="isLiked"/>
+            <result property="isCollected" column="isCollected"/>
+        </association>
+    </resultMap>
+
+    <select id="searchPosts" resultMap="PostSearchVOMap">
+        SELECT
+        p.id,
+        p.title,
+        p.description,
+        p.user_id,
+        p.urgency,
+        p.is_solved,
+        p.is_recommended,
+        p.price,
+        p.deadline,
+        p.view_count,
+        p.collect_count,
+        p.like_count,
+        p.reply_count,
+        p.solved_time,
+        p.publish_time,
+        p.update_time,
+        u.username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major,
+        t.name AS topic,
+        s.name AS subject,
+        -- 是否点赞：true=已点赞，false=未点赞
+        EXISTS(
+        SELECT 1 FROM user_likes ul
+        WHERE ul.target_id = p.id AND ul.target_type = 3
+        AND ul.user_id = #{dto.userId} AND ul.deleted = 0
+        ) AS isLiked,
+        -- 是否收藏：true=已收藏，false=未收藏
+        EXISTS(
+        SELECT 1 FROM user_collections uf
+        WHERE uf.target_id = p.id AND uf.target_type = 3
+        AND uf.user_id = #{dto.userId} AND uf.deleted = 0
+        ) AS isCollected
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id AND u.deleted = 0
+        LEFT JOIN topics t ON p.topic_id = t.id AND t.deleted = 0
+        LEFT JOIN subjects s ON p.topic_id = s.id AND s.deleted = 0
+        WHERE p.deleted = 0
+        AND p.status = 3   <!-- 只查询已发布的资源 -->
+
+        <if test="dto.isSolved != null">
+            AND p.is_solved = #{dto.isSolved}
+        </if>
+        <if test="dto.subjectId != null">
+            AND p.subject_id = #{dto.subjectId}
+        </if>
+        <if test="dto.type != null">
+            AND p.type = #{dto.type}
+        </if>
+
+        <!-- 使用 EXISTS 替代 IN 查询 -->
+        <if test="dto.topicIds != null and dto.topicIds.size() > 0">
+            AND p.topic_id IN
+            <foreach collection="dto.topicIds" item="topic" open="(" close=")" separator=",">
+                #{topic}
+            </foreach>
+        </if>
+
+        <if test="dto.search != null and dto.search != ''">
+            AND (
+            p.title LIKE CONCAT('%', #{dto.search}, '%')
+            OR p.description LIKE CONCAT('%', #{dto.search}, '%')
+            OR p.content LIKE CONCAT('%', #{dto.search}, '%')
+            )
+        </if>
+        GROUP BY
+
+        p.id,p.publish_time
+        ORDER BY
+        <!-- 排序 -->
+        <choose>
+            <when test="dto.orderBy == 1"> p.publish_time DESC</when>
+            <when test="dto.orderBy == 2">p.like_count DESC</when>
+            <when test="dto.orderBy == 3">p.reply_count DESC</when>
+            <when test="dto.orderBy == 4">p.view_count DESC</when>
+            <when test="dto.orderBy == 5">(p.view_count * 0.3 + p.collect_count * 0.2 + p.like_count * 0.5) DESC</when>
+            <otherwise>p.publish_time DESC</otherwise>
+        </choose>
+    </select>
+</mapper>

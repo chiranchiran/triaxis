@@ -25,8 +25,6 @@
   padding: 0 0;
 }
 .bounty a {
-  color: var(--primary-dark);
-}
-.bounty a.postsMore:hover {
-  transform: none;
+  color: var(--text-main);
+  font-weight: 600;
 }

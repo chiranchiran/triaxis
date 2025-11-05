@@ -32,6 +32,10 @@
   background-color: var(--primary-50) !important;
 }
 
+.bg-blue-light {
+  background-color: var(--bg-blue-light) !important;
+}
+
 .bg-like {
   background-color: var(--bg-like) !important;
   color: var(--text-like);
@@ -147,47 +151,49 @@
   box-shadow: var(--shadow-lg);
 }
 
-.tag-orange {
-  font-size: small !important;
-  color: var(--accent-orange-dark) !important;
-  background: var(--accent-orange-light) !important;
-  border-color: var(--accent-orange-border) !important;
+.ant-tag.tag-orange {
+  color: var(--accent-orange-dark);
+  background: var(--accent-orange-light);
+  border: 1px solid var(--accent-orange-border);
 
 }
 
-.tag-blue {
-  color: var(--primary-dark) !important;
-  font-size: small !important;
-  background: var(--primary-light) !important;
-
-  border-color: var(--primary-border) !important;
+.ant-tag.tag-blue {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
 }
 
-.tag-green {
-  font-size: small !important;
-  color: var(--accent-green-dark) !important;
-  background: var(--accent-green-light) !important;
-  border-color: var(--accent-green-border) !important;
+.ant-tag.tag-green {
+  color: var(--accent-green-dark);
+  background: var(--accent-green-light);
+  border: 1px solid var(--accent-green-border);
+}
+
+.ant-tag.tag-red {
+  color: var(--text-like);
+  background: var(--bg-like);
+  border: 1px solid var(--border-like);
 }
 
 .ribbon-orange {
-  color: var(--bg-elevated) !important;
+  color: var(--bg-elevated);
 
-  border-color: var(--accent-orange-ribbon) !important;
+  border-color: var(--accent-orange-ribbon);
 
-  background: var(--accent-orange-ribbon) !important;
+  background: var(--accent-orange-ribbon);
 }
 
 .ribbon-green {
-  color: var(--bg-elevated) !important;
-  border-color: var(--accent-green-ribbon) !important;
-  background: var(--accent-green-ribbon) !important;
+  color: var(--bg-elevated);
+  border-color: var(--accent-green-ribbon);
+  background: var(--accent-green-ribbon);
 }
 
 .ribbon-blue {
   color: var(--bg-elevated);
   border-color: var(--primary);
-  background: var(--primary) !important;
+  background: var(--primary);
 }
 
 

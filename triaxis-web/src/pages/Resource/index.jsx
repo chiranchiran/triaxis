@@ -29,7 +29,7 @@ const Resource = () => {
     search: "",
     page: 1,
     pageSize: 12,
-    orderBy: 0
+    orderBy: 1
   });
 
   // 筛选条件和搜索参数状态
@@ -147,7 +147,7 @@ const Resource = () => {
               >
                 <div className="space-y-2">
                   {/* 描述 */}
-                  <p className="text-main text-sm line-clamp-2 leading-5">
+                  <p className="text-main text-sm line-clamp-2 leading-5 h-10">
                     {description}
                   </p>
 

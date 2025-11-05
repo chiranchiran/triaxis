@@ -30,6 +30,7 @@ html[data-theme='light'] {
   --bg-dark: #1e2939;
   --bg-dark-hover: #1e2939;
   --bg-hover: #d0d1d4;
+  --bg-blue-light: #f4faff;
 
 
   --text: #1e293b;
@@ -47,6 +48,7 @@ html[data-theme='light'] {
 
   --bg-like: #f6dede;
   --text-like: #da5c5c;
+  --border-like: #e99c9c;
   --bg-score: #f3ede0;
   --text-score: #af9b02;
   --text-rate: #fadb14;

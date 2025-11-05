@@ -69,6 +69,7 @@ AND r.target_id = #{targetId}
             <when test="orderBy == 1">r.publish_time DESC</when>
             <when test="orderBy == 2">r.like_count DESC</when>
             <when test="orderBy == 3">r.reply_count DESC</when>
+            <when test="orderBy == 4">(r.reply_count * 0.5 + r.like_count * 0.5) DESC</when>
             <otherwise>r.publish_time DESC</otherwise>
         </choose>
     </select>
