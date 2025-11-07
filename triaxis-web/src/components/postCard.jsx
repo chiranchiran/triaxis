@@ -42,7 +42,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import { useCollect, useLike } from '../hooks/api/common';
 dayjs.extend(relativeTime);
 
-const urgencyMap = {
+export const urgencyMap = {
   1: { color: 'tag-blue', text: '一般' },
   2: { color: 'tag-orange', text: '紧急' },
   3: { color: 'tag-red', text: '非常紧急' }
@@ -122,14 +122,13 @@ export const BountyPost = ({ post, handleLike = null, handleCollect = null }) =>
 
           </div>
           <div className='flex flex-col items-start gap-0'>
-            <div className=' text-main flex gap-3 items-end'>
-              <div className='font-bold cursor-pointer' title={username}>
+            <div className='flex gap-4 items-end text-secondary text-xs'>
+              <div className='cursor-pointer text-main font-semibold text-sm' title={username}>
                 {subUsername(username, 15)}
               </div>
-              <div className='flex text-secondary justify-start flex-wrap text-xs'>
-                {[school, major, grade].filter(Boolean).join(" / ")}
-              </div>
+              {[school, major, grade].filter(Boolean).join(" / ")}
             </div>
+
             <span className='text-xs'> {dayjs(publishTime, "YYYY.MM.DD HH:mm:ss").fromNow()}</span>
           </div>
         </div>
@@ -228,13 +227,11 @@ export const NormalPost = ({ post, handleLike = null, handleCollect = null }) =>
 
         </div>
         <div className='flex flex-col items-start gap-1'>
-          <div className=' text-main flex gap-3 items-end'>
-            <div className='font-bold cursor-pointer' title={username}>
+          <div className='flex gap-4 items-end text-secondary text-xs'>
+            <div className='cursor-pointer text-main font-semibold text-sm' title={username}>
               {subUsername(username, 15)}
             </div>
-            <div className='flex text-secondary justify-start flex-wrap text-xs'>
-              {[school, major, grade].filter(Boolean).join(" / ")}
-            </div>
+            {[school, major, grade].filter(Boolean).join(" / ")}
           </div>
           <span className='text-xs'> {dayjs(publishTime, "YYYY.MM.DD HH:mm:ss").fromNow()}</span>
         </div>
@@ -344,13 +341,11 @@ export const SquarePost = ({ post, handleLike = null, handleCollect = null }) =>
 
           </div>
           <div className='flex flex-col items-start gap-1'>
-            <div className=' text-main flex gap-3 items-end'>
-              <div className='font-bold cursor-pointer' title={username}>
+            <div className='flex gap-4 items-end text-secondary text-sm'>
+              <div className='cursor-pointer text-main text-base font-semibold' title={username}>
                 {subUsername(username, 15)}
               </div>
-              <div className='flex text-secondary justify-start flex-wrap text-sm'>
-                {[school, major, grade].filter(Boolean).join(" / ")}
-              </div>
+              {[school, major, grade].filter(Boolean).join(" / ")}
             </div>
             <span className='text-xs'> {dayjs(publishTime, "YYYY.MM.DD HH:mm:ss").fromNow()}</span>
           </div>

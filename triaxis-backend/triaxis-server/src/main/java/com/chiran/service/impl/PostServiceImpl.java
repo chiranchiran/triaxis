@@ -8,16 +8,16 @@ import com.chiran.bo.*;
 import com.chiran.dto.*;
 import com.chiran.entity.*;
 import com.chiran.mapper.PostMapper;
-import com.chiran.mapper.ResourceImageMapper;
-import com.chiran.mapper.ResourceMapper;
+import com.chiran.mapper.PostImageMapper;
+import com.chiran.mapper.PostMapper;
 import com.chiran.mapper.TagMapper;
 import com.chiran.result.PageResult;
 import com.chiran.service.*;
 import com.chiran.utils.BeanUtil;
 import com.chiran.utils.ExceptionUtil;
 import com.chiran.vo.CommunityHotVO;
+import com.chiran.vo.CommunityPostVO;
 import com.chiran.vo.CommunitySearchVO;
-import com.chiran.vo.ResourceVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,26 +38,28 @@ import java.util.List;
 public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements PostService {
     @Autowired
     private PostMapper postMapper;
+    @Autowired
+    private UserActionService userActionService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private PostImageMapper postImageMapper;
+    @Autowired
+    private ResourceTypesService resourceTypesService;
+    @Autowired
+    private CommunityTypesService communityTypesService;
+    @Autowired
+    private UserTagService userTagService;
+    @Autowired
+    private TagMapper tagMapper;
 //    @Autowired
-//    private ResourceTypesService resourceTypesService;
+//    private PostCategoryService postCategoryService;
 //    @Autowired
-//    private UserActionService userActionService;
+//    private PostPathService postPathService;
 //    @Autowired
-//    private UserService userService;
+//    private PostImageService postImageService;
 //    @Autowired
-//    private ResourceImageMapper resourceImageMapper;
-//    @Autowired
-//    private UserTagService userTagService;
-//    @Autowired
-//    private TagMapper tagMapper;
-//    @Autowired
-//    private ResourceCategoryService resourceCategoryService;
-//    @Autowired
-//    private ResourcePathService resourcePathService;
-//    @Autowired
-//    private ResourceImageService resourceImageService;
-//    @Autowired
-//    private ResourceToolService resourceToolService;
+//    private PostToolService postToolService;
 
     @Override
     public CommunitySearchVO getPosts(CommunitySearchDTO dto) {
@@ -126,136 +128,176 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
         return resultBounty;
     }
 
+    @Override
+    public CommunityPostVO getPost(Integer id, Integer userId) {
+        Post post = this.getById(id);
+        if (post == null || post.getDeleted() == 1) {
+            throw ExceptionUtil.create(14001);
+        }
+
+        // 增加查看次数
+        this.lambdaUpdate()
+                .set(Post::getViewCount, post.getViewCount() + 1)
+                .eq(Post::getId, id)
+                .update();
+
+        PostDetailBO postDetailBO = new PostDetailBO();
+        BeanUtils.copyProperties(post, postDetailBO);
+        Integer hot = post.getViewCount() + post.getLikeCount() * 2 + post.getReplyCount() * 3 + post.getCollectCount() * 2;
+        postDetailBO.setHot(hot);
+        // 查询相关的的缩略图
+        LambdaQueryWrapper<PostImage> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(PostImage::getId, PostImage::getPath).eq(PostImage::getPostId, id).orderByAsc(PostImage::getCreateTime);
+        List<PostImage> list = postImageMapper.selectList(queryWrapper);
+        List<CategoryBO> images = BeanUtil.copyList(list, CategoryBO::new);
+        // 查询分类信息
+
+        PostCategoryBO postCategoryBO = new PostCategoryBO();
+        postCategoryBO.setSubject(resourceTypesService.getSubjectName(post.getSubjectId()));
+        postCategoryBO.setTopic(communityTypesService.getTopicName(post.getTopicId()));
+        CommunityPostVO postVO = CommunityPostVO.builder()
+                .detail(postDetailBO)
+                .uploader(userService.selectUploader(post.getUserId()))
+                .userActions(userActionService.checkAllAction(userId, id, 3))
+                .images(images)
+                .tags(userTagService.selectTags(id, 3))
+                .category(postCategoryBO)
+                .build();
+
+
+        return postVO;
+    }
+
 //    @Override
-//    public ResourceVO getResourceDetail(Integer id, Integer userId) {
-//        Resource resource = this.getById(id);
-//        if (resource == null || resource.getDeleted() == 1) {
+//    public PostVO getPostDetail(Integer id, Integer userId) {
+//        Post post = this.getById(id);
+//        if (post == null || post.getDeleted() == 1) {
 //            throw ExceptionUtil.create(14001);
 //        }
 //
 //        // 增加查看次数
 //        this.lambdaUpdate()
-//                .set(Resource::getViewCount, resource.getViewCount() + 1)
-//                .eq(Resource::getId, id)
+//                .set(Post::getViewCount, post.getViewCount() + 1)
+//                .eq(Post::getId, id)
 //                .update();
 //
-//        ResourceSearchBO resourceSearchBO = new ResourceSearchBO();
-//        BeanUtils.copyProperties(resource, resourceSearchBO);
-////查询相关的的缩略图
-//        LambdaQueryWrapper<ResourceImage> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.select(ResourceImage::getId, ResourceImage::getPath).eq(ResourceImage::getResourceId, id).orderByAsc(ResourceImage::getCreateTime);
-//        List<ResourceImage> list = resourceImageMapper.selectList(queryWrapper);
+//        PostSearchBO postSearchBO = new PostSearchBO();
+//        BeanUtils.copyProperties(post, postSearchBO);
+// //查询相关的的缩略图
+//        LambdaQueryWrapper<PostImage> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.select(PostImage::getId, PostImage::getPath).eq(PostImage::getPostId, id).orderByAsc(PostImage::getCreateTime);
+//        List<PostImage> list = postImageMapper.selectList(queryWrapper);
 //        List<CategoryBO> images = BeanUtil.copyList(list, CategoryBO::new);
 //        //查询分类信息
 //
-//        ResourceCategoryBO resourceCategoryBO = resourceTypesService.selectAllCategories(id);
-//        resourceCategoryBO.setRight(resource.getRight());
-//        resourceCategoryBO.setSubject(resourceTypesService.getSubjectName(resource.getSubjectId()));
-//        resourceCategoryBO.setTools(resourceTypesService.getTools(resource.getId()));
+//        PostCategoryBO postCategoryBO = postTypesService.selectAllCategories(id);
+//        postCategoryBO.setRight(post.getRight());
+//        postCategoryBO.setSubject(postTypesService.getSubjectName(post.getSubjectId()));
+//        postCategoryBO.setTools(postTypesService.getTools(post.getId()));
 //
-//        ResourceVO resourceVO = ResourceVO.builder()
-//                .resourceDetail(resourceSearchBO)
-//                .uploader(userService.selectUploader(resource.getUserId()))
+//        PostVO postVO = PostVO.builder()
+//                .postDetail(postSearchBO)
+//                .uploader(userService.selectUploader(post.getUserId()))
 //                .userActions(userActionService.checkAllAction(userId, id, 1))
 //                .images(images)
 //                .tags(userTagService.selectTags(id, 1))
-//                .category(resourceCategoryBO)
+//                .category(postCategoryBO)
 //                .build();
 //
 //
-//        return resourceVO;
+//        return postVO;
 //    }
 //
 //    @Override
 //    @Transactional(rollbackFor = Exception.class)
-//    public Boolean addResource(ResourceDTO dto) {
+//    public Boolean addPost(PostDTO dto) {
 //        //修改文件大小
 //        getSize(dto);
-//        Resource resource = new Resource();
-//        BeanUtils.copyProperties(dto, resource);
-//        resource.setId(null);
-//        this.save(resource);
-//        Integer resourceId = resource.getId();
+//        Post post = new Post();
+//        BeanUtils.copyProperties(dto, post);
+//        post.setId(null);
+//        this.save(post);
+//        Integer postId = post.getId();
 //        //插入tag标签分类和关系
-//        addTags(dto, resourceId,1);
+//        addTags(dto, postId,1);
 //        //插入资源和分类的关系
-//        addCategories(dto, resourceId);
+//        addCategories(dto, postId);
 //        //插入文件路径的关系
-//        addPaths(dto, resourceId);
+//        addPaths(dto, postId);
 //        //插入文件预览图的关系
-//        addImages(dto, resourceId);
+//        addImages(dto, postId);
 //        //插入资源和工具的关系
-//        addTools(dto, resourceId);
+//        addTools(dto, postId);
 //        return true;
 //    }
 //
 //    @Override
 //    @Transactional(rollbackFor = Exception.class)
-//    public Boolean updateResource(ResourceDTO dto) {
-//        Integer resourceId = dto.getId();
+//    public Boolean updatePost(PostDTO dto) {
+//        Integer postId = dto.getId();
 //        //检查权限和资源存在
-//        check(resourceId,dto.getUserId(), dto.getRole());
+//        check(postId,dto.getUserId(), dto.getRole());
 //        //检查文件变化
 //        dto.setSize(null);
 //        if (dto.getFiles() != null) {
 //            getSize(dto);
 //        }
-//        Resource resource = new Resource();
-//        BeanUtils.copyProperties(dto, resource);
+//        Post post = new Post();
+//        BeanUtils.copyProperties(dto, post);
 //        // 更新资源
-//        this.updateById(resource);
+//        this.updateById(post);
 //        // 更新关联的tag
 //        if (dto.getTags() != null) {
 //            //删除旧的关联
 //            userTagService.lambdaUpdate()
-//                    .eq(UserTag::getTagId, resourceId)
+//                    .eq(UserTag::getTagId, postId)
 //                    .eq(UserTag::getTargetType, 1)
 //                    .remove();
 //            if (!dto.getTags().isEmpty()) {
 //                //插入tag标签分类和关系
-//                addTags(dto, resourceId,1);
+//                addTags(dto, postId,1);
 //            }
 //        }
 //        //更新资源分类关系
 //        if (dto.getCategoryIds() != null) {
 //            //删除旧的关联
-//            resourceCategoryService.lambdaUpdate()
-//                    .eq(ResourceCategory::getResourceId, resourceId)
+//            postCategoryService.lambdaUpdate()
+//                    .eq(PostCategory::getPostId, postId)
 //                    .remove();
 //            if (!dto.getCategoryIds().isEmpty()) {
 //                //插入资源和分类的关系
-//                addCategories(dto, resourceId);
+//                addCategories(dto, postId);
 //            }
 //        }
 //        //更新文件路径的关系
 //        if (dto.getFiles() != null) {
 //            //删除旧的关联
-//            resourcePathService.lambdaUpdate()
-//                    .eq(ResourcePath::getResourceId, resourceId)
+//            postPathService.lambdaUpdate()
+//                    .eq(PostPath::getPostId, postId)
 //                    .remove();
 //            if (!dto.getCategoryIds().isEmpty()) {
 //                //插入文件路径的关系
-//                addPaths(dto, resourceId);
+//                addPaths(dto, postId);
 //            }
 //        }
 //        //更新文件预览图的关系
 //        if (dto.getImages() != null) {
-//            resourceImageService.lambdaUpdate()
-//                    .eq(ResourceImage::getResourceId, resourceId)
+//            postImageService.lambdaUpdate()
+//                    .eq(PostImage::getPostId, postId)
 //                    .remove();
 //            if (!dto.getCategoryIds().isEmpty()) {
 //                //插入文件预览图的关系
-//                addImages(dto, resourceId);
+//                addImages(dto, postId);
 //            }
 //        }
 //        //更新资源和工具的关系
 //        if (dto.getToolIds() != null) {
-//            resourceToolService.lambdaUpdate()
-//                    .eq(ResourceTool::getResourceId, resourceId)
+//            postToolService.lambdaUpdate()
+//                    .eq(PostTool::getPostId, postId)
 //                    .remove();
 //            if (!dto.getCategoryIds().isEmpty()) {
 //                //插入资源和工具的关系
-//                addTools(dto, resourceId);
+//                addTools(dto, postId);
 //            }
 //        }
 //        return true;
@@ -263,7 +305,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //
 //    @Override
 //    @Transactional(rollbackFor = Exception.class)
-//    public Boolean removeResource(Integer id, Integer userId, Integer role) {
+//    public Boolean removePost(Integer id, Integer userId, Integer role) {
 //        //检查权限和资源存在
 //        check(id,userId,role);
 //        //删除
@@ -274,7 +316,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //
 //    @Override
 //    @Transactional(rollbackFor = Exception.class)
-//    public Boolean removeResources(List<Integer> ids,Integer userId,Integer role) {
+//    public Boolean removePosts(List<Integer> ids,Integer userId,Integer role) {
 //        if (ids == null || ids.isEmpty()) {
 //            return true;
 //        }
@@ -286,7 +328,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //        }
 //        return true;
 //    }
-//    private void addTags(ResourceDTO dto, Integer resourceId,Integer type) {
+//    private void addTags(PostDTO dto, Integer postId,Integer type) {
 //        List<UserTag> userTagList = new ArrayList();
 //        for (String s : dto.getTags()) {
 //            Tag tag = new Tag();
@@ -298,58 +340,58 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //            userTag.setTagId(tagId);
 //            userTag.setUserId(dto.getUserId());
 //            userTag.setTargetType(type);
-//            userTag.setTargetId(resourceId);
+//            userTag.setTargetId(postId);
 //            userTagList.add(userTag);
 //        }
 //        userTagService.saveBatch(userTagList);
 //    }
-//    private void addCategories(ResourceDTO dto, Integer resourceId) {
-//        List<ResourceCategory> resourceCategoryList = new ArrayList();
+//    private void addCategories(PostDTO dto, Integer postId) {
+//        List<PostCategory> postCategoryList = new ArrayList();
 //        for (Integer id : dto.getCategoryIds()) {
-//            ResourceCategory resourceCategory = new ResourceCategory();
-//            resourceCategory.setCategoryId(id);
-//            resourceCategory.setResourceId(resourceId);
-//            resourceCategoryList.add(resourceCategory);
+//            PostCategory postCategory = new PostCategory();
+//            postCategory.setCategoryId(id);
+//            postCategory.setPostId(postId);
+//            postCategoryList.add(postCategory);
 //        }
-//        resourceCategoryService.saveBatch(resourceCategoryList);
+//        postCategoryService.saveBatch(postCategoryList);
 //    }
-//    private void addPaths(ResourceDTO dto, Integer resourceId) {
-//        List<ResourcePath> resourcePathList = new ArrayList();
+//    private void addPaths(PostDTO dto, Integer postId) {
+//        List<PostPath> postPathList = new ArrayList();
 //        for (UploadFileBO uploadFileBO : dto.getFiles()) {
-//            ResourcePath resourcePath = new ResourcePath();
-//            resourcePath.setResourceId(resourceId);
-//            resourcePath.setSize(uploadFileBO.getSize());
-//            resourcePath.setType(uploadFileBO.getType());
-//            resourcePath.setName(uploadFileBO.getName());
-//            resourcePath.setPath(uploadFileBO.getPath());
-//            resourcePathList.add(resourcePath);
+//            PostPath postPath = new PostPath();
+//            postPath.setPostId(postId);
+//            postPath.setSize(uploadFileBO.getSize());
+//            postPath.setType(uploadFileBO.getType());
+//            postPath.setName(uploadFileBO.getName());
+//            postPath.setPath(uploadFileBO.getPath());
+//            postPathList.add(postPath);
 //        }
-//        resourcePathService.saveBatch(resourcePathList);
+//        postPathService.saveBatch(postPathList);
 //    }
-//    private void addImages(ResourceDTO dto, Integer resourceId) {
-//        List<ResourceImage> resourceImageList = new ArrayList();
+//    private void addImages(PostDTO dto, Integer postId) {
+//        List<PostImage> postImageList = new ArrayList();
 //        for (UploadFileBO uploadFileBO : dto.getImages()) {
-//            ResourceImage resourceImage = new ResourceImage();
-//            resourceImage.setResourceId(resourceId);
-//            resourceImage.setSize(uploadFileBO.getSize());
-//            resourceImage.setType(uploadFileBO.getType());
-//            resourceImage.setName(uploadFileBO.getName());
-//            resourceImage.setPath(uploadFileBO.getPath());
-//            resourceImageList.add(resourceImage);
+//            PostImage postImage = new PostImage();
+//            postImage.setPostId(postId);
+//            postImage.setSize(uploadFileBO.getSize());
+//            postImage.setType(uploadFileBO.getType());
+//            postImage.setName(uploadFileBO.getName());
+//            postImage.setPath(uploadFileBO.getPath());
+//            postImageList.add(postImage);
 //        }
-//        resourceImageService.saveBatch(resourceImageList);
+//        postImageService.saveBatch(postImageList);
 //    }
-//    private void addTools(ResourceDTO dto, Integer resourceId) {
-//        List<ResourceTool> resourceToolList = new ArrayList();
+//    private void addTools(PostDTO dto, Integer postId) {
+//        List<PostTool> postToolList = new ArrayList();
 //        for (Integer id : dto.getToolIds()) {
-//            ResourceTool resourceTool = new ResourceTool();
-//            resourceTool.setResourceId(resourceId);
-//            resourceTool.setToolId(id);
-//            resourceToolList.add(resourceTool);
+//            PostTool postTool = new PostTool();
+//            postTool.setPostId(postId);
+//            postTool.setToolId(id);
+//            postToolList.add(postTool);
 //        }
-//        resourceToolService.saveBatch(resourceToolList);
+//        postToolService.saveBatch(postToolList);
 //    }
-//    private void getSize(ResourceDTO dto) {
+//    private void getSize(PostDTO dto) {
 //        Long size = 0L;
 //        for (UploadFileBO uploadFileBO : dto.getFiles()) {
 //            size += uploadFileBO.getSize();
@@ -362,7 +404,7 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //            throw ExceptionUtil.create(15000, "资源ID不能为空");
 //        }
 //        // 检查资源是否存在
-//        Resource exist = this.getById(id);
+//        Post exist = this.getById(id);
 //        if (exist == null || exist.getDeleted() == 1) {
 //            throw ExceptionUtil.create(15001, "资源不存在或已被删除");
 //        }
@@ -380,20 +422,20 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 //                .remove();
 //
 //        //删除旧的关联
-//        resourceCategoryService.lambdaUpdate()
-//                .eq(ResourceCategory::getResourceId, id)
+//        postCategoryService.lambdaUpdate()
+//                .eq(PostCategory::getPostId, id)
 //                .remove();
 //
-//        resourcePathService.lambdaUpdate()
-//                .eq(ResourcePath::getResourceId, id)
+//        postPathService.lambdaUpdate()
+//                .eq(PostPath::getPostId, id)
 //                .remove();
 //
-//        resourceImageService.lambdaUpdate()
-//                .eq(ResourceImage::getResourceId, id)
+//        postImageService.lambdaUpdate()
+//                .eq(PostImage::getPostId, id)
 //                .remove();
 //
-//        resourceToolService.lambdaUpdate()
-//                .eq(ResourceTool::getResourceId, id)
+//        postToolService.lambdaUpdate()
+//                .eq(PostTool::getPostId, id)
 //                .remove();
 //    }
 }

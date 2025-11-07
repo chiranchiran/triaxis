@@ -136,6 +136,10 @@
   border-color: var(--bg-hover);
 }
 
+.border-primary {
+  border-color: var(--primary);
+}
+
 .border-secondary {
   border-color: var(--bg-gray);
 }
@@ -176,13 +180,32 @@
 
 }
 
+.tag-orange {
+  color: var(--accent-orange-dark);
+  background: var(--accent-orange-light);
+  border: 1px solid var(--accent-orange-border);
+
+}
+
 .ant-tag.tag-blue {
   color: var(--primary-dark);
   background: var(--primary-light);
   border: 1px solid var(--primary-border);
 }
 
+.tag-blue {
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border: 1px solid var(--primary-border);
+}
+
 .ant-tag.tag-green {
+  color: var(--accent-green-dark);
+  background: var(--accent-green-light);
+  border: 1px solid var(--accent-green-border);
+}
+
+.tag-green {
   color: var(--accent-green-dark);
   background: var(--accent-green-light);
   border: 1px solid var(--accent-green-border);

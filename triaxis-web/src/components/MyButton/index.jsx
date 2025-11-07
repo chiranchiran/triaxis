@@ -4,7 +4,7 @@ import { Button } from 'antd';
 import { RadioGroup, Radio } from '@douyinfe/semi-ui';
 import { Space } from '@douyinfe/semi-ui';
 import { HeartOutlined, HeartFilled, MessageOutlined, UserOutlined, MoreOutlined, LoadingOutlined, StarOutlined, StarFilled, EyeOutlined } from '@ant-design/icons';
-const MyButton = ({ size = 'small', loading = false, onClick, type, children, icon, className }) => {
+const MyButton = ({ size = 'small', loading = false, onClick, type, children, icon, className, ...props }) => {
 
   const getCurrentSize = (size) => {
     switch (size) {
@@ -36,8 +36,9 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
       disabled={loading}
       icon={icon}
       className={`${current} my-button transition-all transition-colors ${className}`}
+      {...props}
     >
-      {loading ? `正在${children}` : children}
+      {children}
     </Button>
   )
 }

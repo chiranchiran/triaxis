@@ -4,7 +4,7 @@
 
     <resultMap id="ResourceSearchVOMap" type="com.chiran.vo.ResourceSearchVO">
         <!-- 映射资源详情 -->
-        <association property="resourceDetail" javaType="com.chiran.bo.ResourceSearchBO">
+        <association property="detail" javaType="com.chiran.bo.ResourceSearchBO">
             <id property="id" column="id"/>
             <result property="title" column="title"/>
             <result property="right" column="right"/>

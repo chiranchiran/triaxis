@@ -1,4 +1,4 @@
-export const isDataValid = (data) => {
+export const isArrayValid = (data) => {
   return Array.isArray(data) && data.length > 0;
 };
 //截断字符串，中间用省略号显示
@@ -54,13 +54,13 @@ export const filterNull = (obj) => {
 
 //给数组添加全部选项
 export const addAll = (type, id = null) => {
-  return isDataValid(type)
+  return isArrayValid(type)
     ? [{ id, name: '全部' }, ...type]
     : (type || [])
 };
 //提取文件上传信息
 export const getFile = (list) => {
-  if (!isDataValid(list)) return null
+  if (!isArrayValid(list)) return null
   return list.map(item => ({
     uid: item.uid,
     type: item.type,

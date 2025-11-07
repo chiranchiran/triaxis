@@ -1,6 +1,7 @@
 package com.chiran.mapper;
 
 import com.chiran.bo.CategoryBO;
+import com.chiran.bo.PostCategoryBO;
 import com.chiran.bo.ResourceCategoryBO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -19,6 +20,4 @@ import java.util.List;
 public interface CommunityTypesMapper {
     List<CategoryBO> getTopicLists();
 
-//    ResourceCategoryBO selectAllCategories(@Param("resourceId") Integer resourceId
-//    );
 }

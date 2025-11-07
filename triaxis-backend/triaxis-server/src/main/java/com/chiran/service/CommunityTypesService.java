@@ -20,8 +20,7 @@ public interface CommunityTypesService {
 
     CommunityTypesVO getTypes();
 
-//    List<CategoryBO> getCategorySecondary(Integer subjectId, Integer parentId);
-//    String getSubjectName(Integer subjectId);
+   String getTopicName(Integer topicId);
 //    List<CategoryBO> getTools(Integer id);
 //    ResourceCategoryBO selectAllCategories(Integer id);
 }

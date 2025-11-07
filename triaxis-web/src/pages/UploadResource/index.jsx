@@ -605,7 +605,7 @@ const UploadResource = () => {
                   ]}>
                   <Checkbox>
                     <span className='text-main'>我已阅读并同意</span>
-                    <Link to='' className='text-green'> 《资源上传协议》</Link>
+                    <Link to='' className='text-green'> 《资源课程上传协议》</Link>
                     <span className='text-main'>和</span>
                     <Link to='' className='text-green'> 《版权声明》 </Link>
                   </Checkbox>

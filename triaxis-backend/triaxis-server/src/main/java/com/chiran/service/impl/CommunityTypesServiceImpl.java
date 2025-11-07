@@ -6,6 +6,7 @@ import com.chiran.bo.ResourceCategoryBO;
 import com.chiran.entity.ResourceTool;
 import com.chiran.entity.Subject;
 import com.chiran.entity.Tool;
+import com.chiran.entity.Topic;
 import com.chiran.mapper.*;
 import com.chiran.service.CommunityTypesService;
 import com.chiran.service.ResourceTypesService;
@@ -35,6 +36,8 @@ public class CommunityTypesServiceImpl implements CommunityTypesService {
     @Autowired
     private SubjectMapper subjectMapper;
     @Autowired
+    private TopicMapper topicMapper;
+    @Autowired
     private ResourceToolMapper resourceToolMapper;
     @Autowired
     private ToolMapper toolMapper;
@@ -46,18 +49,13 @@ public class CommunityTypesServiceImpl implements CommunityTypesService {
         return CommunityTypesVO.builder().subjects(subjects).topics(topics).build();
     }
 
-//    @Override
-//    public List<CategoryBO> getCategorySecondary(Integer subjectId, Integer parentId) {
-//        return resourceTypesMapper.getCategorySecondLists(subjectId,parentId);
-//    }
-//
-//    @Override
-//    public String getSubjectName(Integer subjectId) {
-//        LambdaQueryWrapper <Subject> queryWrapper = new LambdaQueryWrapper<>();
-//        queryWrapper.eq(Subject::getId,subjectId).select(Subject::getName);
-//        Subject subject = subjectMapper.selectOne(queryWrapper);
-//        return subject.getName();
-//    }
+   @Override
+   public String getTopicName(Integer topicId) {
+       LambdaQueryWrapper <Topic> queryWrapper = new LambdaQueryWrapper<>();
+       queryWrapper.eq(Topic::getId,topicId).select(Topic::getName);
+       Topic topic = topicMapper.selectOne(queryWrapper);
+       return topic.getName();
+   }
 //
 //    @Override
 //    public List<CategoryBO> getTools(Integer id) {

@@ -62,12 +62,15 @@ const userData = {
   school: '清华大学',
   major: '城乡规划',
   grade: '研究生三年级',
-  joinDate: '2022-03-15',
+  createTime: '2022-03-15',
   followers: 245,
   following: 128,
   posts: 89,
   resources: 34,
   courses: 12,
+  likes: 0,
+
+
   bindAccounts: {
     wechat: true,
     github: false,
@@ -438,22 +441,48 @@ const UserCenter = () => {
     ? chatList
     : messages.filter(msg => msg.type === activeMessageType);
 
+  const { id = null,
+    username = 'zhangming',
+    realName = '张明',
+    avatar = 'https=//api.dicebear.com/7.x/avataaars/svg?seed=1',
+    level = 5,
+    title = '',
+    bio = '',
+    school = '',
+    major = '',
+    grade = '',
+    createTime = null,
+    followers = 0,
+    following = 0,
+    posts = 0,
+    // resources= 0,
+    // courses= 0,
+    likes = 0,
+
+
+    // bindAccounts= {
+    //   wechat= '',
+    //   github= false,
+    //   qq= true,
+    //   weibo= false
+  } = user
+
+
   return (
-    <div className="min-h-screen bg-gray-50" data-theme={theme}>
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <section className="max-w-7xl mx-auto py-4" data-theme={theme}>
+      <div className="">
         {/* 用户信息卡片 */}
-        <div className="mb-8 bg-blue-50 rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div className="mb-8 bg-blue-light rounded-lg p-6 shadow-md">
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-6">
             {/* 头像区域 */}
             <div className="text-center">
-              <Badge count={user.level} offset={[-10, 80]} color="#7fb6f5">
-                <Avatar
-                  size={100}
-                  src={user.avatar}
-                  icon={<UserOutlined />}
-                  className="border-4 border-white shadow-md"
-                />
-              </Badge>
+              <Avatar
+                size={100}
+                src={user.avatar}
+                icon={<UserOutlined />}
+                title={username}
+                className="border-4 border-white shadow-md"
+              />
               <div className="mt-4">
                 <Button
                   type="primary"
@@ -497,7 +526,7 @@ const UserCenter = () => {
 
               <div className="text-sm text-gray-500 flex items-center justify-center md:justify-start">
                 <ClockCircleOutlined className="mr-2" />
-                加入时间：{user.joinDate}
+                加入时间：{user.createTime}
               </div>
             </div>
           </div>
@@ -1461,7 +1490,7 @@ const UserCenter = () => {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </section>
   );
 };
 

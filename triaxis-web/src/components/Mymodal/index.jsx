@@ -126,7 +126,7 @@ export const CancelConfirmButton = ({ onConfirm, onCancel, children, ...buttonPr
   };
 
   return (
-    <MyButton {...buttonProps} onClick={handleClick} type="gray" htmltype="button">
+    <MyButton onClick={handleClick} type="gray" htmltype="button" {...buttonProps}>
       {children || '取消'}
     </MyButton>
   );
@@ -140,7 +140,7 @@ export const SubmitConfirmButton = ({ onConfirm, onCancel, children, ...buttonPr
   };
 
   return (
-    <MyButton {...buttonProps} onClick={handleClick} type="black" htmltype="submit">
+    <MyButton onClick={handleClick} type="black" htmltype="submit" {...buttonProps} >
       {children || '提交'}
     </MyButton>
   );

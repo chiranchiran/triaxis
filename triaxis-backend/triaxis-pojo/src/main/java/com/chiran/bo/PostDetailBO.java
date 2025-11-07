@@ -23,6 +23,7 @@ public class PostDetailBO implements Serializable {
     private String content;
     private Integer type;
     private Integer price;
+    private Integer hot;
     private Integer urgency;
     private Boolean isSolved;
     private Boolean isRecommended;

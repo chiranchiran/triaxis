@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResourceSearchVO implements Serializable {
-    private ResourceSearchBO resourceDetail;
+    private ResourceSearchBO detail;
     private UserBO uploader;
     private UserActionsBO userActions;
 }

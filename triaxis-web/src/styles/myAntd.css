@@ -23,7 +23,6 @@
 input,
 select {
   background-color: var(--bg);
-
 }
 
 input:focus,

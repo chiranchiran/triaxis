@@ -40,8 +40,12 @@ public class UserActionServiceImpl implements UserActionService {
     @Override
     public UserActionsBO checkAllAction(Integer userId, Integer targetId, Integer targetType) {
         UserActionsBO userActionsBO = UserActionsBO.builder().isLiked(checkIsLiked(userId,targetId,targetType))
-                        .isCollected(checkIsCollectd(userId,targetId,targetType))
-                                .isPurchased(checkIsPurchased(userId,targetId,targetType)).build();
+                        .isCollected(checkIsCollectd(userId,targetId,targetType)).build();
+        if(targetType==1||targetType==2){
+            userActionsBO.setIsPurchased(checkIsPurchased(userId,targetId,targetType));
+        } else {
+            userActionsBO.setIsPurchased(true);
+        }
         return userActionsBO;
     }
 

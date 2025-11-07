@@ -30,8 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -51,14 +53,24 @@ public class UserTagServiceImpl extends ServiceImpl<UserTagMapper, UserTag> impl
     @Override
     public List<CategoryBO> selectTags(Integer targetId, Integer targetType) {
         LambdaQueryWrapper<UserTag> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.select(UserTag::getTagId).eq(UserTag::getTargetType,targetType)
-                .eq(UserTag::getTargetId,targetId);
-        List<UserTag> ids = userTagMapper.selectList(queryWrapper);
-        if(ids.isEmpty()){
-            return null;
+        queryWrapper.select(UserTag::getTagId)
+                .eq(UserTag::getTargetType, targetType)
+                .eq(UserTag::getTargetId, targetId);
+
+        List<UserTag> userTagList = userTagMapper.selectList(queryWrapper);
+        if (userTagList.isEmpty()) {
+            return Collections.emptyList(); // 建议返回空列表，而非 null（避免调用处空指针）
         }
-        List<Tag> list = tagMapper.selectBatchIds(ids);
-        List<CategoryBO> tags = BeanUtil.copyList(list, CategoryBO::new);
-        return tags;
+
+        // 提取 tagId 组成 ID 集合（关键修正）
+        List<Integer> tagIds = userTagList.stream()
+                .map(UserTag::getTagId)
+                .collect(Collectors.toList());
+
+        // 用 tagId 集合批量查询 Tag
+        List<Tag> tagList = tagMapper.selectBatchIds(tagIds);
+
+        // 转换为 CategoryBO
+        return BeanUtil.copyList(tagList, CategoryBO::new);
     }
 }

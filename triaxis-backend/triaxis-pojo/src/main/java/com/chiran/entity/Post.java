@@ -50,8 +50,8 @@ public class Post {
     /**
      * 关联主题分类ID
      */
-    @TableField("category_id")
-    private Integer categoryId;
+    @TableField("topic_id")
+    private Integer topicId;
 
     /**
      * 发帖人ID

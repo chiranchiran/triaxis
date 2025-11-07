@@ -1,18 +1,19 @@
 .uploadResource .semi-radioGroup.semi-radioGroup-buttonRadio {
-  background: var(--accent-green-btn);
+  background: var(--accent-orange-btn);
   border-radius: calc(var(--semi-border-radius-large)*1.2);
-  border: 1px solid var(--accent-green-dark);
   font-weight: 400;
   font-size: var(--text-lg);
-
 }
-
 .uploadResource .semi-radio-addon-buttonRadio-large {
   font-size: var(--text-base);
   padding: 6px 16px;
   border-radius: var(--semi-border-radius-large);
 }
-
+.uploadResource .semi-radio-addon-buttonRadio.semi-radio-addon-buttonRadio-checked.semi-radio-addon-buttonRadio-large {
+  font-weight: 600;
+  background: var(--bg-gray-light);
+  color: var(--text);
+}
 .tag-container {
   border-radius: var(--ant-border-radius);
 }

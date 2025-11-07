@@ -99,7 +99,7 @@ const CreatePost = () => {
         type,
         tags: tags,
         subjectId: values.subjectId,
-        topicIds: values.topicIds,
+        topicId: values.topicId,
         price: values.price,
         urgency: values.urgency,
         deadline: values.dealine.format('YYYY-MM-DD HH:mm:ss'),
@@ -143,7 +143,7 @@ const CreatePost = () => {
             <span className='text-lg'> <FolderOutlined /> 请选择帖子的分类：</span>
             <OrderButton
               className="!text-lg"
-              handleSortChange={(value) => toggleType(value)} value={type} list={[{ id: 1, name: "普通帖子" }, { id: 2, name: "悬赏贴" }]} />
+              handleSortChange={(value) => toggleType(value)} value={type} list={[{ id: 1, name: "普通帖" }, { id: 2, name: "悬赏贴" }]} />
           </div>
 
         </div>
@@ -208,14 +208,13 @@ const CreatePost = () => {
                   </Select>
                 </Form.Item>
                 <Form.Item
-                  name="topicIds"
+                  name="topicId"
                   label="主题分类"
                   rules={[{ required: true, message: '请选择主题分类' }]}
                 >
                   <Select
-                    mode="multiple"
                     placeholder="选择主题"
-                    className="w-auto"
+                    className="max-w-40"
                   >
                     {topics && topics.map(topic => (
                       <Option key={topic.id} value={topic.id}>
@@ -354,28 +353,21 @@ const CreatePost = () => {
               {/* 底部操作 */}
               <div className='mx-32' >
                 <div className="bg-orange-light p-4 rounded my-4 text-center flex flex-col justify-center items-center">
-                  <h4 className="font-medium mb-2">上传须知</h4>
+                  <h4 className="font-medium mb-2">发帖须知</h4>
                   <ul className="text-sm text-secondary space-y-1 list-disc list-inside text-left">
-                    <li>请确保内容符合法律法规及平台规范，禁止传播违法违规信息，避免内容下架、账号受限。</li>
-                    <li>请勿上传侵犯他人著作权、肖像权等合法权益的内容，侵权需承担法律责任，平台将下架相关内容。</li>
-                    <li>审核通常需1-3个工作日，节假日或高峰期可能延长1-2天，建议合理安排提交时间。</li>
-                    <li>内容通过审核后将在平台展示（位置依内容质量匹配），可查看数据，违规或数据差可能调整展示范围。</li>
+                    <li>请确保发帖内容符合法律法规及平台规范，禁止传播违法违规信息，避免内容删除、账号受限。</li>
+                    <li>请勿发布侵犯他人著作权、肖像权等合法权益的内容，侵权需承担法律责任，平台将删除相关帖子。</li>
+                    <li>帖子审核通常需1-3个工作日，节假日或高峰期可能延长1-2天，建议合理安排发布时间。</li>
+                    <li>内容通过审核后将在平台展示（位置依内容质量匹配），可查看互动数据，违规或数据差可能调整展示范围。</li>
                   </ul>
                 </div>
-                <Form.Item
-                  name="agreement"
-                  valuePropName="checked"
-                  rules={[
-                    {
-                      validator: (_, value) =>
-                        value ? Promise.resolve() : Promise.reject(new Error('请同意《资源上传协议》和《版权声明》！')),
-                    },
-                  ]}>
+                <Form.Item name="agreement" valuePropName="checked"
+                  rules={[{ validator: (_, value) => value ? Promise.resolve() : Promise.reject(new Error('请同意《发帖协议》和《版权声明》！')), },]}>
                   <Checkbox>
                     <span className='text-main'>我已阅读并同意</span>
-                    <Link to='' className='text-green'> 《资源上传协议》</Link>
-                    <span className='text-main'>和</span>
-                    <Link to='' className='text-green'> 《版权声明》 </Link>
+                    <Link to='' className='text-green'> 《发帖协议》</Link>
+                    <span className='text-main'>和
+                    </span><Link to='' className='text-green'> 《版权声明》 </Link>
                   </Checkbox>
                 </Form.Item>
                 {/* 表单按钮 */}

@@ -11,6 +11,7 @@ import com.chiran.result.Result;
 import com.chiran.service.CommunityTypesService;
 import com.chiran.service.PostService;
 import com.chiran.vo.CommunityHotVO;
+import com.chiran.vo.CommunityPostVO;
 import com.chiran.vo.CommunitySearchVO;
 import com.chiran.vo.CommunityTypesVO;
 
@@ -102,15 +103,15 @@ public class CommunityController {
         return Result.success(result);
     }
 
-//    /**
-//     * 查看某个资源
-//     */
-//    @GetMapping("/{id}")
-//    public Result<CommunityVO> getCommunity(@PathVariable Integer id, HttpServletRequest request) {
-//       log.debug("查看资源，id是{}",id);
-//        CommunityVO community = communityService.getCommunityDetail(id,(Integer)request.getAttribute("userId"));
-//        return Result.success(community);
-//    }
+   /**
+    * 查看某个帖子
+    */
+   @GetMapping("/posts/{id}")
+   public Result<CommunityPostVO> getPost(@PathVariable Integer id, HttpServletRequest request) {
+      log.debug("查看资源，id是{}",id);
+       CommunityPostVO community = postService.getPost(id,(Integer)request.getAttribute("userId"));
+       return Result.success(community);
+   }
 //
 //    /**
 //     * 上传资源

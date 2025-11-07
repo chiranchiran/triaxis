@@ -61,8 +61,8 @@
         r.deleted = 0 -- 只查未删除的评论
         AND r.status = 1 -- 只查审核通过的评论
         AND ISNULL(parent_id)
-AND r.target_type = #{targetType}
-AND r.target_id = #{targetId}
+        AND r.target_type = #{targetType}
+        AND r.target_id = #{targetId}
 
         ORDER BY
         <choose>

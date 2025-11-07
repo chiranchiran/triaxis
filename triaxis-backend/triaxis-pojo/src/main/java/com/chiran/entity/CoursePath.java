@@ -18,21 +18,32 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@TableName("tags")
-public class Tag implements Serializable {
+@TableName("course_paths")
+public class CoursePath implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
+    @TableField("course_id")
+    private Integer courseId;
+
     @TableField("name")
     private String name;
-    @TableField("create_by")
-    private Integer createBy;
+    @TableField("path")
+    private String path;
+    @TableField("size")
+    private Long size;
+    @TableField("type")
+    private String type;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
     @TableField("deleted")
     @TableLogic
     private Integer deleted;

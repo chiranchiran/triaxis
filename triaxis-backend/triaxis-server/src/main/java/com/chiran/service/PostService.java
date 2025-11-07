@@ -7,6 +7,7 @@ import com.chiran.entity.Post;
 import com.chiran.entity.Resource;
 import com.chiran.result.PageResult;
 import com.chiran.vo.CommunityHotVO;
+import com.chiran.vo.CommunityPostVO;
 import com.chiran.vo.CommunitySearchVO;
 import com.chiran.vo.ResourceVO;
 
@@ -31,10 +32,8 @@ public interface PostService extends IService<Post> {
     PageResult<PostSearchBO> getBounty(CommunityBountyDTO communityBountyDTO);
     PageResult<PostSearchBO> getNormal(CommunityBountyDTO communityBountyDTO);
 
-//    /**
-//     * 根据ID获取资源详情
-//     */
-//    ResourceVO getResourceDetail(Integer id,Integer userId);
+    CommunityPostVO getPost(Integer id, Integer userId);
+
 //
 //    /**
 //     * 新增资源

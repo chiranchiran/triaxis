@@ -14,7 +14,7 @@ export const useGetReviews = (params = {}, options = {}) => {
 }
 export const useGetReviewReplies = (params = {}, options = {}) => {
   return useApi(getReviewReplies, {
-    queryKey: ['reviews', 'replies', params.targetType, params.targetId, params.parentId],
+    queryKey: ['reviews', 'replies', params.targetType, params.targetId, params.rootId],
     config: apiConfigs.common.getView,
     params,
     isMutation: false,

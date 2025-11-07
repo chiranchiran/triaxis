@@ -7,45 +7,4 @@
         where is_active=true
         order by sort_order
     </select>
-
-    <resultMap id="ResourceCategoryBOMap" type="com.chiran.bo.ResourceCategoryBO">
-        <!-- 一级分类列表（对应 first_ids，来源于二级分类的 parent_id） -->
-        <collection property="categoriesFirst" ofType="com.chiran.bo.CategoryBO"
-                    select="selectCategoryByIds"
-                    column="first_ids"/>
-
-        <!-- 二级分类列表（对应 second_ids，直接来源于 resource_category 的 category_id） -->
-        <collection property="categoriesSecondary" ofType="com.chiran.bo.CategoryBO"
-                    select="selectCategoryByIds"
-                    column="second_ids"/>
-    </resultMap>
-
-    <!-- 子查询：根据ID字符串查询分类（兼容单个/多个ID，不变） -->
-    <select id="selectCategoryByIds" resultType="com.chiran.bo.CategoryBO">
-        SELECT id, name FROM resource_categories
-        WHERE deleted = 0
-        AND FIND_IN_SET(id, #{ids}) > 0  <!-- 用FIND_IN_SET适配逗号分隔的ID字符串 -->
-    </select>
-
-    <!-- 主查询：正确区分一级/二级分类ID -->
-    <select id="selectAllCategories" resultMap="ResourceCategoryBOMap">
-        SELECT
-            -- 一级分类ID：通过资源关联的二级分类，取它们的parent_id（即一级分类ID）
-            (SELECT GROUP_CONCAT(DISTINCT rc.parent_id)
-             FROM resource_category rct  -- 资源-分类关联表
-                      INNER JOIN resource_categories rc ON rct.category_id = rc.id  -- 关联分类表
-             WHERE rct.resource_id = #{resourceId}  -- 传入当前资源ID
-               AND rct.deleted = 0  -- 过滤已删除的关联
-               AND rc.deleted = 0  -- 过滤已删除的分类
-               AND rc.level = 2)  -- 确保只取二级分类的parent_id（即一级分类）
-                AS first_ids,
-
-            -- 二级分类ID：直接取资源关联的category_id（即二级分类ID）
-            (SELECT GROUP_CONCAT(DISTINCT category_id)
-             FROM resource_category
-             WHERE resource_id = #{resourceId}
-               AND deleted = 0)  -- 过滤已删除的关联
-                AS second_ids
-        FROM DUAL
-    </select>
 </mapper>

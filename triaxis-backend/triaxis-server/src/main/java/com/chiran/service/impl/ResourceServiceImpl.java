@@ -107,7 +107,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         resourceCategoryBO.setTools(resourceTypesService.getTools(resource.getId()));
 
         ResourceVO resourceVO = ResourceVO.builder()
-                .resourceDetail(resourceSearchBO)
+                .detail(resourceSearchBO)
                 .uploader(userService.selectUploader(resource.getUserId()))
                 .userActions(userActionService.checkAllAction(userId, id, 1))
                 .images(images)

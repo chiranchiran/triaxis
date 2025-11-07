@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { addAll, isDataValid } from '../utils/error/commonUtil';
+import { addAll, isArrayValid } from '../utils/error/commonUtil';
 import { FilterButton } from './MyButton';
 import { SORT_OPTIONS } from '../utils/constant/order';
 
@@ -70,7 +70,7 @@ export default function Category({
     const field = filterList.filter(item => !item.isFirst && item.isTypes).map(i => i.type)
     //有字段没有获得数据先不初始化
     for (const i of field) {
-      if (!isDataValid(enhancedtypes[i])) return
+      if (!isArrayValid(enhancedtypes[i])) return
     }
 
     const multiple = filterList.filter(item => item.isMultiple).map(i => i.type)
