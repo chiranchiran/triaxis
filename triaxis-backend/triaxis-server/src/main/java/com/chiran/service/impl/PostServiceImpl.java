@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chiran.bo.*;
-import com.chiran.dto.CommunitySearchDTO;
-import com.chiran.dto.ResourceDTO;
-import com.chiran.dto.ResourceSearchDTO;
+import com.chiran.dto.*;
 import com.chiran.entity.*;
 import com.chiran.mapper.PostMapper;
 import com.chiran.mapper.ResourceImageMapper;
@@ -17,6 +15,7 @@ import com.chiran.result.PageResult;
 import com.chiran.service.*;
 import com.chiran.utils.BeanUtil;
 import com.chiran.utils.ExceptionUtil;
+import com.chiran.vo.CommunityHotVO;
 import com.chiran.vo.CommunitySearchVO;
 import com.chiran.vo.ResourceVO;
 import org.springframework.beans.BeanUtils;
@@ -69,8 +68,8 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
         // 执行查询
         dto.setType(2);
-        IPage<PostSearchBO> Bounty = postMapper.searchPosts(page, dto);
-        PageResult<PostSearchBO> resultBounty = new PageResult<>(Bounty.getTotal(), Bounty.getRecords());
+        IPage<PostSearchBO> bounty = postMapper.searchPosts(page, dto);
+        PageResult<PostSearchBO> resultBounty = new PageResult<>(bounty.getTotal(), bounty.getRecords());
 
         // 搜索普通帖子
         // 创建分页对象
@@ -78,12 +77,53 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post> implements Po
 
         // 执行查询
         dto.setType(1);
-        IPage<PostSearchBO> Normal = postMapper.searchPosts(pageNormal, dto);
-        PageResult<PostSearchBO> resultNormal = new PageResult<>(Normal.getTotal(), Normal.getRecords());
+        IPage<PostSearchBO> normal = postMapper.searchPosts(pageNormal, dto);
+        PageResult<PostSearchBO> resultNormal = new PageResult<>(normal.getTotal(), normal.getRecords());
         // 总条数
         Long total = resultNormal.getTotal() + resultBounty.getTotal();
         // 转换为自定义分页结果
         return CommunitySearchVO.builder().total(total).bounty(resultBounty).normal(resultNormal).build();
+    }
+
+    @Override
+    public List<CommunityHotVO> getHot() {
+        List<CommunityHotVO> list = postMapper.getHot();
+        return list;
+    }
+
+    @Override
+    public List<PostSearchBO> getSquare(CommunitySquareDTO dto) {
+        Page<PostSearchBO> page = new Page<>(dto.getPage(), dto.getPageSize());
+        IPage<PostSearchBO> posts = postMapper.getSquare(page, dto);
+        return posts.getRecords();
+    }
+
+    @Override
+    public PageResult<PostSearchBO> getBounty(CommunityBountyDTO dto) {
+        // 创建分页对象
+        Page<PostSearchBO> page = new Page<>(dto.getPage(), dto.getPageSize());
+
+        // 执行查询
+        dto.setType(2);
+        CommunitySearchDTO communitySearchDTO = new CommunitySearchDTO();
+        BeanUtils.copyProperties(dto, communitySearchDTO);
+        IPage<PostSearchBO> bounty = postMapper.searchPosts(page, communitySearchDTO);
+        PageResult<PostSearchBO> resultBounty = new PageResult<>(bounty.getTotal(), bounty.getRecords());
+        return resultBounty;
+    }
+
+    @Override
+    public PageResult<PostSearchBO> getNormal(CommunityBountyDTO dto) {
+        // 创建分页对象
+        Page<PostSearchBO> page = new Page<>(dto.getPage(), dto.getPageSize());
+
+        // 执行查询
+        dto.setType(1);
+        CommunitySearchDTO communitySearchDTO = new CommunitySearchDTO();
+        BeanUtils.copyProperties(dto, communitySearchDTO);
+        IPage<PostSearchBO> bounty = postMapper.searchPosts(page, communitySearchDTO);
+        PageResult<PostSearchBO> resultBounty = new PageResult<>(bounty.getTotal(), bounty.getRecords());
+        return resultBounty;
     }
 
 //    @Override

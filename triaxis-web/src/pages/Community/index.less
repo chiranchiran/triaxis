@@ -1,10 +1,10 @@
 .hot {
-  .bg-red-20 {
-    background-color: #fef7f7;
+  .ant-card {
+    border: 2px var(--border-like);
   }
 
-  .ant-card {
-    border: 2px #f7aeae !important;
+  button:hover {
+    color: var(--primary-dark);
   }
 
   .ant-card .ant-card-head {
@@ -18,7 +18,7 @@
     font-weight: 600;
     font-size: 18px;
     background: transparent;
-    border-bottom: 3px solid #f58b8b !important;
+    border-bottom: 3px solid var(--border-hot);
     border-radius: 8px 8px 0 0;
   }
 
@@ -35,8 +35,11 @@
     color: var(--text-main);
     font-weight: 600;
   }
+}
 
-  // a.postsMore:hover {
-  //   transform: none;
-  // }
+.normal>div:last-child {
+
+  .border-b.border-main {
+    border-bottom: none !important;
+  }
 }

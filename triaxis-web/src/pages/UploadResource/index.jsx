@@ -28,6 +28,7 @@ import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from 
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { UploadFiles } from '../../components/UploadFiles';
+import { getFile } from '../../utils/error/commonUtil';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -251,16 +252,7 @@ const UploadResource = () => {
       return cascaderValues.flat();
     }
   };
-  //提取文件上传信息
-  const getFile = (list) => {
-    return list.map(item => ({
-      uid: item.uid,
-      type: item.type,
-      name: item.name,
-      size: item.size,
-      path: item.path
-    }))
-  }
+
   const getSecondaryIdsByFirstCategory = (id) => {
     const cachedSecondaryData = categoryTreeData.find(i => i.value === id);
     return cachedSecondaryData.children.map((i) => i.value)
@@ -300,7 +292,7 @@ const UploadResource = () => {
           initialValues={{
             price: 1,
             level: 2,
-            details: "还没有任何详细介绍~",
+            details: "还没有任何详细介绍,支持Markdown语法编辑~",
             agreement: true
           }}
           layout="horizontal"
@@ -547,7 +539,7 @@ const UploadResource = () => {
                         console.log(fileList)
                         const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
                         if (hasUnfinishedFile) {
-                          return Promise.reject(new Error('请移除没有上传成功的文件'));
+                          return Promise.reject(new Error('请移除没有上传成功的图片'));
                         }
                         return Promise.resolve();
                       },
@@ -563,7 +555,7 @@ const UploadResource = () => {
                         validator(_, fileList) {
                           const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
                           if (hasUnfinishedFile) {
-                            return Promise.reject(new Error('请移除没有上传成功的文件'));
+                            return Promise.reject(new Error('请移除没有上传成功的图片'));
                           }
                           return Promise.resolve();
                         },
@@ -628,7 +620,7 @@ const UploadResource = () => {
                     </SubmitConfirmButton>
                     <MyButton type='gray' htmltype="submit" onClick={() => onFinish(true)}
                     >
-                      保存为草稿
+                      保存草稿
                     </MyButton>
                   </div>
 

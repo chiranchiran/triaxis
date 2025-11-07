@@ -58,3 +58,14 @@ export const addAll = (type, id = null) => {
     ? [{ id, name: '全部' }, ...type]
     : (type || [])
 };
+//提取文件上传信息
+export const getFile = (list) => {
+  if (!isDataValid(list)) return null
+  return list.map(item => ({
+    uid: item.uid,
+    type: item.type,
+    name: item.name,
+    size: item.size,
+    path: item.path
+  }))
+}

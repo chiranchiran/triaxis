@@ -1,6 +1,6 @@
 package com.chiran.vo;
 
-import com.chiran.bo.*;
+import com.chiran.bo.PostSearchBO;
 import com.chiran.result.PageResult;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,15 +8,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommunitySearchVO implements Serializable {
-    private Long total;
-    private PageResult<PostSearchBO> bounty;
-    private PageResult<PostSearchBO> normal;
-
+public class CommunityHotVO implements Serializable {
+    private Integer id;
+    private String title;
+    private Integer hot;
 }

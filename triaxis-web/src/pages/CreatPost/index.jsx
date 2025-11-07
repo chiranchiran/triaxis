@@ -1,604 +1,414 @@
-// CreatePost.jsx
-import React, { useState } from 'react';
+// UploadResource.jsx
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
-  Button,
   Form,
   Input,
   Select,
+  Upload,
   Tag,
-  Divider,
   Row,
   Col,
-  message,
-  Switch,
   InputNumber,
-  Upload,
-  Avatar
+  Radio,
+  Divider,
+  Checkbox,
+  Cascader,
+  Typography,
+  DatePicker,
 } from 'antd';
 import {
-  UploadOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-  TrophyOutlined,
-  FileTextOutlined,
-  PaperClipOutlined,
-  PictureOutlined
+  FolderOutlined,
 } from '@ant-design/icons';
 import MDEditor from '@uiw/react-md-editor';
+import { MyButton, OrderButton } from '../../components/MyButton';
+import { Link } from 'react-router-dom';
+import { logger } from '../../utils/logger';
+import { ResetConfirmButton, SubmitConfirmButton, useToggleConfirm } from '../../components/Mymodal';
+import { UploadFiles } from '../../components/UploadFiles';
+import { useGetPostTypes, useUploadPost } from '../../hooks/api/community';
+import { getFile } from '../../utils/error/commonUtil';
 
 const { TextArea } = Input;
 const { Option } = Select;
-
-// 主题分类
-const TOPIC_CATEGORIES = [
-  { id: 1, name: '学术讨论', icon: '📚', color: 'blue' },
-  { id: 2, name: '技术交流', icon: '💻', color: 'green' },
-  { id: 3, name: '项目互助', icon: '🤝', color: 'orange' },
-  { id: 4, name: '政策解读', icon: '📋', color: 'purple' },
-  { id: 5, name: '求职招聘', icon: '💼', color: 'cyan' },
-  { id: 6, name: '日常聊天', icon: '💬', color: 'pink' },
-  { id: 7, name: '课程交流', icon: '🎓', color: 'red' },
-  { id: 8, name: '吐槽专区', icon: '😤', color: 'volcano' }
-];
-
-// 专业领域
-const PROFESSIONAL_FIELDS = [
-  { id: 1, name: '城乡规划' },
-  { id: 2, name: '建筑设计' },
-  { id: 3, name: '风景园林' },
-  { id: 4, name: '地理信息' },
-  { id: 5, name: '其他' }
-];
-
-// 紧急程度选项
-const URGENCY_OPTIONS = [
-  { value: 'low', label: '普通', color: 'blue' },
-  { value: 'medium', label: '一般', color: 'orange' },
-  { value: 'high', label: '紧急', color: 'red' }
-];
-
-// 自定义卡片组件
-const CustomCard = ({ children, className = '', ...props }) => (
-  <div
-    className={`bg-white rounded-lg border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-sm ${className}`}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-// 自定义卡片标题组件
-const CustomCardTitle = ({ children, className = '' }) => (
-  <div className={`px-6 py-4 border-b border-gray-100 bg-gray-50 ${className}`}>
-    <h3 className="text-lg font-semibold text-gray-800">{children}</h3>
-  </div>
-);
-
-// 自定义卡片内容组件
-const CustomCardContent = ({ children, className = '' }) => (
-  <div className={`p-6 ${className}`}>
-    {children}
-  </div>
-);
-
 const CreatePost = () => {
   const [form] = Form.useForm();
-  const [postType, setPostType] = useState('normal'); // 'normal' or 'bounty'
-  const [tags, setTags] = useState([]);
-  const [inputVisible, setInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const toggleModal = useToggleConfirm();
+  const { mutate: doUploadPost, isSuccess: postSuccess } = useUploadPost();
+
+  /**
+   *  state管理
+   */
+  const [type, setType] = useState(1);
   const [fileList, setFileList] = useState([]);
-  const [content, setContent] = useState('**请在此输入您的帖子内容...**\n\n支持 Markdown 语法编辑');
-  const [submitting, setSubmitting] = useState(false);
+  const [tagState, setTagState] = useState({
+    tags: [],
+    inputValue: ''
+  });
+  const { tags, inputValue } = tagState;
 
-  // 获取主题颜色类名
-  const getTopicColorClass = (color) => {
-    const colorMap = {
-      blue: 'bg-blue-100 text-blue-700 border-blue-200',
-      green: 'bg-green-100 text-green-700 border-green-200',
-      orange: 'bg-orange-100 text-orange-700 border-orange-200',
-      purple: 'bg-purple-100 text-purple-700 border-purple-200',
-      cyan: 'bg-cyan-100 text-cyan-700 border-cyan-200',
-      pink: 'bg-pink-100 text-pink-700 border-pink-200',
-      red: 'bg-red-100 text-red-700 border-red-200',
-      volcano: 'bg-volcano-100 text-volcano-700 border-volcano-200'
-    };
-    return colorMap[color] || 'bg-gray-100 text-gray-700 border-gray-200';
-  };
+  /**
+ *  获取数据
+ */
+  //获取学科、主题
+  const { data: postTypes = {} } = useGetPostTypes();
+  const { subjects = [], topics = [] } = postTypes || {}
 
+  /**
+   * 标签处理
+   */
   // 处理标签输入
   const handleInputConfirm = () => {
-    if (inputValue && tags.indexOf(inputValue) === -1) {
-      setTags([...tags, inputValue]);
+    if (inputValue && !tags.includes(inputValue)) {
+      setTagState({
+        tags: [...tags, inputValue],
+        inputValue: ''
+      });
     }
-    setInputVisible(false);
-    setInputValue('');
   };
-
-  // 移除标签
+  //标签移除
   const handleTagRemove = (removedTag) => {
-    const newTags = tags.filter(tag => tag !== removedTag);
-    setTags(newTags);
+    setTagState({
+      ...tagState,
+      tags: tags.filter(tag => tag !== removedTag)
+    });
   };
-
-  // 显示标签输入框
-  const showInput = () => {
-    setInputVisible(true);
-  };
-
-  // 文件上传配置
-  const uploadProps = {
-    onRemove: (file) => {
-      const index = fileList.indexOf(file);
-      const newFileList = fileList.slice();
-      newFileList.splice(index, 1);
-      setFileList(newFileList);
-    },
-    beforeUpload: (file) => {
-      setFileList([...fileList, file]);
-      return false;
-    },
-    fileList,
-  };
-
-  // 处理表单提交
-  const onFinish = async (values) => {
-    setSubmitting(true);
-    try {
-      // 模拟API调用
-      setTimeout(() => {
-        console.log('提交数据:', {
-          ...values,
-          tags,
-          content,
-          fileList,
-          postType
-        });
-
-        message.success(postType === 'bounty' ? '悬赏帖发布成功！' : '帖子发布成功！');
-        setSubmitting(false);
-
-        // 这里应该是实际的提交逻辑和页面跳转
-      }, 1500);
-    } catch (error) {
-      console.error('发布失败:', error);
-      message.error('发布失败，请重试');
-      setSubmitting(false);
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
     }
+    return e?.fileList;
   };
+  /**
+   * 表单事件处理
+   */
 
-  // 重置表单
-  const handleReset = () => {
+  //类型切换
+  const toggleType = value => {
+    toggleModal(() => {
+      setType(value);
+      formReset();
+    })
+  }
+  //提交
+  const onFinish = (isSave = false) => {
+    form.validateFields().then(() => {
+      const values = form.getFieldsValue();
+      logger.debug("初始数据", values);
+      const submitData = {
+        status: isSave ? 1 : 2,
+        type,
+        tags: tags,
+        subjectId: values.subjectId,
+        topicIds: values.topicIds,
+        price: values.price,
+        urgency: values.urgency,
+        deadline: values.dealine.format('YYYY-MM-DD HH:mm:ss'),
+        // 文件路径 - 直接从状态中获取
+        files: getFile(values.file),
+        images: getFile(values.images),
+        // 其他字段
+        title: values.title,
+        description: values.description,
+        context: values.content,
+      };
+
+      logger.debug('准备提交数据:', submitData);
+      doUploadPost(submitData);
+    }).catch((error) => {
+      logger.error('表单验证失败:', error);
+    });
+  };
+  //处理成功的表单清除
+  useEffect(() => {
+    if (postSuccess) {
+      formReset();
+    }
+  }, [postSuccess])
+
+  //重置
+  const formReset = () => {
     form.resetFields();
-    setTags([]);
-    setContent('**请在此输入您的帖子内容...**\n\n支持 Markdown 语法编辑');
     setFileList([]);
+    setTagState({
+      tags: [],
+      inputValue: ''
+    });
   };
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        {/* 页面标题 */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">发布新帖子</h1>
-          <p className="text-gray-600">与社区用户分享您的知识、经验和问题</p>
+    <section>
+      <div className="bg-gradient-to-white h-72 uploadResource">
+        <div className="max-w-5xl mx-auto px-2">
+          <h3 className="text-3xl font-semibold pt-10 mb-3 flex items-center">帖子信息</h3>
+          <div className='flex justify-start gap-2 items-center'>
+            <span className='text-lg'> <FolderOutlined /> 请选择帖子的分类：</span>
+            <OrderButton
+              className="!text-lg"
+              handleSortChange={(value) => toggleType(value)} value={type} list={[{ id: 1, name: "普通帖子" }, { id: 2, name: "悬赏贴" }]} />
+          </div>
+
         </div>
-
+      </div >
+      <div className="-mt-36 max-w-5xl mx-auto flex flex-col items-center bg-card pt-6 py-2 mb-10 rounded-xl shadow-lg">
         <Form
+          labelCol={{ span: 3 }}
+          wrapperCol={{ span: 20 }}
           form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          className="space-y-6"
           initialValues={{
-            topicId: 1,
-            fieldId: 1,
-            urgency: 'low',
-            bounty: 50,
-            allowComments: true,
-            isPublic: true
+            price: 1,
+            urgency: 1,
+            content: "还没有任何详细介绍,支持Markdown语法编辑~",
+            agreement: true
           }}
+          layout="horizontal"
+          onFinish={onFinish}
+          className="space-y-8"
         >
-          {/* 帖子类型选择 */}
-          <CustomCard>
-            <CustomCardTitle>帖子类型</CustomCardTitle>
-            <CustomCardContent>
-              <div className="flex space-x-4">
-                <button
-                  type="button"
-                  onClick={() => setPostType('normal')}
-                  className={`flex-1 py-4 px-6 rounded-lg border-2 text-center transition-all ${postType === 'normal'
-                    ? 'border-orange-300 bg-orange-100 text-black'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                    }`}
+          <Row gutter={16}>
+            <Col span={24}>
+              {/* 标题等设置 */}
+              <>
+                <Form.Item
+                  name="title" label="标题" layout="horizontal"
+                  rules={[{ required: true, message: '请输入标题（最多15字）' },
+                  { max: 15, message: '标题不能超过15字' }
+                  ]}>
+                  <Input placeholder="请输入标题（最多15字）" className='max-w-120' />
+                </Form.Item>
+                <Form.Item
+                  name="description"
+                  label="描述"
+                  layout="horizontal"
+                  rules={[
+                    { required: true, message: '请输入描述' },
+                    { max: 50, message: '描述不能超过50字' }
+                  ]}
                 >
-                  <FileTextOutlined className="text-2xl mb-3 block mx-auto" />
-                  <div className="font-medium text-lg">普通帖子</div>
-                  <div className="text-sm opacity-80 mt-1">分享知识、经验、讨论</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPostType('bounty')}
-                  className={`flex-1 py-4 px-6 rounded-lg border-2 text-center transition-all ${postType === 'bounty'
-                    ? 'border-orange-300 bg-orange-100 text-black'
-                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
-                    }`}
+                  <TextArea
+                    rows={3}
+                    placeholder="简要描述帖子的具体内容（最多50字）"
+                    showCount
+                    maxLength={50}
+                  />
+                </Form.Item>
+              </>
+              {/* 分类设置 */}
+              <>
+                <Form.Item
+                  name="subjectId"
+                  label="学科分类"
+                  layout="horizontal"
+                  rules={[{ required: true, message: '请选择学科分类' }]}
                 >
-                  <TrophyOutlined className="text-2xl mb-3 block mx-auto" />
-                  <div className="font-medium text-lg">悬赏求助</div>
-                  <div className="text-sm opacity-80 mt-1">设置积分奖励寻求帮助</div>
-                </button>
-              </div>
-            </CustomCardContent>
-          </CustomCard>
-
-          {/* 基本信息 */}
-          <CustomCard>
-            <CustomCardTitle>基本信息</CustomCardTitle>
-            <CustomCardContent>
-              <div className="space-y-6">
-                <Row gutter={16}>
-                  <Col span={24}>
+                  <Select placeholder="选择学科分类" className='max-w-40'>
+                    {subjects && subjects.map(subject => (
+                      <Option key={subject.id} value={subject.id}>
+                        {subject.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  name="topicIds"
+                  label="主题分类"
+                  rules={[{ required: true, message: '请选择主题分类' }]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="选择主题"
+                    className="w-auto"
+                  >
+                    {topics && topics.map(topic => (
+                      <Option key={topic.id} value={topic.id}>
+                        {topic.name}
+                      </Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                {type === 2 && (
+                  <>
                     <Form.Item
-                      name="title"
-                      label="帖子标题"
-                      rules={[{ required: true, message: '请输入帖子标题' }]}
+                      name="urgency"
+                      label="紧急程度"
+                      layout="horizontal"
+                      rules={[{ required: true, message: '请选择紧急程度' }]}
                     >
-                      <Input
-                        size="large"
-                        placeholder="请输入清晰明确的标题，吸引更多用户关注"
-                        className="border-gray-300 hover:border-gray-400 focus:border-gray-500"
+                      <Select placeholder="选择紧急程度" className='max-w-40'>
+                        <Option value={1}>一般</Option>
+                        <Option value={2}>紧急</Option>
+                        <Option value={3}>非常紧急</Option>
+                      </Select>
+                    </Form.Item>
+                    <Form.Item
+                      name="price"
+                      label="悬赏积分"
+                      rules={[{ required: true, message: '请输入悬赏积分' }]}
+                    >
+                      <InputNumber
+                        size='middle'
+                        controls
+                        min={1}
+                        step={10}
+                        max={100000}
+                        placeholder="输入积分数量（1-100000）"
+                        className="w-full overflow-hidden max-w-40"
                       />
                     </Form.Item>
-                  </Col>
-                </Row>
-
-                <Row gutter={16}>
-                  <Col span={12}>
                     <Form.Item
-                      name="topicId"
-                      label="主题分类"
-                      rules={[{ required: true, message: '请选择主题分类' }]}
+                      name="dealine"
+                      label="截止日期"
+                      rules={[{ type: 'object', required: true, message: '请选择截止日期' }]}
                     >
-                      <Select
-                        size="large"
-                        placeholder="选择主题分类"
-                        className="border-gray-300 hover:border-gray-400"
-                      >
-                        {TOPIC_CATEGORIES.map(topic => (
-                          <Option key={topic.id} value={topic.id}>
-                            <span className="flex items-center">
-                              <span className="mr-2">{topic.icon}</span>
-                              {topic.name}
-                            </span>
-                          </Option>
-                        ))}
-                      </Select>
+                      <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" className='max-w-60' onChange={() => { debugger }} />
                     </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      name="fieldId"
-                      label="专业领域"
-                      rules={[{ required: true, message: '请选择专业领域' }]}
-                    >
-                      <Select
-                        size="large"
-                        placeholder="选择专业领域"
-                        className="border-gray-300 hover:border-gray-400"
-                      >
-                        {PROFESSIONAL_FIELDS.map(field => (
-                          <Option key={field.id} value={field.id}>
-                            {field.name}
-                          </Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
 
-                {/* 悬赏帖子特有字段 */}
-                {postType === 'bounty' && (
-                  <Row gutter={16}>
-                    <Col span={12}>
-                      <Form.Item
-                        name="bounty"
-                        label="悬赏积分"
-                        rules={[{ required: true, message: '请设置悬赏积分' }]}
-                      >
-                        <InputNumber
-                          min={10}
-                          max={1000}
-                          size="large"
-                          placeholder="设置悬赏积分"
-                          className="w-full border-gray-300 hover:border-gray-400"
-                          addonAfter="积分"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                      <Form.Item
-                        name="urgency"
-                        label="紧急程度"
-                        rules={[{ required: true, message: '请选择紧急程度' }]}
-                      >
-                        <Select
-                          size="large"
-                          placeholder="选择紧急程度"
-                          className="border-gray-300 hover:border-gray-400"
-                        >
-                          {URGENCY_OPTIONS.map(option => (
-                            <Option key={option.value} value={option.value}>
-                              <span className={`inline-flex items-center px-2 py-1 rounded text-sm ${getTopicColorClass(option.color)}`}>
-                                {option.label}
-                              </span>
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  </>
                 )}
-              </div>
-            </CustomCardContent>
-          </CustomCard>
 
-          {/* 内容编辑 */}
-          <CustomCard>
-            <CustomCardTitle>内容编辑</CustomCardTitle>
-            <CustomCardContent>
-              <div className="space-y-4">
-                <Form.Item
-                  name="content"
-                  label="帖子内容"
-                  rules={[{ required: true, message: '请输入帖子内容' }]}
-                >
-                  <div className="border border-gray-300 rounded-lg overflow-hidden">
-                    <MDEditor
-                      value={content}
-                      onChange={setContent}
-                      height={400}
-                      preview="edit"
-                      visibleDragbar={false}
-                    />
-                  </div>
-                </Form.Item>
-
-                {/* 编辑器提示 */}
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="text-sm text-blue-700">
-                    <div className="font-medium mb-1">编辑提示：</div>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>支持 Markdown 语法，可使用 # 标题、**粗体**、*斜体* 等格式</li>
-                      <li>可以插入代码块、图片、链接等丰富内容</li>
-                      <li>建议内容清晰明了，便于其他用户理解和回复</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </CustomCardContent>
-          </CustomCard>
-
-          {/* 附件上传 */}
-          <CustomCard>
-            <CustomCardTitle>
-              <div className="flex items-center">
-                <PaperClipOutlined className="mr-2" />
-                附件上传
-              </div>
-            </CustomCardTitle>
-            <CustomCardContent>
-              <div className="space-y-4">
-                <Form.Item
-                  label="上传附件"
-                  help="支持图片、文档等文件格式，单个文件不超过 10MB"
-                >
-                  <Upload
-                    {...uploadProps}
-                    listType="picture"
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-gray-400 transition-colors"
-                  >
-                    <div className="text-center py-8">
-                      <UploadOutlined className="text-3xl text-gray-400 mb-2" />
-                      <div className="text-gray-600">点击或拖拽文件到此处上传</div>
-                      <div className="text-gray-500 text-sm mt-1">
-                        支持 JPG, PNG, PDF, DOC, ZIP 等格式
-                      </div>
+                <Form.Item label="标签">
+                  <div className="flex flex-wrap gap-2 mb-2 p-1 flex-col justify-start bg-main border border-main tag-container">
+                    <div className='h-5 flex flex-wrap '>
+                      {tags && tags.map(tag => (
+                        <Tag
+                          key={tag}
+                          closable
+                          onClose={() => handleTagRemove(tag)}
+                          className="px-2 py-2"
+                        >
+                          {tag}
+                        </Tag>
+                      ))}
                     </div>
-                  </Upload>
-                </Form.Item>
-              </div>
-            </CustomCardContent>
-          </CustomCard>
-
-          {/* 标签和设置 */}
-          <CustomCard>
-            <CustomCardTitle>标签与设置</CustomCardTitle>
-            <CustomCardContent>
-              <div className="space-y-6">
-                {/* 标签输入 */}
-                <Form.Item label="帖子标签">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {tags.map(tag => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-gray-100 text-gray-700 border border-gray-300"
-                      >
-                        {tag}
-                        <DeleteOutlined
-                          className="ml-1 cursor-pointer hover:text-red-500 text-xs"
-                          onClick={() => handleTagRemove(tag)}
-                        />
-                      </span>
-                    ))}
-                  </div>
-                  {inputVisible ? (
                     <Input
-                      type="text"
-                      size="small"
                       value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
+                      onChange={(e) => setTagState({
+                        ...tagState,
+                        inputValue: e.target.value
+                      })}
                       onBlur={handleInputConfirm}
                       onPressEnter={handleInputConfirm}
-                      className="w-32 border-gray-300"
-                      autoFocus
-                    />
-                  ) : (
-                    <Button
-                      size="small"
-                      type="dashed"
-                      icon={<PlusOutlined />}
-                      onClick={showInput}
-                      className="border-gray-300 text-gray-600 hover:border-gray-400"
+                      placeholder='按下回车生成标签'
                     >
-                      添加标签
-                    </Button>
-                  )}
-                  <div className="text-xs text-gray-500 mt-2">
-                    添加相关标签有助于更多人看到您的帖子
+                    </Input>
                   </div>
                 </Form.Item>
+              </>
 
-                <Divider className="my-4 border-gray-200" />
+              {/* 文件上传 */}
+              <>
+                <Form.Item
+                  label="文件"
+                  name="file"
+                  valuePropName="fileList"
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator(_, fileList) {
+                        const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
+                        if (hasUnfinishedFile) {
+                          return Promise.reject(new Error('请移除没有上传成功的文件'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}
+                  getValueFromEvent={normFile}
 
-                {/* 发布设置 */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-800">允许评论</div>
-                      <div className="text-sm text-gray-600">其他用户可以对您的帖子进行回复</div>
-                    </div>
-                    <Form.Item
-                      name="allowComments"
-                      valuePropName="checked"
-                      className="mb-0"
-                    >
-                      <Switch className="bg-gray-300" defaultChecked />
-                    </Form.Item>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-800">公开显示</div>
-                      <div className="text-sm text-gray-600">在社区中公开显示您的帖子</div>
-                    </div>
-                    <Form.Item
-                      name="isPublic"
-                      valuePropName="checked"
-                      className="mb-0"
-                    >
-                      <Switch className="bg-gray-300" defaultChecked />
-                    </Form.Item>
-                  </div>
-
-                  {postType === 'bounty' && (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-gray-800">匿名发布</div>
-                        <div className="text-sm text-gray-600">隐藏您的身份信息</div>
-                      </div>
-                      <Form.Item
-                        name="isAnonymous"
-                        valuePropName="checked"
-                        className="mb-0"
-                      >
-                        <Switch className="bg-gray-300" />
-                      </Form.Item>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CustomCardContent>
-          </CustomCard>
-
-          {/* 发布预览 */}
-          <CustomCard>
-            <CustomCardTitle>发布预览</CustomCardTitle>
-            <CustomCardContent>
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="flex items-start space-x-3">
-                  <Avatar
-                    size={40}
-                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=user"
-                    className="border border-gray-300"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="font-medium text-gray-800">您的用户名</span>
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">
-                        Lv.3
-                      </span>
-                      {postType === 'bounty' && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-orange-100 text-orange-700 border border-orange-200">
-                          <TrophyOutlined className="mr-1" />
-                          悬赏帖
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {form.getFieldValue('title') || '帖子标题将显示在这里'}
-                    </h3>
-
-                    <div className="prose prose-sm max-w-none text-gray-700 mb-3">
-                      {content ? (
-                        <MDEditor.Markdown
-                          source={content.length > 150 ? content.substring(0, 150) + '...' : content}
-                          style={{ whiteSpace: 'pre-wrap' }}
-                        />
-                      ) : (
-                        '帖子内容预览...'
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>刚刚</span>
-                      <span>•</span>
-                      <span>0 浏览</span>
-                      <span>•</span>
-                      <span>0 回复</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CustomCardContent>
-          </CustomCard>
-
-          {/* 操作按钮 */}
-          <div>
-            <CustomCardContent>
-              <div className="flex justify-between items-center">
-                <Button
-                  onClick={handleReset}
-                  className="border-gray-300 text-gray-600 hover:border-gray-400 px-6"
-                  size="large"
                 >
-                  重置
-                </Button>
+                  <UploadFiles fileList={fileList} setFileList={setFileList} type={type} />
+                </Form.Item>
 
-                <div className="flex space-x-3">
-                  <Button
-                    className="border-gray-300 text-gray-600 hover:border-gray-400 px-6"
-                    size="large"
-                  >
-                    保存草稿
-                  </Button>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    loading={submitting}
-                    className={`px-8 ${postType === 'bounty' ? 'bg-orange-500 hover:bg-orange-600 border-orange-500' : 'bg-gray-800 hover:bg-gray-700 border-gray-800'}`}
-                    size="large"
-                  >
-                    {submitting ? '发布中...' : (postType === 'bounty' ? '发布悬赏' : '发布帖子')}
-                  </Button>
-                </div>
+                <Form.Item label="图片" name="images" valuePropName="fileList" getValueFromEvent={normFile}
+                  rules={[
+                    ({ getFieldValue }) => ({
+                      validator(_, fileList) {
+                        const hasUnfinishedFile = fileList && fileList.some(i => i.status !== 'done');
+                        if (hasUnfinishedFile) {
+                          return Promise.reject(new Error('请移除没有上传成功的图片'));
+                        }
+                        return Promise.resolve();
+                      },
+                    }),
+                  ]}>
+                  <UploadFiles type={4} />
+                </Form.Item>
+              </>
+              {/* 详情介绍 */}
+              <Form.Item
+                name="content"
+                label="帖子内容"
+                rules={[
+                  { required: true, message: '请输入具体帖子' },
+                  { max: 5000, message: '内容不能超过5000字' }
+                ]}
+              >
+                <MDEditor
+                  enableScroll={false}
+                  preview="edit"
+                  style={{ minHeight: 300 }}
+                  data-color-mode="light"
+                />
+              </Form.Item>
+
+              <div className='mx-auto w-[95%] my-10 '>
+                <Divider className="bg-gray" />
               </div>
-            </CustomCardContent>
-          </div>
-        </Form>
-      </div>
-    </div>
-  );
-};
+              {/* 底部操作 */}
+              <div className='mx-32' >
+                <div className="bg-orange-light p-4 rounded my-4 text-center flex flex-col justify-center items-center">
+                  <h4 className="font-medium mb-2">上传须知</h4>
+                  <ul className="text-sm text-secondary space-y-1 list-disc list-inside text-left">
+                    <li>请确保内容符合法律法规及平台规范，禁止传播违法违规信息，避免内容下架、账号受限。</li>
+                    <li>请勿上传侵犯他人著作权、肖像权等合法权益的内容，侵权需承担法律责任，平台将下架相关内容。</li>
+                    <li>审核通常需1-3个工作日，节假日或高峰期可能延长1-2天，建议合理安排提交时间。</li>
+                    <li>内容通过审核后将在平台展示（位置依内容质量匹配），可查看数据，违规或数据差可能调整展示范围。</li>
+                  </ul>
+                </div>
+                <Form.Item
+                  name="agreement"
+                  valuePropName="checked"
+                  rules={[
+                    {
+                      validator: (_, value) =>
+                        value ? Promise.resolve() : Promise.reject(new Error('请同意《资源上传协议》和《版权声明》！')),
+                    },
+                  ]}>
+                  <Checkbox>
+                    <span className='text-main'>我已阅读并同意</span>
+                    <Link to='' className='text-green'> 《资源上传协议》</Link>
+                    <span className='text-main'>和</span>
+                    <Link to='' className='text-green'> 《版权声明》 </Link>
+                  </Checkbox>
+                </Form.Item>
+                {/* 表单按钮 */}
 
+                <div className='flex justify-between mb-10'>
+                  <div className='flex gap-4'>
+                    <SubmitConfirmButton onConfirm={onFinish}
+                    >
+                      提交
+                    </SubmitConfirmButton>
+                    <MyButton type='gray' htmltype="submit" onClick={() => onFinish(true)}
+                    >
+                      保存草稿
+                    </MyButton>
+                  </div>
+
+                  <ResetConfirmButton onConfirm={formReset}
+                  >
+                    重置
+                  </ResetConfirmButton>
+                  {/* <CancelConfirmButton
+                    >
+                      取消
+                    </CancelConfirmButton> */}
+                </div>
+
+              </div>
+            </Col>
+          </Row>
+        </Form>
+      </div >
+    </section>
+
+  )
+};
 export default CreatePost;

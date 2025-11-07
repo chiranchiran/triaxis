@@ -29,6 +29,8 @@ select {
 input:focus,
 input.ant-input-outlined:focus,
 .ant-input-outlined:hover,
+.ant-picker-outlined:focus-within,
+.ant-picker-outlined:hover,
 .ant-input-group .ant-input-affix-wrapper:not(:last-child):hover,
 .ant-input-affix-wrapper-lg:hover,
 .ant-input-affix-wrapper-lg:focus,
@@ -42,6 +44,7 @@ textarea:focus,
 input:hover,
 select:hover {
   border-color: var(--text-secondary);
+  overflow: hidden;
   width: 100%;
   box-shadow: 0 0 0 2px var(--border-active);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -138,7 +141,7 @@ select:hover {
 /* tag标签 */
 .ant-tag {
   display: flex;
-  align-self: start;
+  align-self: center;
   border: 0;
   height: 1.5rem;
   max-width: 100%;
@@ -186,4 +189,35 @@ select:hover {
 /* 卡片 */
 .ant-card {
   font-size: var(--text-sm);
+}
+
+/* 日期选择器 */
+.ant-picker input:hover,
+.ant-picker input:focus {
+  box-shadow: none;
+  border: 0;
+}
+
+.ant-picker-dropdown .ant-picker-panel-container {
+
+  background: var(--bg-elevated);
+}
+
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border: 0;
+}
+
+.ant-picker-dropdown .ant-picker-cell-in-view.ant-picker-cell-selected:not(.ant-picker-cell-disabled) .ant-picker-cell-inner {
+  background-color: var(--primary);
+}
+
+.ant-picker-dropdown .ant-picker-time-panel-column>li.ant-picker-time-panel-cell-selected .ant-picker-time-panel-cell-inner {
+  background-color: var(--primary);
+  color: var(--bg-elevated);
+}
+
+.ant-btn-variant-solid {
+  background-color: var(--bg-dark);
+  font-size: var(--text-sm);
+  color: var(--bg-elevated);
 }

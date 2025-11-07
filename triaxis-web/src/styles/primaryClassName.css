@@ -78,6 +78,13 @@
   background-color: var(--accent-orange-light) !important;
 }
 
+.bg-hot {
+  background-color: var(--bg-hot);
+}
+
+.bg-red {
+  background-color: var(--bg-red);
+}
 
 .text-main {
   color: var(--text);
@@ -98,6 +105,10 @@
 
 .text-primary {
   color: var(--primary);
+}
+
+.text-primary-dark {
+  color: var(--primary-dark);
 }
 
 .text-blue {
@@ -123,11 +134,18 @@
 
 .border-main {
   border-color: var(--bg-hover);
+}
 
+.border-secondary {
+  border-color: var(--bg-gray);
 }
 
 .border-dark {
   border-color: var(--bg-dark);
+}
+
+.border-hot {
+  border-color: var(--border-hot);
 }
 
 .border-divider {
@@ -174,6 +192,11 @@
   color: var(--text-like);
   background: var(--bg-like);
   border: 1px solid var(--border-like);
+}
+
+.ant-tag.tag-black {
+  color: var(--text-light);
+  background: var(--bg-dark);
 }
 
 .ribbon-orange {

@@ -1,12 +1,12 @@
 package com.chiran.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.chiran.dto.CommunitySearchDTO;
-import com.chiran.dto.ResourceDTO;
-import com.chiran.dto.ResourceSearchDTO;
+import com.chiran.bo.PostSearchBO;
+import com.chiran.dto.*;
 import com.chiran.entity.Post;
 import com.chiran.entity.Resource;
 import com.chiran.result.PageResult;
+import com.chiran.vo.CommunityHotVO;
 import com.chiran.vo.CommunitySearchVO;
 import com.chiran.vo.ResourceVO;
 
@@ -23,6 +23,14 @@ import java.util.List;
 public interface PostService extends IService<Post> {
 
     CommunitySearchVO getPosts(CommunitySearchDTO communitySearchDTO);
+
+    List<CommunityHotVO> getHot();
+
+    List<PostSearchBO> getSquare(CommunitySquareDTO communitySquareDTO);
+
+    PageResult<PostSearchBO> getBounty(CommunityBountyDTO communityBountyDTO);
+    PageResult<PostSearchBO> getNormal(CommunityBountyDTO communityBountyDTO);
+
 //    /**
 //     * 根据ID获取资源详情
 //     */

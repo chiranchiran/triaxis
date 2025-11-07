@@ -12,7 +12,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
       case 'middle': return "h-12 w-32 px-4"
       case 'large': return "h-12 w-40 px-4"
       case 'long': return "!h-7 "
-      case 'more': return "!h-9"
+      case 'more': return "!h-7"
     }
   }
   const getType = (type) => {
@@ -31,7 +31,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
   return (
     <Button
       type="text"
-      size={size === 'long' || size === 'large' || size === 'more' ? 'large' : 'middle'}
+      size={size === 'long' || size === 'large' ? 'large' : 'middle'}
       onClick={onClick}
       disabled={loading}
       icon={icon}

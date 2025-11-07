@@ -20,6 +20,7 @@ html[data-theme='light'] {
   --accent-orange-ribbon: #f8c187;
   --accent-orange: #f7e59d;
   --accent-orange-50: rgba(247, 229, 157, 0.4);
+  --accent-green-btn: #d7f1d7;
   --accent-orange-light: #fcf3df;
 
   --bg: #f9fafb;
@@ -47,7 +48,10 @@ html[data-theme='light'] {
   --blue: #4298f4;
 
   --bg-like: #f6dede;
+  --bg-hot: #fef7f7;
+  --bg-red: #ff6467;
   --text-like: #da5c5c;
+  --border-hot: #f58b8b;
   --border-like: #e99c9c;
   --bg-score: #f3ede0;
   --text-score: #af9b02;

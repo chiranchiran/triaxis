@@ -13,20 +13,20 @@ export const getPost = (id) => {
   return service.get(`/community/posts/${id}`)
 }
 //查看悬赏帖子
-export const getBountyPosts = () => {
-  return service.get(`/community/posts/bounty`)
+export const getBountyPosts = (params) => {
+  return service.get('/community/posts/bounty', { params })
 }
 //查看普通帖子
-export const getNormalPosts = () => {
-  return service.get(`/community/posts/nomal`)
+export const getNormalPosts = (params) => {
+  return service.get('/community/posts/normal', { params })
 }
 //查看帖子广场
 export const getSquarePosts = (params) => {
-  return service.get('/community/square', { params })
+  return service.get('/community/posts', { params })
 }
 //查看热门榜单
-export const getHot = (params) => {
-  return service.get('/community/hot', { params })
+export const getHot = () => {
+  return service.get('/community/hot')
 }
 
 //上传某个帖子

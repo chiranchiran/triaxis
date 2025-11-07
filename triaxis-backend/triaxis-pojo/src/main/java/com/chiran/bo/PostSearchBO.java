@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -17,4 +18,5 @@ public class PostSearchBO implements Serializable {
     private PostDetailBO postDetail;
     private UserBO uploader;
     private UserActionsBO userActions;
+    private List<CategoryBO> tags;
 }

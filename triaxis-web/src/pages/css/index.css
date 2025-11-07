@@ -1,30 +1,18 @@
-.hot .bg-red-20 {
-  background-color: #fef7f7;
+.uploadResource .semi-radioGroup.semi-radioGroup-buttonRadio {
+  background: var(--accent-green-btn);
+  border-radius: calc(var(--semi-border-radius-large)*1.2);
+  border: 1px solid var(--accent-green-dark);
+  font-weight: 400;
+  font-size: var(--text-lg);
+
 }
-.hot .ant-card {
-  border: 2px #f7aeae !important;
+
+.uploadResource .semi-radio-addon-buttonRadio-large {
+  font-size: var(--text-base);
+  padding: 6px 16px;
+  border-radius: var(--semi-border-radius-large);
 }
-.hot .ant-card .ant-card-head {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  min-height: 56px;
-  margin-bottom: -1px;
-  margin: 0 24px;
-  color: var(--text);
-  font-weight: 600;
-  font-size: 18px;
-  background: transparent;
-  border-bottom: 3px solid #f58b8b !important;
-  border-radius: 8px 8px 0 0;
-}
-.hot .ant-list .ant-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0;
-}
-.bounty a {
-  color: var(--text-main);
-  font-weight: 600;
+
+.tag-container {
+  border-radius: var(--ant-border-radius);
 }

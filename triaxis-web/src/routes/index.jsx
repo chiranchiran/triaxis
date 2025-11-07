@@ -90,7 +90,7 @@ const Element = () => {
       element: <CommunityDetail />
     },
     {
-      path: '/community/nomal',
+      path: '/community/normal',
       element: <CommunityDetail />
     },
     {

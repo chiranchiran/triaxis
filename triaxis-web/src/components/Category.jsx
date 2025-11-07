@@ -141,12 +141,15 @@ export default function Category({
         } else {
           const withoutNull = currentValues.filter(item => item !== null);
           if (currentValues.includes(value)) {
+            // 选择选项
             newFilters[type] = currentValues.filter(item => item !== value);
           } else {
+            // 取消选择
             newFilters[type] = [...withoutNull, value];
           }
+          //不选中时默认选择全部
           if (newFilters[type].length === 0) {
-            newFilters[type] = [];
+            newFilters[type] = [null];
           }
         }
       }

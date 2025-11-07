@@ -9,6 +9,7 @@
             <result property="title" column="title"/>
             <result property="description" column="description"/>
             <result property="urgency" column="urgency"/>
+            <result property="type" column="type"/>
             <result property="isSolved" column="is_solved"/>
             <result property="isRecommended" column="is_recommended"/>
             <result property="price" column="price"/>
@@ -39,8 +40,28 @@
             <result property="isLiked" column="isLiked"/>
             <result property="isCollected" column="isCollected"/>
         </association>
+        <collection
+                property="tags"
+        javaType="java.util.List"
+        ofType="com.chiran.bo.CategoryBO"
+        select="selectPostTags"
+        column="id"/>
     </resultMap>
-
+    <!-- 新增：单独查询post对应的所有标签（id+name） -->
+    <select id="selectPostTags" resultType="com.chiran.bo.CategoryBO">
+        SELECT
+        tag.id,
+        tag.name
+        FROM user_tags ut
+        <!-- 关联tags表，获取标签名称 -->
+        LEFT JOIN tags tag
+        ON ut.tag_id = tag.id
+        AND tag.deleted = 0
+        WHERE
+        ut.target_id = #{postId}
+        AND ut.target_type = 3
+        AND ut.deleted = 0
+    </select>
     <select id="searchPosts" resultMap="PostSearchVOMap">
         SELECT
         p.id,
@@ -51,6 +72,7 @@
         p.is_solved,
         p.is_recommended,
         p.price,
+        p.type,
         p.deadline,
         p.view_count,
         p.collect_count,
@@ -81,7 +103,7 @@
         FROM posts p
         LEFT JOIN users u ON p.user_id = u.id AND u.deleted = 0
         LEFT JOIN topics t ON p.topic_id = t.id AND t.deleted = 0
-        LEFT JOIN subjects s ON p.topic_id = s.id AND s.deleted = 0
+        LEFT JOIN subjects s ON p.subject_id = s.id AND s.deleted = 0
         WHERE p.deleted = 0
         AND p.status = 3   <!-- 只查询已发布的资源 -->
 
@@ -124,4 +146,71 @@
             <otherwise>p.publish_time DESC</otherwise>
         </choose>
     </select>
+    <!-- 查询最近7天热门帖子，返回前10条 -->
+    <select id="getHot" resultType="com.chiran.vo.CommunityHotVO">
+        SELECT
+        id,
+        title,
+        -- 点赞*2 + 收藏*2 + 回复*3 + 浏览*1（权重可自定义）
+        (like_count * 2 + collect_count * 2 + reply_count * 3 + view_count * 1) AS hot
+        FROM
+        posts
+        WHERE
+        -- 筛选最近7天内发布的帖子（MySQL 时间函数）
+        publish_time >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        <![CDATA[ AND publish_time <= NOW() ]]>
+        -- 按热度降序排序，取前10
+        ORDER BY
+        hot DESC
+        LIMIT 10
+    </select>
+    <select id="getSquare" resultMap="PostSearchVOMap">
+        SELECT
+        p.id,
+        p.title,
+        p.description,
+        p.user_id,
+        p.urgency,
+        p.is_solved,
+        p.is_recommended,
+        p.price,
+        p.type,
+        p.deadline,
+        p.view_count,
+        p.collect_count,
+        p.like_count,
+        p.reply_count,
+        p.solved_time,
+        p.publish_time,
+        p.update_time,
+        u.username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major,
+        t.name AS topic,
+        s.name AS subject,
+        -- 是否点赞：true=已点赞，false=未点赞
+        EXISTS(
+        SELECT 1 FROM user_likes ul
+        WHERE ul.target_id = p.id AND ul.target_type = 3
+        AND ul.user_id = #{dto.userId} AND ul.deleted = 0
+        ) AS isLiked,
+        -- 是否收藏：true=已收藏，false=未收藏
+        EXISTS(
+        SELECT 1 FROM user_collections uf
+        WHERE uf.target_id = p.id AND uf.target_type = 3
+        AND uf.user_id = #{dto.userId} AND uf.deleted = 0
+        ) AS isCollected
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id AND u.deleted = 0
+        LEFT JOIN topics t ON p.topic_id = t.id AND t.deleted = 0
+        LEFT JOIN subjects s ON p.subject_id = s.id AND s.deleted = 0
+        WHERE p.deleted = 0
+        AND p.status = 3   <!-- 只查询已发布的资源 -->
+        GROUP BY
+        p.id,p.publish_time
+        ORDER BY p.publish_time DESC
+    </select>
+
 </mapper>
