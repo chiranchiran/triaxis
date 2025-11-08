@@ -22,7 +22,7 @@ public interface UserService extends IService<User> {
     /**
      * 获取用户详情
      */
-    UserVO getUserDetail(Integer userId);
+    UserVO getUser(Integer userId);
 
     /**
      * 更新用户信息

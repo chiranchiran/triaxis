@@ -25,13 +25,13 @@ const DetailCard = ({ title, children, className = '', ...props }) => (
     {children}
   </CustomCard>
 )
-const Statis = ({ count, children }) => {
+const Statis = ({ count, children, className = 'text-xs' }) => {
   return (
     <div className="text-center p-2">
       <div className="text-xl font-bold text-main">
         {count}
       </div>
-      <div className="text-xs text-main mt-1">{children}</div>
+      <div className={`text-main mt-1 ${className}`}>{children}</div>
     </div>)
 }
 const FileTime = ({ count, children }) => {

@@ -22,7 +22,7 @@ import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
 import { useLoginByCount, useLoginByMobile } from '../../hooks/api/login';
 import { getUserData } from '../../utils/localStorage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setAutoLogin } from '../../store/slices/authSlice';
 import Logo from '../../components/Logo';
 import { Link } from 'react-router-dom';
@@ -30,6 +30,8 @@ import LoginBase from '../../components/LoginBase';
 import { useCaptcha } from '../../hooks/api/common';
 
 const Login = () => {
+  const auth = useSelector(state => state.auth)
+  logger.debug("当前的redux用户信息", auth);
   const [form] = useForm()
   const { mutate: doCaptcha, isError: isCaptcha, data } = useCaptcha()
   const { mutate: doCountLogin, isSuccess: isCount } = useLoginByCount()

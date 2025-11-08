@@ -69,3 +69,9 @@ export const getFile = (list) => {
     path: item.path
   }))
 }
+export const normFile = (e) => {
+  if (Array.isArray(e)) {
+    return e;
+  }
+  return e?.fileList;
+};

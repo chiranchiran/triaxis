@@ -20,6 +20,7 @@ import CreatePost from "../pages/CreatPost/index.jsx"
 import PostDetail from "../pages/PostDetail/index.jsx"
 import { useNotification } from "../components/AppProvider.jsx"
 import { logger } from "../utils/logger.js"
+import EditProfile from "../pages/EditProfile/index.jsx"
 
 
 //路由守卫组件
@@ -30,7 +31,7 @@ const Protect = ({ children }) => {
   const { isAuthenticated } = useSelector(state => state.auth)
   const navigate = useNavigate()
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isAuthenticated) {
       navigate('/login')
       notification.info({ message: "请先登录!", description: "登录后才能进行操作" })
     }
@@ -108,6 +109,10 @@ const Element = () => {
     {
       path: '/user/userinfo',
       element: <Protect> <UserCenter /></Protect>
+    },
+    {
+      path: '/user/edit',
+      element: <Protect> <EditProfile /></Protect>
     },
     {
       path: '/user/feedback',

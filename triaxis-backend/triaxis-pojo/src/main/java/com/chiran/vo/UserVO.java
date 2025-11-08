@@ -3,6 +3,7 @@ package com.chiran.vo;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,16 +32,21 @@ public class UserVO implements Serializable {
     private String school;
     private String major;
     private String grade;
-    private Integer subjectId;
+    private String subject;
     private Integer vipLevel;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime vipTime;
+    @JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
+    private LocalDateTime createTime;
     private Integer points;
+    private Integer pointsGet;
+    private Integer pointsSpent;
     private Integer resourceCount;
     private Integer postCount;
     private Integer courseCount;
     private Integer likeCount;
+    private Integer purchaseCount;
     private Integer status;
-    private Integer deleted;
     private Integer role;
 
 }

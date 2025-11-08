@@ -220,3 +220,49 @@ select:hover {
   font-size: var(--text-sm);
   color: var(--bg-elevated);
 }
+
+/* tab栏切换 */
+/* 活动页的颜色 */
+.userCenter .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+/* 活动页背景 */
+.userCenter .ant-tabs-tab.ant-tabs-tab-active {
+  background-color: var(--primary-light);
+}
+
+.userCenter .ant-tabs-tab .ant-tabs-tab-btn:hover {
+  color: var(--blue);
+}
+
+
+/* 右侧滑块的颜色 */
+.userCenter .ant-tabs .ant-tabs-ink-bar {
+  background: var(--primary-dark);
+}
+
+/* 右侧滑块的宽度 */
+.userCenter .ant-tabs-left>.ant-tabs-nav .ant-tabs-ink-bar {
+  width: 0.15rem;
+}
+
+/* 数据描述 */
+.ant-descriptions.ant-descriptions-bordered>.ant-descriptions-view .ant-descriptions-row {
+  border-bottom: var(--ant-line-width) var(--ant-line-type) var(--bg-gray);
+}
+
+.ant-descriptions.ant-descriptions-bordered>.ant-descriptions-view {
+  border: var(--ant-line-width) var(--ant-line-type) var(--bg-gray);
+}
+
+/* 徽标数字 */
+.ant-badge .ant-badge-count-sm {
+  min-width: var(--ant-badge-indicator-height-sm);
+  height: 1.2rem;
+  line-height: 1.2rem;
+  text-align: center;
+  font-size: var(--ant-badge-text-font-size-sm);
+  border-radius: calc(var(--ant-badge-indicator-height-sm) / 2.1);
+}

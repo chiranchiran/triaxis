@@ -1,19 +1,10 @@
-.uploadResource .semi-radioGroup.semi-radioGroup-buttonRadio {
-  background: var(--accent-orange-btn);
-  border-radius: calc(var(--semi-border-radius-large)*1.2);
-  font-weight: 400;
-  font-size: var(--text-lg);
+.userCenter .setting:hover {
+  background-color: var(--bg-gray);
 }
-.uploadResource .semi-radio-addon-buttonRadio-large {
-  font-size: var(--text-base);
-  padding: 6px 16px;
-  border-radius: var(--semi-border-radius-large);
+.userCenter .setting {
+  pointer-events: auto;
 }
-.uploadResource .semi-radio-addon-buttonRadio.semi-radio-addon-buttonRadio-checked.semi-radio-addon-buttonRadio-large {
-  font-weight: 600;
-  background: var(--bg-gray-light);
-  color: var(--text);
-}
-.tag-container {
-  border-radius: var(--ant-border-radius);
+.password .ant-row input:hover {
+  border: 0;
+  box-shadow: none !important;
 }

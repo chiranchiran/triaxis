@@ -19,7 +19,7 @@ export const useCaptcha = (params, options = {}) => {
   return useApi(getCaptcha, {
     config: apiConfigs.auth.captcha,
     params,
-    isMutation: false,
+    isMutation: true,
     ...options
   })
 }

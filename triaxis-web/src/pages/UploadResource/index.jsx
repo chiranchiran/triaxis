@@ -28,7 +28,7 @@ import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from 
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { UploadFiles } from '../../components/UploadFiles';
-import { getFile } from '../../utils/error/commonUtil';
+import { getFile, normFile } from '../../utils/error/commonUtil';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -156,12 +156,7 @@ const UploadResource = () => {
       tags: tags.filter(tag => tag !== removedTag)
     });
   };
-  const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
-  };
+
   /**
    * 表单事件处理
    */
@@ -281,10 +276,9 @@ const UploadResource = () => {
               className="!text-lg"
               handleSortChange={(value) => toggleType(value)} value={type} list={[{ id: 1, name: "资源" }, { id: 2, name: "课程" }]} />
           </div>
-
         </div>
       </div >
-      <div className="-mt-36 max-w-5xl mx-auto flex flex-col items-center bg-card pt-6 py-2 mb-10 rounded-xl shadow-lg">
+      <div className="-mt-36 max-w-5xl mx-auto bg-card pt-6 py-2 px-8 mb-10 rounded-xl shadow-lg">
         <Form
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 20 }}

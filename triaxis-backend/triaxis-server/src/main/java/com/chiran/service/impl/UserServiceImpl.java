@@ -6,19 +6,25 @@ import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.Course;
 import com.chiran.entity.Resource;
 import com.chiran.entity.User;
+import com.chiran.entity.UserPurchase;
 import com.chiran.exception.BusinessException;
 import com.chiran.mapper.UserMapper;
+import com.chiran.mapper.UserPurchaseMapper;
 import com.chiran.service.CourseService;
 import com.chiran.service.ResourceService;
+import com.chiran.service.ResourceTypesService;
 import com.chiran.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.chiran.utils.ExceptionUtil;
 import com.chiran.vo.MembershipVO;
 import com.chiran.vo.PointsVO;
 import com.chiran.vo.UserStatsVO;
 import com.chiran.vo.UserVO;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,25 +33,31 @@ import java.util.Date;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author chiran
  * @since 2025-10-07
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-
-    private final UserMapper userMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private UserPurchaseMapper userPurchaseMapper;
+    @Autowired
+    private ResourceTypesService resourceTypesService;
 //    private final ResourceService resourceService;
 //    private final CourseService courseService;
 
     @Override
     public UserBO selectUploader(Integer userId) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(User::getId, userId).select(User::getId,User::getUsername,User::getAvatar,User::getSchool,User::getGrade,User::getMajor);
+        queryWrapper.eq(User::getId, userId).select(User::getId, User::getUsername, User::getAvatar, User::getSchool, User::getGrade, User::getMajor);
         User u = userMapper.selectOne(queryWrapper);
+        checkUserIsExist(u, u.getDeleted() == 1);
         UserBO userBO = new UserBO();
         BeanUtils.copyProperties(u, userBO);
         userBO.setUserId(u.getId());
@@ -53,21 +65,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserVO getUserDetail(Integer userId) {
+    public UserVO getUser(Integer userId) {
         User user = this.getById(userId);
-        if (user == null || user.getDeleted() == 1) {
-            throw new BusinessException(14000, "用户不存在");
+        checkUserIsExist(user, user.getDeleted() == 1);
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        LambdaQueryWrapper<UserPurchase> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UserPurchase::getUserId, userId);
+        Integer purchaseCount = (int) (long) userPurchaseMapper.selectCount(queryWrapper);
+        userVO.setPurchaseCount(purchaseCount);
+        String subject = resourceTypesService.getSubjectName(user.getSubjectId());
+        userVO.setSubject(subject);
+        return userVO;
+    }
+
+    private static void checkUserIsExist(User user, boolean user1) {
+        if (user == null || user1) {
+            // 账号不存在
+            log.info("用户不存在");
+            throw ExceptionUtil.create(12000);
         }
-        return convertToVO(user);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateUserProfile(Integer userId, UserUpdateDTO dto) {
         User user = this.getById(userId);
-        if (user == null || user.getDeleted() == 1) {
-            throw new BusinessException(14000, "用户不存在");
-        }
+        checkUserIsExist(user, user.getDeleted() == 1);
 
         // 检查用户名是否重复（如果修改了用户名）
         if (StringUtils.isNotBlank(dto.getUsername()) && !dto.getUsername().equals(user.getUsername())) {
@@ -190,4 +214,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(user, vo);
         return vo;
     }
+
 }

@@ -1,6 +1,6 @@
 /* 基础工具类 */
 .bg-main {
-  background-color: var(--bg) !important;
+  background-color: var(--bg);
 }
 
 .bg-gray {
@@ -119,12 +119,25 @@
   color: var(--text-green);
 }
 
+.text-green-dark {
+  color: var(--accent-green-dark);
+}
+
 .text-orange {
   color: var(--accent-orange);
 }
 
+
+.text-vip {
+  color: var(--accent-orange-vip);
+}
+
 .text-light {
   color: var(--text-light);
+}
+
+.text-like {
+  color: var(--bg-red);
 }
 
 .text-rate {
@@ -162,6 +175,10 @@
 
 .border-primary-dark {
   border-color: var(--primary-dark);
+}
+
+.border-orange-dark {
+  border-color: var(--accent-orange-border);
 }
 
 

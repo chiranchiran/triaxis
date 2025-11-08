@@ -1,10 +1,10 @@
 import service from "../../utils/api/service"
 
 //登出
-export const logout = (data) => {
-  return service.post('/user/logout', data)
+export const logout = () => {
+  return service.post('/user/logout')
 }
-export const getCurrentUser = () => {
+export const getUser = () => {
   return service.get('/user/info')
 }
 
