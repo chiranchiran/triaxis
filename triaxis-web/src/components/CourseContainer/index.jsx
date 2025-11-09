@@ -99,7 +99,7 @@ const CourseContainer = ({
         </div>
       </div>
 
-      <div className="check max-w-7xl mx-auto">
+      <div className="-mt-28 max-w-7xl mx-auto">
         {/* 筛选条件区域 */}
         <Category
           filterList={filterList}

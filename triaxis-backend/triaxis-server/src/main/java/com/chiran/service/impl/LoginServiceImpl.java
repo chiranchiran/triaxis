@@ -29,7 +29,7 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
     private BCryptPasswordEncoder passwordEncoder;
 
 
-    private <T> UserInfoVO baseCheck(SFunction<User,T> fn,T t) {
+    private <T> UserInfoVO baseCheck(SFunction<User,T> fn, T t) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(fn, t).select(User::getId, User::getUsername, User::getPassword,
                 User::getRole, User::getStatus,User::getAvatar,User::getVipLevel,User::getVipTime,User::getPoints);
@@ -46,7 +46,7 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
             throw ExceptionUtil.create(12005);
         }
         UserInfoVO userInfoVO = new UserInfoVO();
-        BeanUtils.copyProperties(user,userInfoVO);
+        BeanUtils.copyProperties(user, userInfoVO);
         return userInfoVO;
     }
     @Override

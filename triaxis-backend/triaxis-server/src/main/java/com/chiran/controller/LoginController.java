@@ -1,12 +1,10 @@
 package com.chiran.controller;
 
 import com.chiran.JwtUtil;
-import com.chiran.dto.UserGetCaptchaDTO;
 import com.chiran.dto.UserLoginCountDTO;
 import com.chiran.dto.UserLoginPhoneDTO;
 import com.chiran.result.Result;
 import com.chiran.service.LoginService;
-import com.chiran.utils.CaptchaUtil;
 import com.chiran.vo.UserInfoVO;
 import com.chiran.vo.UserLoginVO;
 import io.jsonwebtoken.JwtException;

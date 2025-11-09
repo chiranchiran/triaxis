@@ -1,10 +1,6 @@
 package com.chiran.controller;
 
 import com.chiran.JwtUtil;
-import com.chiran.dto.CourseSearchDTO;
-import com.chiran.dto.ResourceSearchDTO;
-import com.chiran.dto.UserUpdateDTO;
-import com.chiran.result.PageResult;
 import com.chiran.result.Result;
 import com.chiran.service.CourseService;
 import com.chiran.service.ResourceService;
@@ -59,13 +55,36 @@ public class UserController {
    /**
     * 获取当前用户信息
     */
-   @GetMapping("/info")
-   public Result<UserVO> getUser(HttpServletRequest request) {
+   @GetMapping("/profile")
+   public Result<UserProfileVO> getUserProfile(HttpServletRequest request) {
        Integer id = (Integer)request.getAttribute("userId");
-       UserVO user = userService.getUser(id);
+       UserProfileVO user = userService.getUserProfile(id);
        return Result.success(user);
    }
-
+    @GetMapping("/detail")
+    public Result<UserDetailVO> getUserDetail(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserDetailVO user = userService.getUserDetail(id);
+        return Result.success(user);
+    }
+    @GetMapping("/settings")
+    public Result<UserMySettingsVO> getUserSettings(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMySettingsVO user = userService.getUserSettings(id);
+        return Result.success(user);
+    }
+    @GetMapping("/points")
+    public Result<UserMyPointsVO> getUserPoints(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMyPointsVO user = userService.getUserPoints(id);
+        return Result.success(user);
+    }
+    @GetMapping("/vip")
+    public Result<UserMyVipVO> getUserVip(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMyVipVO user = userService.getUserVip(id);
+        return Result.success(user);
+    }
    // /**
    //  * 更新用户信息
    //  */

@@ -55,11 +55,15 @@ import {
 import { MyButton } from '../../components/MyButton';
 import { Statis } from '../../components/DetailCard';
 import { useNavigate } from 'react-router-dom';
+import { useGetUserDetail } from '../../hooks/api/user';
 
 
-export default function UserDetail({ user }) {
+export default function UserDetail() {
   const navigate = useNavigate();
-
+  /**
+   * @description 数据获取
+   */
+  const { data: user = {} } = useGetUserDetail();
   // 解构用户字段
   const {
     id = null,
@@ -134,7 +138,7 @@ export default function UserDetail({ user }) {
           <div className="flex gap-20 flex-wrap">
             <div className="flex items-center gap-2">
               <TagsOutlined />
-              <span>研究领域：{subject || "未设置"}</span>
+              <span>研究领域：{subject.name || "未设置"}</span>
             </div>
             <div className="flex items-center gap-2">
               <LockOutlined className={status === 0 ? 'text-red-500' : 'text-green-500'} />
@@ -153,10 +157,8 @@ export default function UserDetail({ user }) {
           </div>
         </div>
         <p>个人简介：{bio || "未填写"}</p>
-        <div className="grid grid-cols-8 gap-3 text-center bg-orange-light rounded-lg">
+        <div className="grid grid-cols-6 gap-3 text-center bg-orange-light rounded-lg">
           <Statis count={points} className='text-sm mt-2' >积分</Statis>
-          <Statis count={pointsGet} className='text-sm mt-2' >已获得积分</Statis>
-          <Statis count={pointsSpent} className='text-sm mt-2' >已使用积分</Statis>
           <Statis count={postCount} className='text-sm mt-2' >帖子</Statis>
           <Statis count={resourceCount} className='text-sm mt-2' >上传资源</Statis>
           <Statis count={courseCount} className='text-sm mt-2' >上传课程</Statis>

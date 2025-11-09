@@ -4,6 +4,7 @@ import { usePreference } from "../../components/usePreference";
 import { ButtonOption, ItemLayout, SecondTitle, SwitchOption } from ".";
 import { MyButton } from "../../components/MyButton";
 import { ResetConfirmButton, SubmitConfirmButton } from "../../components/Mymodal";
+import { useGetUserSettings } from "../../hooks/api/user";
 
 export const MySettings = () => {
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
@@ -11,12 +12,27 @@ export const MySettings = () => {
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  /**
+   * @description 数据获取
+   */
+  const { data: userSettings = {} } = useGetUserSettings();
+  const {
+    publicInfo = true,
+    publicLikes = false,
+    publicCollections = false,
+    messageNotification = true,
+    emailSubscription = false,
+
+  } = userSettings;
+
+  /**
+ * @description 事件处理
+ */
   // 确认修改的最终逻辑
   const handleFinalConfirm = async () => {
     try {
       // 修改成功
       setChangePasswordVisible(false);
-
       setShowConfirm(false);
       formReset();
 
@@ -44,11 +60,11 @@ export const MySettings = () => {
         <ButtonOption title="登录密码" description="定期更改密码有助于保护账户安全" onClick={() => setChangePasswordVisible(true)} text="修改密码" />
       </SecondTitle>
       <SecondTitle label="隐私设置">
-        <SwitchOption title="公开个人信息" description="允许他人查看您的个人资料" defaultChecked={true} />
-        <SwitchOption title="公开点赞" description="允许他人查看您的点赞" defaultChecked={false} />
-        <SwitchOption title="公开收藏" description="允许他人查看您的收藏" defaultChecked={false} />
-        <SwitchOption title="消息通知" description="接收系统消息和更新通知" defaultChecked={true} />
-        <SwitchOption title="邮件订阅" description="接收产品更新和促销信息" defaultChecked={false} />
+        <SwitchOption title="公开个人信息" description="允许他人查看您的个人资料" defaultChecked={publicInfo} />
+        <SwitchOption title="公开点赞" description="允许他人查看您的点赞" defaultChecked={publicLikes} />
+        <SwitchOption title="公开收藏" description="允许他人查看您的收藏" defaultChecked={publicCollections} />
+        <SwitchOption title="消息通知" description="接收系统消息和更新通知" defaultChecked={messageNotification} />
+        <SwitchOption title="邮件订阅" description="接收产品更新和促销信息" defaultChecked={emailSubscription} />
       </SecondTitle>
       {/* 修改密码弹窗 */}
       <Modal

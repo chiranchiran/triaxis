@@ -129,9 +129,15 @@ public class User implements Serializable {
     /**
      * 会员到期时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField("vip_time")
     private LocalDateTime vipTime;
-
+    /**
+     * 会员生效时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField("vip_start")
+    private LocalDateTime vipStart;
     /**
      * 积分余额
      */
@@ -211,4 +217,38 @@ public class User implements Serializable {
      */
     @TableField("role")
     private Integer role;
+
+    /**
+     * 公开个人信息（默认开启）
+     */
+    @TableField(value = "public_info")
+    private Boolean publicInfo = true;
+
+
+    /**
+     * 公开点赞（默认关闭）
+     */
+    @TableField("public_likes")
+    private Boolean publicLikes = false;
+
+
+    /**
+     * 公开收藏（默认关闭）
+     */
+    @TableField("public_collections")
+    private Boolean publicCollections = false;
+
+
+    /**
+     * 消息通知（默认开启）
+     */
+    @TableField("message_notification")
+    private Boolean messageNotification = true;
+
+
+    /**
+     * 邮件订阅（默认关闭）
+     */
+    @TableField("email_subscription")
+    private Boolean emailSubscription = false;
 }

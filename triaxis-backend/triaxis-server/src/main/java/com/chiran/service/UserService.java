@@ -4,10 +4,7 @@ import com.chiran.bo.UserBO;
 import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.chiran.vo.MembershipVO;
-import com.chiran.vo.PointsVO;
-import com.chiran.vo.UserStatsVO;
-import com.chiran.vo.UserVO;
+import com.chiran.vo.*;
 
 /**
  * <p>
@@ -22,7 +19,6 @@ public interface UserService extends IService<User> {
     /**
      * 获取用户详情
      */
-    UserVO getUser(Integer userId);
 
     /**
      * 更新用户信息
@@ -48,4 +44,14 @@ public interface UserService extends IService<User> {
      * 更新最后登录信息
      */
     void updateLastLoginInfo(Integer userId, String ip);
+
+    UserProfileVO getUserProfile(Integer id);
+
+    UserDetailVO getUserDetail(Integer id);
+
+    UserMySettingsVO getUserSettings(Integer id);
+
+    UserMyPointsVO getUserPoints(Integer id);
+
+    UserMyVipVO getUserVip(Integer id);
 }

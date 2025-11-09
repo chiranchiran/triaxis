@@ -7,7 +7,7 @@ import { UploadFiles } from '../../components/UploadFiles';
 import { normFile, getFile, isArrayValid } from '../../utils/error/commonUtil';
 import { logger } from '../../utils/logger';
 import { useGetResourceTypes } from '../../hooks/api/resources';
-import { useGetUser } from '../../hooks/api/user';
+import { useGetUserProfile } from '../../hooks/api/user';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -20,19 +20,18 @@ const EditProfile = () => {
   /**
    * @description 数据获取
    */
-  const { data: user = {} } = useGetUser();
+  const { data: user = {} } = useGetUserProfile();
   const { data: resourceTypes = {}, isError: resourceTypesError } = useGetResourceTypes();
   const { subjects = [] } = resourceTypes || {}
   // 初始化表单值
   useEffect(() => {
     form.setFieldsValue({
       username: user.username || '',
-      realName: user.realName || '',
       gender: user.gender || 0,
       school: user.school || '',
       major: user.major || '',
       grade: user.grade || '',
-      subject: user.subject || '',
+      subject: user.subject.id || '',
       bio: user.bio || '',
       avatar: user.avatar ? [{ url: user.avatar, status: 'done' }] : [],
     });
@@ -50,7 +49,6 @@ const EditProfile = () => {
       const submitData = {
         ...user,
         username: values.username,
-        realName: values.realName,
         gender: values.gender,
         school: values.school,
         major: values.major,

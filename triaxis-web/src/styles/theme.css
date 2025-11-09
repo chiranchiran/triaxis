@@ -33,7 +33,8 @@ html[data-theme='light'] {
   --bg-dark-hover: #1e2939;
   --bg-hover: #d0d1d4;
   --bg-blue-light: #f4faff;
-
+  --bg-btn: #f3f4f6;
+  --bg-selected: #9cc7f8;
 
   --text: #1e293b;
   --text-secondary: #64748b;

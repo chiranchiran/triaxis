@@ -19,6 +19,22 @@ import { MyButton } from '../../components/MyButton';
 import { filterNull, subUsername } from '../../utils/error/commonUtil';
 import { resourceFilterList } from '../../utils/constant/order';
 
+// 获取价格标签
+export const getPriceTag = (isPurchased, right, price) => {
+  if (isPurchased) return ['已购买', 'ribbon-green'];
+  switch (right) {
+    case 1:
+      return ['免费', 'ribbon-green'];
+    case 3:
+      return ['VIP专享', 'ribbon-orange'];
+    case 2:
+      return [`${price}积分`, 'ribbon-blue'];
+    default:
+      return [`${price}积分`, 'ribbon-blue'];
+  }
+};
+
+
 const Resource = () => {
   const navigate = useNavigate();
   const userData = getUserData();
@@ -45,20 +61,7 @@ const Resource = () => {
     enabled: !!selectedFilters.subjectId && (selectedFilters.categoriesSecondary.length > 0 || (selectedFilters.categoriesSecondary.length === 0 && selectedFilters.categoriesFirst === null))
   });
 
-  // 获取价格标签
-  const getPriceTag = (isPurchased, right, price) => {
-    if (isPurchased) return ['已购买', 'ribbon-green'];
-    switch (right) {
-      case 1:
-        return ['免费', 'ribbon-green'];
-      case 3:
-        return ['VIP专享', 'ribbon-orange'];
-      case 2:
-        return [`${price}积分`, 'ribbon-blue'];
-      default:
-        return [`${price}积分`, 'ribbon-blue'];
-    }
-  };
+
 
   const records = resources.records || [];
 
@@ -81,7 +84,7 @@ const Resource = () => {
     >
       {records.map(resource => {
         const {
-          resourceDetail: {
+          detail: {
             id,
             title = "",
             description = "没有具体介绍",

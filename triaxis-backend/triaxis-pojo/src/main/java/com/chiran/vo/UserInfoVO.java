@@ -1,5 +1,6 @@
 package com.chiran.vo;
 
+import com.chiran.bo.CategoryBO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,4 +42,5 @@ public class UserInfoVO implements Serializable {
     private Integer points;
     private Integer Status;
     private String password;
+
 }

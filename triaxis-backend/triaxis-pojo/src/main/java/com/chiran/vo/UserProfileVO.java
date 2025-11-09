@@ -1,8 +1,5 @@
 package com.chiran.vo;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.chiran.bo.CategoryBO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -12,19 +9,17 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserVO implements Serializable {
+public class UserProfileVO implements Serializable {
     private Integer id;
     private String username;
+    private String avatar;
     private String email;
     private String phone;
-    private String avatar;
     private String wechatOpenid;
     private String qqOpenid;
     private String weiboUid;
@@ -42,19 +37,6 @@ public class UserVO implements Serializable {
     private LocalDateTime vipStart;
     @JsonFormat(pattern = "yyyy.MM.dd", timezone = "GMT+8")
     private LocalDateTime createTime;
-    private Integer points;
-    private Integer pointsGet;
-    private Integer pointsSpent;
-    private Integer resourceCount;
-    private Integer postCount;
-    private Integer courseCount;
-    private Integer likeCount;
-    private Integer purchaseCount;
     private Integer status;
     private Integer role;
-    private Boolean publicInfo = true;
-    private Boolean publicLikes = false;
-    private Boolean publicCollections = false;
-    private Boolean messageNotification = true;
-    private Boolean emailSubscription = false;
 }

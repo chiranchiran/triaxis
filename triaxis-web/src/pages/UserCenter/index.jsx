@@ -53,13 +53,15 @@ import {
 } from '@ant-design/icons';
 import { MyButton } from '../../components/MyButton';
 import { Statis } from '../../components/DetailCard';
-import { useGetUser } from '../../hooks/api/user';
+import { useGetUserProfile } from '../../hooks/api/user';
 import { Profile } from './Profile';
 import './index.less'
 import { MySettings } from './MySettings';
 import UserDetail from './UserDetail';
 import { MyPoints } from './MyPoints';
 import { MyVip } from './MyVip';
+import { MyMessages } from './MyMessages';
+import { MyResources } from './MyResources';
 
 const { Search } = Input;
 const { Meta } = Card;
@@ -94,15 +96,7 @@ const userData = {
   }
 };
 
-// 消息类型
-const MESSAGE_TYPES = [
-  { key: 'chat', name: '聊天', icon: <MessageOutlined />, color: '#7fb6f5', count: 5 },
-  { key: 'like', name: '点赞', icon: <HeartOutlined />, color: '#f7a8a8', count: 12 },
-  { key: 'collect', name: '收藏', icon: <StarOutlined />, color: '#f7d6a8', count: 8 },
-  { key: 'follow', name: '关注', icon: <UserOutlined />, color: '#a8d8f7', count: 3 },
-  { key: 'comment', name: '评论', icon: <BellOutlined />, color: '#c8a8f7', count: 7 },
-  { key: 'system', name: '系统', icon: <SafetyCertificateOutlined />, color: '#b8b8b8', count: 2 }
-];
+
 
 export const ItemLayout = ({ children, label, className }) => {
   return (
@@ -134,10 +128,10 @@ export const TabIcon = ({ children, icon }) => {
 }
 export const SwitchOption = ({ title, description, checked = null, onChange = null, defaultChecked = null, checkedText = null, unCheckedText = null }) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-main rounded-lg setting">
+    <div className="flex items-center justify-between p-4 bg-gray-light rounded-lg setting">
       <div>
-        <div className="font-medium text-gray-800">{title}</div>
-        <div className="text-sm text-gray-600">{description}</div>
+        <div className="font-medium mb-1">{title}</div>
+        <div className="text-sm text-secondary">{description}</div>
       </div>
       <Switch
         checked={checked}
@@ -151,10 +145,10 @@ export const SwitchOption = ({ title, description, checked = null, onChange = nu
 }
 export const ButtonOption = ({ title, description, onClick, text }) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-main rounded-lg setting">
+    <div className="flex items-center justify-between p-4 bg-gray-light rounded-lg setting">
       <div>
-        <div className="font-medium text-gray-800">{title}</div>
-        <div className="text-sm text-gray-600">{description}</div>
+        <div className="font-medium mb-1">{title}</div>
+        <div className="text-sm text-secondary">{description}</div>
       </div>
       <MyButton
         type="black"
@@ -166,31 +160,17 @@ export const ButtonOption = ({ title, description, onClick, text }) => {
   )
 }
 const UserCenter = () => {
-  const [activeMessageType, setActiveMessageType] = useState('chat');
-
-
+  console.log('22222')
   const [createCollectionVisible, setCreateCollectionVisible] = useState(false);
-  const [activeResourceTab, setActiveResourceTab] = useState('collections');
   const [activeCourseTab, setActiveCourseTab] = useState('collections');
-
   // 模拟数据
-  const [messages, setMessages] = useState([]);
-  const [resources, setResources] = useState([]);
   const [courses, setCourses] = useState([]);
   const [collections, setCollections] = useState([]);
-  const [chatList, setChatList] = useState([]);
 
 
 
 
-  // 资源子标签
-  const resourceTabItems = [
-    { key: 'collections', label: '收藏夹', icon: <FolderOutlined />, color: '#7fb6f5' },
-    { key: 'favorites', label: '收藏', icon: <StarOutlined />, color: '#f7d6a8' },
-    { key: 'likes', label: '点赞', icon: <HeartOutlined />, color: '#f7a8a8' },
-    { key: 'uploads', label: '上传', icon: <DownloadOutlined />, color: '#a8d8f7' },
-    { key: 'purchased', label: '已购买', icon: <CheckCircleOutlined />, color: '#a8f7c8' }
-  ];
+
 
   // 课程子标签
   const courseTabItems = [
@@ -396,11 +376,11 @@ const UserCenter = () => {
       }
     ];
 
-    setMessages(mockMessages);
-    setResources(mockResources);
-    setCourses(mockCourses);
-    setCollections(mockResources.collections);
-    setChatList(mockChatList);
+    // setMessages(mockMessages);
+    // setResources(mockResources);
+    // setCourses(mockCourses);
+    // setCollections(mockResources.collections);
+    // setChatList(mockChatList);
   }, []);
 
 
@@ -421,15 +401,12 @@ const UserCenter = () => {
     message.success('收藏夹创建成功');
   };
 
-  // 过滤消息
-  const filteredMessages = activeMessageType === 'chat'
-    ? chatList
-    : messages.filter(msg => msg.type === activeMessageType);
+
 
   /**
    * @description 数据获取
    */
-  const { data: user = {} } = useGetUser();
+  const { data: user = {} } = useGetUserProfile();
 
 
   const {
@@ -464,348 +441,8 @@ const UserCenter = () => {
   } = user
   // Tab项配置
 
-  const MyMessages = ({ }) => {
-    return (
-      <div className="space-y-6">
-        {/* 消息类型筛选 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex flex-wrap gap-4 justify-center">
-            {MESSAGE_TYPES.map(type => (
-              <div
-                key={type.key}
-                onClick={() => setActiveMessageType(type.key)}
-                className={`flex flex-col items-center p-4 rounded-lg cursor-pointer transition-all duration-300 ${activeMessageType === type.key
-                  ? 'bg-white border-2 scale-105 shadow-sm'
-                  : 'bg-gray-50 hover:bg-white hover:shadow-sm'
-                  }`}
-                style={{
-                  borderColor: activeMessageType === type.key ? type.color : 'transparent',
-                  minWidth: '100px'
-                }}
-              >
-                <div
-                  className="text-2xl mb-2"
-                  style={{ color: type.color }}
-                >
-                  {type.icon}
-                </div>
-                <div className="text-sm font-medium text-gray-700">{type.name}</div>
-                <div
-                  className="text-xs mt-1 px-2 py-1 rounded-full text-white"
-                  style={{ backgroundColor: type.color }}
-                >
-                  {type.count}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* 消息列表 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              {MESSAGE_TYPES.find(t => t.key === activeMessageType)?.name}
-            </h3>
-            <div
-              className="ml-2 text-xs px-2 py-1 rounded-full text-white"
-              style={{ backgroundColor: MESSAGE_TYPES.find(t => t.key === activeMessageType)?.color }}
-            >
-              {MESSAGE_TYPES.find(t => t.key === activeMessageType)?.count}
-            </div>
-          </div>
 
-          {activeMessageType === 'chat' ? (
-            chatList.length > 0 ? (
-              <div className="space-y-4">
-                {chatList.map(item => (
-                  <div key={item.id} className="flex items-center p-4 hover:bg-blue-50 rounded-lg cursor-pointer transition-colors">
-                    <div className="relative mr-4">
-                      <Avatar src={item.user.avatar} size={50} />
-                      {item.user.online && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-gray-800">{item.user.name}</span>
-                        {item.unread > 0 && (
-                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                            {item.unread}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-gray-600 truncate">{item.lastMessage}</p>
-                      <div className="text-sm text-gray-500 mt-1">{item.time}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Empty description="暂无聊天记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            )
-          ) : filteredMessages.length > 0 ? (
-            <div className="space-y-4">
-              {filteredMessages.map(item => (
-                <div key={item.id} className="flex items-start p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Avatar
-                    src={item.sender?.avatar}
-                    icon={!item.sender ? <SafetyCertificateOutlined /> : null}
-                    size={50}
-                    className="mr-4"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className={!item.read ? 'font-semibold text-gray-800' : 'text-gray-700'}>
-                        {item.sender ? item.sender.name : '系统通知'}
-                      </span>
-                      <span
-                        className="px-2 py-1 text-xs rounded-full text-white"
-                        style={{ backgroundColor: MESSAGE_TYPES.find(t => t.key === item.type)?.color }}
-                      >
-                        {MESSAGE_TYPES.find(t => t.key === item.type)?.name}
-                      </span>
-                    </div>
-                    <p className={!item.read ? 'font-medium text-gray-800 mt-2' : 'text-gray-600 mt-2'}>
-                      {item.content}
-                    </p>
-                    <div className="text-sm text-gray-500 mt-2">{item.time}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Empty description={`暂无${MESSAGE_TYPES.find(t => t.key === activeMessageType)?.name}`} />
-          )}
-        </div>
-      </div>
-    );
-  };
-  const MyResources = ({ }) => {
-    return (
-      <div className="space-y-6">
-        {/* 资源类型筛选 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex flex-wrap gap-2">
-            {resourceTabItems.map(item => (
-              <button
-                key={item.key}
-                onClick={() => setActiveResourceTab(item.key)}
-                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${activeResourceTab === item.key
-                  ? 'text-white shadow-sm'
-                  : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
-                  }`}
-                style={{
-                  backgroundColor: activeResourceTab === item.key ? item.color : undefined
-                }}
-              >
-                {item.icon}
-                <span className="ml-2">{item.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 资源内容区 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          {/* 我的收藏夹 */}
-          {activeResourceTab === 'collections' && (
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">我的收藏夹</h3>
-                <Button
-                  icon={<PlusOutlined />}
-                  onClick={() => setCreateCollectionVisible(true)}
-                  className="bg-blue-400 hover:bg-blue-500 border-blue-400"
-                >
-                  新建收藏夹
-                </Button>
-              </div>
-              {resources.collections && resources.collections.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {resources.collections.map(collection => (
-                    <div
-                      key={collection.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-300 cursor-pointer bg-white"
-                    >
-                      <div className="flex items-center mb-3">
-                        <FolderOutlined className="text-2xl text-blue-400 mr-3" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{collection.name}</h4>
-                          <p className="text-sm text-gray-500">包含 {collection.count} 个项目</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-500">
-                        <span>{collection.isPublic ? '公开' : '私密'}</span>
-                        <span>{collection.createTime}</span>
-                      </div>
-                      <div className="flex justify-between mt-3 pt-3 border-t border-gray-100">
-                        <button className="text-blue-400 hover:text-blue-500 text-sm">查看</button>
-                        <button className="text-gray-500 hover:text-gray-700 text-sm">编辑</button>
-                        <button className="text-orange-400 hover:text-orange-500 text-sm flex items-center">
-                          <StarOutlined className="mr-1" />
-                          {collection.count}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Empty description="暂无收藏夹" />
-              )}
-            </div>
-          )}
-
-          {/* 收藏的资源 */}
-          {activeResourceTab === 'favorites' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">收藏的资源</h3>
-              {resources.favorites && resources.favorites.length > 0 ? (
-                <div className="space-y-4">
-                  {resources.favorites.map(item => (
-                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-orange-50 rounded-lg transition-colors border border-gray-100">
-                      <div className="flex items-center">
-                        <FolderOutlined className="text-2xl text-orange-400 mr-4" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{item.title}</h4>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>类型: {item.type}</span>
-                            <span className="mx-2">•</span>
-                            <span>大小: {item.size}</span>
-                            <span className="mx-2">•</span>
-                            <span>作者: {item.author}</span>
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            收藏时间: {item.favoriteTime}
-                          </div>
-                        </div>
-                      </div>
-                      <Button type="link" className="text-blue-400">下载</Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Empty description="暂无收藏资源" />
-              )}
-            </div>
-          )}
-
-          {/* 点赞的资源 */}
-          {activeResourceTab === 'likes' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">点赞的资源</h3>
-              {resources.likes && resources.likes.length > 0 ? (
-                <div className="space-y-4">
-                  {resources.likes.map(item => (
-                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-pink-50 rounded-lg transition-colors border border-gray-100">
-                      <div className="flex items-center">
-                        <HeartOutlined className="text-2xl text-pink-400 mr-4" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{item.title}</h4>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>类型: {item.type}</span>
-                            <span className="mx-2">•</span>
-                            <span>大小: {item.size}</span>
-                            <span className="mx-2">•</span>
-                            <span>作者: {item.author}</span>
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            点赞时间: {item.likeTime}
-                          </div>
-                        </div>
-                      </div>
-                      <Button type="link" className="text-blue-400">下载</Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Empty description="暂无点赞资源" />
-              )}
-            </div>
-          )}
-
-          {/* 上传的资源 */}
-          {activeResourceTab === 'uploads' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">上传的资源</h3>
-              {resources.uploads && resources.uploads.length > 0 ? (
-                <div className="space-y-4">
-                  {resources.uploads.map(item => (
-                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-green-50 rounded-lg transition-colors border border-gray-100">
-                      <div className="flex items-center">
-                        <DownloadOutlined className="text-2xl text-green-400 mr-4" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{item.title}</h4>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>类型: {item.type}</span>
-                            <span className="mx-2">•</span>
-                            <span>大小: {item.size}</span>
-                            <span className="mx-2">•</span>
-                            <span>下载: {item.downloads}</span>
-                          </div>
-                          <div className="flex items-center mt-1">
-                            <span className={`px-2 py-1 text-xs rounded-full ${item.status === '审核通过'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-orange-100 text-orange-700'
-                              }`}>
-                              {item.status}
-                            </span>
-                            <span className="text-sm text-gray-500 ml-2">
-                              上传时间: {item.uploadTime}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-x-2">
-                        <Button size="small">编辑</Button>
-                        <Button size="small" type="text" danger>删除</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Empty description="暂无上传资源" />
-              )}
-            </div>
-          )}
-
-          {/* 已购买的资源 */}
-          {activeResourceTab === 'purchased' && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">已购买的资源</h3>
-              {resources.purchased && resources.purchased.length > 0 ? (
-                <div className="space-y-4">
-                  {resources.purchased.map(item => (
-                    <div key={item.id} className="flex items-center justify-between p-4 hover:bg-purple-50 rounded-lg transition-colors border border-gray-100">
-                      <div className="flex items-center">
-                        <CheckCircleOutlined className="text-2xl text-purple-400 mr-4" />
-                        <div>
-                          <h4 className="font-medium text-gray-800">{item.title}</h4>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>类型: {item.type}</span>
-                            <span className="mx-2">•</span>
-                            <span>大小: {item.size}</span>
-                            <span className="mx-2">•</span>
-                            <span>价格: {item.price}</span>
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            购买时间: {item.purchaseTime}
-                          </div>
-                        </div>
-                      </div>
-                      <Button type="link" className="text-blue-400">下载</Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <Empty description="暂无购买资源" />
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
   const MyCourses = ({ }) => {
     return (
       <div className="space-y-6">
@@ -929,17 +566,17 @@ const UserCenter = () => {
     {
       key: 'profile',
       label: <TabIcon icon={<UserOutlined />}>个人信息</TabIcon>,
-      children: <Profile user={user} />
+      children: <Profile />
     },
     {
       key: 'settings',
       label: <TabIcon icon={<SettingOutlined />}>我的设置</TabIcon>,
-      children: <MySettings user={user} />
+      children: <MySettings />
     },
     {
       key: 'messages',
       label: (
-        <Badge count={23} size="small" offset={[-3, 1]}>
+        <Badge count={23} size="small" offset={[-3, 1]} overflowCount={999}>
           <TabIcon icon={<BellOutlined />}>我的消息</TabIcon>
         </Badge>
       ),
@@ -963,21 +600,19 @@ const UserCenter = () => {
     {
       key: 'points',
       label: <TabIcon icon={<StarOutlined />}>我的积分</TabIcon>,
-      children: <MyPoints user={user} />
+      children: <MyPoints />
     },
   ];
   return (
     <section className="max-w-7xl mx-auto py-4 userCenter mb-4">
       {/* 用户信息卡片 */}
-      <UserDetail user={user} />
+      <UserDetail />
       {/* 主要内容区域 */}
-      <>
-        <Tabs
-          tabPosition="left"
-          items={tabItems}
-          tabBarGutter={4}
-        />
-      </>
+      <Tabs
+        tabPosition="left"
+        items={tabItems}
+        tabBarGutter={4}
+      />
       {/* 创建收藏夹弹窗 */}
       <Modal
         title="新建收藏夹"

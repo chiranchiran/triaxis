@@ -1,12 +1,6 @@
 package com.chiran.service;
 
-import com.chiran.bo.CategoryBO;
 import com.chiran.bo.UserActionsBO;
-import com.chiran.dto.UserLoginCountDTO;
-import com.chiran.dto.UserLoginPhoneDTO;
-import com.chiran.vo.UserInfoVO;
-
-import java.util.List;
 
 public interface UserActionService {
 

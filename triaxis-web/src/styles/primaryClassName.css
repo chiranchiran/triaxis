@@ -4,78 +4,89 @@
 }
 
 .bg-gray {
-  background-color: var(--bg-gray) !important;
+  background-color: var(--bg-gray);
 }
 
 .bg-gray-light {
-  background-color: var(--bg-gray-light) !important;
+  background-color: var(--bg-gray-light);
 }
 
+.bg-btn {
+  background-color: var(--bg-btn);
+}
 
 .bg-card {
-  background-color: var(--bg-elevated) !important;
+  background-color: var(--bg-elevated);
 }
 
 .bg-dark {
-  background-color: var(--bg-dark) !important;
+  background-color: var(--bg-dark);
 }
 
 .bg-light {
-  background-color: var(--bg-light) !important;
+  background-color: var(--bg-light);
 }
 
 .bg-primary {
-  background-color: var(--primary) !important;
+  background-color: var(--primary);
 }
 
 .bg-primary-50 {
-  background-color: var(--primary-50) !important;
+  background-color: var(--primary-50);
 }
 
 .bg-blue-light {
-  background-color: var(--bg-blue-light) !important;
+  background-color: var(--bg-blue-light);
 }
 
 .bg-like {
-  background-color: var(--bg-like) !important;
+  background-color: var(--bg-like);
   color: var(--text-like);
 }
 
 .bg-score {
-  background-color: var(--bg-score) !important;
+  background-color: var(--bg-score);
   color: var(--text-score);
 }
 
 .bg-primary-light {
-  background-color: var(--primary-light) !important;
+  background-color: var(--primary-light);
 }
 
 .bg-black-light {
-  background-color: var(--black) !important;
+  background-color: var(--black);
 }
 
 .bg-green {
-  background-color: var(--accent-green) !important;
+  background-color: var(--accent-green);
+}
+
+.bg-green-dark {
+  background-color: var(--accent-green-dark);
 }
 
 .bg-green-50 {
-  background-color: var(--accent-green-50) !important;
+  background-color: var(--accent-green-50);
 }
 
 .bg-green-light {
-  background-color: var(--accent-green-light) !important;
+  background-color: var(--accent-green-light);
 }
 
 .bg-orange {
-  background-color: var(--accent-orange) !important;
+  background-color: var(--accent-orange);
 }
 
 .bg-orange-50 {
-  background-color: var(--accent-orange-50) !important;
+  background-color: var(--accent-orange-50);
+}
+
+.bg-selected {
+  background-color: var(--bg-selected);
 }
 
 .bg-orange-light {
-  background-color: var(--accent-orange-light) !important;
+  background-color: var(--accent-orange-light);
 }
 
 .bg-hot {
@@ -166,7 +177,7 @@
 }
 
 .border-divider {
-  border-block-start: var(--text-muted) !important;
+  border-block-start: var(--text-muted);
 }
 
 .border-light {

@@ -4,17 +4,31 @@ import service from "../../utils/api/service"
 export const logout = () => {
   return service.post('/user/logout')
 }
-export const getUser = () => {
-  return service.get('/user/info')
+//获取个人信息
+export const getUserProfile = () => {
+  return service.get('/user/profile')
+}
+//获取资料卡片
+export const getUserDetail = () => {
+  return service.get('/user/detail')
+}
+//获取我的设置
+export const getUserSettings = () => {
+  return service.get('/user/settings')
+}
+//获取我的积分
+export const getUserPoints = () => {
+  return service.get('/user/points')
+}
+//获取我的会员
+export const getUserVip = () => {
+  return service.get('/user/vip')
 }
 
 export const updateProfile = (data) => {
   return service.put('/user/info', data)
 }
 
-export const getUserStats = () => {
-  return service.get('/user/stats')
-}
 
 // 我的资源
 export const getMyUploadedResources = (params) => {

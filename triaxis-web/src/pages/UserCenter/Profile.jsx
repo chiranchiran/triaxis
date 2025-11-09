@@ -54,13 +54,19 @@ import {
 import { MyButton } from '../../components/MyButton';
 import { Statis } from '../../components/DetailCard';
 import { ItemLayout, SecondTitle } from '.';
+import { useGetUserProfile } from '../../hooks/api/user';
 
 const { Search } = Input;
 const { Meta } = Card;
 const { Option } = Select;
 
 
-export const Profile = ({ user }) => {
+export const Profile = () => {
+
+  /**
+   * @description 数据获取
+   */
+  const { data: userProfile = {} } = useGetUserProfile();
   const {
     id = null,
     username = "",
@@ -79,6 +85,7 @@ export const Profile = ({ user }) => {
     subject = "",
     vipLevel = 0,
     vipTime = "",
+    vipStart = "",
     createTime = "",
     points = 0,
     pointsGet = 0,
@@ -90,7 +97,8 @@ export const Profile = ({ user }) => {
     purchaseCount = 0,
     status = 1,
     role = 0,
-  } = user
+  } = userProfile
+
   const infoList = [{
     key: "1",
     label: "用户名",
@@ -103,7 +111,7 @@ export const Profile = ({ user }) => {
 
     key: "3",
     label: "领域",
-    children: subject
+    children: subject.name
   }, {
     key: "4",
     label: "身份",
@@ -129,6 +137,18 @@ export const Profile = ({ user }) => {
     key: "9",
     label: "VIP等级",
     children: vipLevel === 0 ? < Badge status="warning" text="您还不是vip" /> : vipLevel
+  }, {
+    key: "10",
+    label: "VIP开通时间",
+    children: vipLevel === 0 || !vipStart ? "暂无" : vipStart
+  }, {
+    key: "11",
+    label: "VIP到期",
+    children: vipLevel === 0 || !vipTime ? "暂无" : vipTime
+  }, {
+    key: "12",
+    label: "加入网站时间",
+    children: createTime
   }
   ]
 
@@ -169,12 +189,12 @@ export const Profile = ({ user }) => {
         <Descriptions bordered items={infoList} />
       </SecondTitle>
       <SecondTitle label="个人简介">
-        <p className="text-gray-700 leading-relaxed p-4 bg-gray-50 rounded-lg">{user.bio}</p>
+        <p className="text-gray-700 leading-relaxed p-4 bg-gray-light rounded-lg">{bio}</p>
       </SecondTitle>
       <SecondTitle label="账户绑定">
         {
           countInfo.map(info => (
-            <div className='text-base flex items-center setting bg-main rounded-lg py-2 px-4 w-80' key={info.label}>
+            <div className='text-base flex items-center setting bg-gray-light rounded-lg py-2 px-4 w-80' key={info.label}>
               <div className='w-50 flex gap-2 items-center'>
                 {info.icon}
                 {info.label}：
