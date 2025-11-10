@@ -174,7 +174,7 @@ const Resource = () => {
                   </div>
 
                   {/* 统计信息 */}
-                  <div className="mb-0 flex items-center justify-start text-md text-secondary border-t border-light space-x-4">
+                  <div className="mb-0 flex items-center justify-start text-xs text-secondary border-t border-light space-x-4">
                     <span className="flex items-center">
                       <DownloadOutlined className="mr-1" />
                       {downloadCount}

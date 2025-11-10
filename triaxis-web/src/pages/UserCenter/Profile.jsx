@@ -200,7 +200,13 @@ export const Profile = () => {
                 {info.label}：
               </div>
               {
-                info.id ? <span className="px-1 text-secondary">已绑定</span> : <MyButton size="long" type="green" className="!w-24">绑定</MyButton>
+                info.id ? <span className="px-1 text-secondary">已绑定</span> : <MyButton
+                  size='long'
+                  className="!w-24"
+                  type="black"
+                >
+                  绑定
+                </MyButton>
               }
             </div>
           ))

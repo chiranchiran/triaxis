@@ -99,7 +99,7 @@ const CourseContainer = ({
         </div>
       </div>
 
-      <div className="-mt-28 max-w-7xl mx-auto">
+      <div className="-mt-28 check max-w-7xl mx-auto">
         {/* 筛选条件区域 */}
         <Category
           filterList={filterList}
@@ -120,7 +120,7 @@ const CourseContainer = ({
         {/* 资源列表 */}
         <div>
           {dataLoading ? (
-            <div className="flex justify-center items-center py-20">
+            <div className="flex  justify-center items-center py-20">
               <Spin size="large" />
             </div>
           ) : records.length > 0 && !dataError ? (

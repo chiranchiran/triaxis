@@ -6,9 +6,7 @@ import com.chiran.bo.UserBO;
 import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.*;
 import com.chiran.exception.BusinessException;
-import com.chiran.mapper.UserMapper;
-import com.chiran.mapper.UserPointMapper;
-import com.chiran.mapper.UserPurchaseMapper;
+import com.chiran.mapper.*;
 import com.chiran.service.ResourceTypesService;
 import com.chiran.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -48,6 +46,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private ResourceTypesService resourceTypesService;
     @Autowired
     private UserPointMapper userPointMapper;
+    @Autowired
+    private UserLikeMapper userLikeMapper;
+    @Autowired
+    private UserCollectionMapper userCollectionMapper;
+    @Autowired
+    private UserReviewServiceImpl userReviewServiceImpl;
 //    private final ResourceService resourceService;
 //    private final CourseService courseService;
 
@@ -190,6 +194,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserMyVipVO userMyVipVO = new UserMyVipVO();
         BeanUtils.copyProperties(user, userMyVipVO);
         return userMyVipVO;
+    }
+
+    @Override
+    public UserMessageVO getUserMessages(Integer id, Integer type) {
+        // if(type==1){
+        //     LambdaQueryWrapper<UserLike> queryWrapper = new LambdaQueryWrapper<>();
+        //     queryWrapper.eq(UserLike::getUserId,id);
+        // }
+        if(type==2){
+
+        }
+
+
+        return null;
     }
 
     private static void checkUserIsExist(User user, boolean user1) {

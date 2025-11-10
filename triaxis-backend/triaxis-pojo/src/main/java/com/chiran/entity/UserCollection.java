@@ -35,6 +35,8 @@ public class UserCollection implements Serializable {
     @TableField("deleted")
     @TableLogic
     private Integer deleted;
+    @TableField("is_read")
+    private Boolean isRead;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;

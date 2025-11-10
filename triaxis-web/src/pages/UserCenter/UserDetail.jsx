@@ -157,7 +157,7 @@ export default function UserDetail() {
           </div>
         </div>
         <p>个人简介：{bio || "未填写"}</p>
-        <div className="grid grid-cols-6 gap-3 text-center bg-orange-light rounded-lg">
+        <div className="grid grid-cols-6 gap-3 text-center bg-orange-light rounded-lg mt-4">
           <Statis count={points} className='text-sm mt-2' >积分</Statis>
           <Statis count={postCount} className='text-sm mt-2' >帖子</Statis>
           <Statis count={resourceCount} className='text-sm mt-2' >上传资源</Statis>
@@ -165,7 +165,7 @@ export default function UserDetail() {
           <Statis count={purchaseCount} className='text-sm mt-2' >已购买</Statis>
           <Statis count={likeCount} className='text-sm mt-2' >获赞</Statis>
         </div>
-        <div className="text-sm text-secondary flex items-center justify-center md:justify-start">
+        <div className="text-sm text-secondary flex items-center justify-center md:justify-start -mt-4">
           <ClockCircleOutlined className="mr-2" />
           加入时间：{createTime}
         </div>

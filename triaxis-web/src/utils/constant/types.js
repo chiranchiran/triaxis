@@ -9,3 +9,9 @@ export const POINTS_TYPE = {
   8: '发布悬赏贴消耗',
   9: '每日签到获得'
 };
+export const MyRESOURCE_TYPE = {
+  'collections': 6,
+  'likes': 7,
+  'uploads': 8,
+  'purchased': 9
+}

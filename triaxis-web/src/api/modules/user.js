@@ -24,6 +24,27 @@ export const getUserPoints = () => {
 export const getUserVip = () => {
   return service.get('/user/vip')
 }
+//获取我的消息列表
+export const getUserMessagesLike = (params) => {
+  return service.get('/user/messages/like', { params })
+}
+export const getUserMessagesCollect = (params) => {
+  return service.get('/user/messages/collect', { params })
+}
+export const getUserMessagesReview = (params) => {
+  return service.get('/user/messages/review', { params })
+}
+export const getUserMessagesSystem = (params) => {
+  return service.get('/user/messages/system', { params })
+}
+//获取我的聊天列表
+export const getUserChats = () => {
+  return service.get('/user/chats')
+}
+//获取单个聊天记录
+export const getUserChat = (id) => {
+  return service.get(`/user/chat/:id`)
+}
 
 export const updateProfile = (data) => {
   return service.put('/user/info', data)

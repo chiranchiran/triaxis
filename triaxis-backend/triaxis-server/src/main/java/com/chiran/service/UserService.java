@@ -54,4 +54,6 @@ public interface UserService extends IService<User> {
     UserMyPointsVO getUserPoints(Integer id);
 
     UserMyVipVO getUserVip(Integer id);
+
+    UserMessageVO getUserMessages(Integer id,Integer type);
 }

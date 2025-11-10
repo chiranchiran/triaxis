@@ -22,6 +22,7 @@ public class ResourceSearchBO implements Serializable {
     private Integer right;
     private Integer price;
     private Long size;
+    private Integer status;
     private String extension;
     private String details;
     private Integer downloadCount;

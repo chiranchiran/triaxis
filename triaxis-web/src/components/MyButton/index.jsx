@@ -35,7 +35,7 @@ const MyButton = ({ size = 'small', loading = false, onClick, type, children, ic
       onClick={onClick}
       disabled={loading}
       icon={icon}
-      className={`${current} my-button transition-all transition-colors ${className}`}
+      className={`${current} my-button transition-all transition-colors settings ${className}`}
       {...props}
     >
       {children}

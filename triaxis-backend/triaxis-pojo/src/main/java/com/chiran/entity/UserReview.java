@@ -73,4 +73,6 @@ public class UserReview implements Serializable {
 
     @TableField("reply_count")
     private Integer replyCount;
+    @TableField("is_read")
+    private Boolean isRead;
 }

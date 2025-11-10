@@ -4,13 +4,14 @@ import {
   SearchOutlined, CrownOutlined, GlobalOutlined, UserOutlined, MoonOutlined, SunOutlined, SettingOutlined, BellOutlined, UploadOutlined, FolderOutlined, BookOutlined, StarOutlined, LogoutOutlined
 } from '@ant-design/icons';
 import { Form, NavLink, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import './index.less'
 import { useLogout } from '../../hooks/api/login';
 import Logo from '../Logo';
 import { usePreference } from '../usePreference';
 import { MyButton } from '../MyButton';
 import { useTranslation } from 'react-i18next';
+import { setUserActiveKey } from '../../store/slices/userCenterSlice';
 
 const Header = () => {
   const { t } = useTranslation()
@@ -18,6 +19,7 @@ const Header = () => {
   const navigate = useNavigate()
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
   const { mutate: doLogout } = useLogout()
+  const dispatch = useDispatch();
   const { username, isAuthenticated, role } = useSelector(state => state.auth);
 
   const unreadMessageCount = 3;
@@ -40,53 +42,24 @@ const Header = () => {
 
   // 处理下拉菜单点击事件，转跳不同的页面
   const handleMenuClick = ({ key }) => {
-    switch (key) {
-      case 'userinfo':
-        navigate('/user/userinfo')
-        break;
-      case 'setting':
-        navigate('/user/setting')
-        break;
-      case 'message':
-        navigate('/user/message')
-        break;
-      case 'upload':
-        navigate('/user/upload')
-        break;
-      case 'resource':
-        navigate('/user/resources')
-        break;
-      case 'course':
-        navigate('/user/courses')
-        break;
-      case 'vip':
-        navigate('/user/vip')
-        break;
-      case 'points':
-        navigate('/user/points')
-        break;
-      case 'logout':
-        doLogout()
-        break;
-      default:
-        break;
-    }
+    dispatch(setUserActiveKey({ userActiveKey: key }));
+    navigate('/user')
   }
 
   // 用户下拉菜单项
   const menuItems = [
     {
-      key: 'userinfo',
+      key: 'profile',
       icon: <UserOutlined />,
       label: '个人中心',
     },
     {
-      key: 'setting',
+      key: 'settings',
       icon: <SettingOutlined />,
       label: '我的设置',
     },
     {
-      key: 'message',
+      key: 'messages',
       icon: <BellOutlined />,
       label: (
         <Badge count={unreadMessageCount} size="small">
@@ -98,17 +71,12 @@ const Header = () => {
       type: 'divider',
     },
     {
-      key: 'upload',
-      icon: <UploadOutlined />,
-      label: '我的上传',
-    },
-    {
-      key: 'resource',
+      key: 'resources',
       icon: <FolderOutlined />,
       label: '我的资源',
     },
     {
-      key: 'course',
+      key: 'courses',
       icon: <BookOutlined />,
       label: '我的课程',
     },

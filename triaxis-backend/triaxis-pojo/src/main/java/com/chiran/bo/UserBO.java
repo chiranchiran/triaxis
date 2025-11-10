@@ -20,4 +20,5 @@ public class UserBO implements Serializable {
     private String school;
     private  String grade;
     private String major;
+    private Boolean online=false;
 }

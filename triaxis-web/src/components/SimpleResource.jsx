@@ -10,20 +10,38 @@ import { MyButton } from './MyButton';
 import { useNavigate } from 'react-router-dom';
 import { subUsername } from '../utils/error/commonUtil';
 import { converBytes } from '../utils/convertUnit';
+import { orderBy } from 'lodash';
+import { MyRESOURCE_TYPE } from '../utils/constant/types';
+import { MyEmpty } from './MyEmpty';
 
 const SimpleResource = ({ type }) => {
-  const navigate = useNavigate();
-  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources();
-  const records = resources.records || [];
+  /**
+ * @description state管理
+ */
 
   // 多选相关状态：选中的资源ID列表、全选状态
   const [selectedIds, setSelectedIds] = useState([]);
   const [checkAll, setCheckAll] = useState(false);
 
+  const navigate = useNavigate();
+  /**
+   * @description 数据获取
+   */
+
+  //传递筛选条件和排序方式
+  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ orderBy: MyRESOURCE_TYPE[type] }, {
+    enabled: !!MyRESOURCE_TYPE[type]
+  });
+  const records = resources.records || [];
+
+  /**
+   * @description 多选功能
+   */
+
+
   // 全选/取消全选逻辑
   const handleCheckAll = (checked) => {
     setCheckAll(checked);
-    // 全选时选中所有资源ID，取消全选时清空
     setSelectedIds(checked ? records.map(item => item.detail?.id) : []);
   };
 
@@ -45,7 +63,10 @@ const SimpleResource = ({ type }) => {
     setCheckAll(selectedIds.length === records.length);
   }, [selectedIds, records.length]);
 
-  // 批量删除逻辑（需替换为你的实际删除接口调用）
+
+  /**
+ * @description 批量删除逻
+ */
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) {
       message.warning('请先选择要删除的资源');
@@ -64,10 +85,7 @@ const SimpleResource = ({ type }) => {
     }
   };
 
-  // 空状态处理
-  if (!records || records.length === 0) {
-    return <Empty description="暂无相关信息" />;
-  }
+
 
   const getStatus = (status) => {
     switch (status) {
@@ -77,9 +95,14 @@ const SimpleResource = ({ type }) => {
         return "已发布";
       case 4:
         return "已下架";
+      default:
+        return '未知状态';
     }
   }
-
+  // 空状态处理
+  if (!records || records.length === 0) {
+    return <MyEmpty />
+  }
   return (
     <div className="pt-6 check">
       {/* 仅上传资源显示：全选按钮 + 批量删除按钮 */}

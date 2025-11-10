@@ -62,41 +62,13 @@ import { MyPoints } from './MyPoints';
 import { MyVip } from './MyVip';
 import { MyMessages } from './MyMessages';
 import { MyResources } from './MyResources';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeUserActiveKey, setUserActiveKey } from '../../store/slices/userCenterSlice';
+import { store } from '../../store';
 
 const { Search } = Input;
 const { Meta } = Card;
 const { Option } = Select;
-
-// 模拟用户数据
-const userData = {
-  id: 1,
-  username: 'zhangming',
-  realName: '张明',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-  level: 5,
-  title: '高级城乡规划师',
-  bio: '专注于城市规划与设计，热爱分享专业知识，希望通过这个平台与更多同行交流学习。',
-  school: '清华大学',
-  major: '城乡规划',
-  grade: '研究生三年级',
-  createTime: '2022-03-15',
-  followers: 245,
-  following: 128,
-  posts: 89,
-  resources: 34,
-  courses: 12,
-  likes: 0,
-
-
-  bindAccounts: {
-    wechat: true,
-    github: false,
-    qq: true,
-    weibo: false
-  }
-};
-
-
 
 export const ItemLayout = ({ children, label, className }) => {
   return (
@@ -160,17 +132,13 @@ export const ButtonOption = ({ title, description, onClick, text }) => {
   )
 }
 const UserCenter = () => {
-  console.log('22222')
+  const userActiveKey = useSelector(state => state.userCenter.userActiveKey) || 'profile';
+  const dispatch = useDispatch();
   const [createCollectionVisible, setCreateCollectionVisible] = useState(false);
   const [activeCourseTab, setActiveCourseTab] = useState('collections');
   // 模拟数据
   const [courses, setCourses] = useState([]);
   const [collections, setCollections] = useState([]);
-
-
-
-
-
 
   // 课程子标签
   const courseTabItems = [
@@ -180,213 +148,6 @@ const UserCenter = () => {
     { key: 'purchased', label: '已购买', icon: <CheckCircleOutlined />, color: '#a8f7c8' },
     { key: 'learning', label: '学习中', icon: <BookOutlined />, color: '#c8a8f7' }
   ];
-
-  // 加载模拟数据
-  useEffect(() => {
-    // 模拟消息数据
-    const mockMessages = [
-      {
-        id: 1,
-        type: 'like',
-        content: '李华点赞了您的帖子《城市规划设计要点》',
-        time: '2小时前',
-        read: false,
-        sender: {
-          name: '李华',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2'
-        }
-      },
-      {
-        id: 2,
-        type: 'comment',
-        content: '王伟评论了您的资源：这个资料很有用，谢谢分享！',
-        time: '5小时前',
-        read: true,
-        sender: {
-          name: '王伟',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3'
-        }
-      },
-      {
-        id: 3,
-        type: 'follow',
-        content: '新用户张丽关注了您',
-        time: '1天前',
-        read: false,
-        sender: {
-          name: '张丽',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4'
-        }
-      },
-      {
-        id: 4,
-        type: 'system',
-        content: '系统通知：您的会员即将到期，请及时续费',
-        time: '2天前',
-        read: true
-      }
-    ];
-
-    // 模拟资源数据
-    const mockResources = {
-      collections: [
-        {
-          id: 1,
-          name: '城市规划资料',
-          count: 23,
-          type: 'resource',
-          createTime: '2024-01-01',
-          isPublic: true
-        },
-        {
-          id: 2,
-          name: '设计规范',
-          count: 15,
-          type: 'resource',
-          createTime: '2024-01-05',
-          isPublic: false
-        }
-      ],
-      favorites: [
-        {
-          id: 1,
-          title: '城市规划设计规范2024',
-          type: 'pdf',
-          size: '2.3MB',
-          author: '李教授',
-          favoriteTime: '2024-01-15'
-        }
-      ],
-      likes: [
-        {
-          id: 1,
-          title: '建筑设计方案模板',
-          type: 'zip',
-          size: '15.7MB',
-          author: '王设计师',
-          likeTime: '2024-01-10'
-        }
-      ],
-      uploads: [
-        {
-          id: 1,
-          title: '我的设计作品集',
-          type: 'zip',
-          size: '45.2MB',
-          uploadTime: '2024-01-18',
-          downloads: 156,
-          status: '审核通过'
-        }
-      ],
-      purchased: [
-        {
-          id: 1,
-          title: '高级城市规划素材包',
-          type: 'zip',
-          size: '120.5MB',
-          price: '298积分',
-          purchaseTime: '2024-01-12'
-        }
-      ]
-    };
-
-    // 模拟课程数据
-    const mockCourses = {
-      collections: [
-        {
-          id: 1,
-          name: '专业提升课程',
-          count: 8,
-          type: 'course',
-          createTime: '2024-01-01'
-        }
-      ],
-      favorites: [
-        {
-          id: 1,
-          title: '城市规划原理与实践',
-          teacher: '王教授',
-          duration: '12小时',
-          favoriteTime: '2024-01-15'
-        }
-      ],
-      likes: [
-        {
-          id: 1,
-          title: '景观生态设计',
-          teacher: '李老师',
-          duration: '8小时',
-          likeTime: '2024-01-10'
-        }
-      ],
-      purchased: [
-        {
-          id: 1,
-          title: 'BIM技术高级应用',
-          teacher: '张工程师',
-          price: '599积分',
-          purchaseTime: '2024-01-08'
-        }
-      ],
-      learning: [
-        {
-          id: 1,
-          title: '城市规划原理与实践',
-          progress: 75,
-          lastStudy: '2024-01-18',
-          duration: '12小时',
-          teacher: '王教授',
-          rating: 4.8
-        },
-        {
-          id: 2,
-          title: '景观生态设计',
-          progress: 30,
-          lastStudy: '2024-01-16',
-          duration: '8小时',
-          teacher: '李老师',
-          rating: 4.6
-        }
-      ]
-    };
-
-    // 模拟私聊数据
-    const mockChatList = [
-      {
-        id: 1,
-        user: {
-          name: '李华',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-          online: true
-        },
-        lastMessage: '关于那个设计方案，我有一些建议...',
-        time: '10:30',
-        unread: 2
-      },
-      {
-        id: 2,
-        user: {
-          name: '王伟',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-          online: false
-        },
-        lastMessage: '谢谢分享的资料，很有帮助！',
-        time: '昨天',
-        unread: 0
-      }
-    ];
-
-    // setMessages(mockMessages);
-    // setResources(mockResources);
-    // setCourses(mockCourses);
-    // setCollections(mockResources.collections);
-    // setChatList(mockChatList);
-  }, []);
-
-
-
-
-
 
   // 创建收藏夹
   const handleCreateCollection = (values) => {
@@ -439,10 +200,13 @@ const UserCenter = () => {
     status = 1,//0禁用
     role = 0,//0普通
   } = user
+
   // Tab项配置
 
 
-
+  const handleTabChange = (key) => {
+    dispatch(setUserActiveKey({ userActiveKey: key }));
+  };
   const MyCourses = ({ }) => {
     return (
       <div className="space-y-6">
@@ -611,6 +375,8 @@ const UserCenter = () => {
       <Tabs
         tabPosition="left"
         items={tabItems}
+        activeKey={userActiveKey}
+        onChange={handleTabChange}
         tabBarGutter={4}
       />
       {/* 创建收藏夹弹窗 */}

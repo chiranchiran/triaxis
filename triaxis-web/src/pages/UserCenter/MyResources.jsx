@@ -88,39 +88,39 @@ export const MyResources = () => {
   // 按 tabItems 格式重构的资源子标签数组
   const tabItems = [
     // {
-    //   key: 'collections',
+    //   key: 'favorites,
     //   icon: FolderOutlined, // 改为组件引用（移除 <>/</>）
     //   label: '收藏夹',
     //   count: 0, // 补充 count 字段（根据实际数据填写，这里用 0 占位）
-    //   children: <ResourceList resourceType="collections" /> // 假设资源列表组件为 ResourceList，传入对应类型
+    //   children: <ResourceList resourceType="favorites" /> // 假设资源列表组件为 ResourceList，传入对应类型
     // },
     {
-      key: 'favorites',
+      key: 'collections',
       icon: StarOutlined,
       label: '收藏',
       count: 0,
-      children: <SimpleResource type="favorites" />
+      children: <SimpleResource type='collections' />
     },
     {
       key: 'likes',
       icon: HeartOutlined,
       label: '点赞',
       count: 0,
-      children: <SimpleResource type="likes" />
+      children: <SimpleResource type='likes' />
     },
     {
       key: 'uploads',
       icon: DownloadOutlined,
       label: '上传',
       count: 0,
-      children: <SimpleResource type="uploads" />
+      children: <SimpleResource type='uploads' />
     },
     {
       key: 'purchased',
       icon: CheckCircleOutlined,
       label: '已购买',
       count: 0,
-      children: <SimpleResource type="purchased" />
+      children: <SimpleResource type='purchased' />
     }
   ];
   return (

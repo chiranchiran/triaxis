@@ -1,6 +1,7 @@
 package com.chiran.controller;
 
 import com.chiran.JwtUtil;
+import com.chiran.entity.UserChat;
 import com.chiran.result.Result;
 import com.chiran.service.CourseService;
 import com.chiran.service.ResourceService;
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
 * <p>
@@ -83,6 +86,42 @@ public class UserController {
     public Result<UserMyVipVO> getUserVip(HttpServletRequest request) {
         Integer id = (Integer)request.getAttribute("userId");
         UserMyVipVO user = userService.getUserVip(id);
+        return Result.success(user);
+    }
+    @GetMapping("/messages/like")
+    public Result<UserMessageVO> getUserMessagesLike(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMessageVO user = userService.getUserMessages(id,1);
+        return Result.success(user);
+    }
+    @GetMapping("/messages/collect")
+    public Result<UserMessageVO> getUserMessagesCollect(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMessageVO user = userService.getUserMessages(id,2);
+        return Result.success(user);
+    }      @GetMapping("/messages/review")
+    public Result<UserMessageVO> getUserMessagesReview(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMessageVO user = userService.getUserMessages(id,3);
+        return Result.success(user);
+    }
+    @GetMapping("/messages/system")
+    public Result<UserMessageVO> getUserMessagesSystem(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserMessageVO user = userService.getUserMessages(id,4);
+        return Result.success(user);
+    }
+
+    @GetMapping("/chats")
+    public Result<UserChatVO> getUserChats(HttpServletRequest request) {
+        Integer id = (Integer)request.getAttribute("userId");
+        UserChatVO user = userService.getUserChats(id);
+        return Result.success(user);
+    }
+    @GetMapping("/chat/{id}")
+    public Result<List<UserChat>> getUserChat(HttpServletRequest request) {
+        Integer userId = (Integer)request.getAttribute("userId");
+        List<UserChat> user = userService.getUserChat(useId,id);
         return Result.success(user);
     }
    // /**

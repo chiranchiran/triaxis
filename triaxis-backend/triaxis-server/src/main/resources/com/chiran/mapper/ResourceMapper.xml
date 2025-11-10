@@ -13,6 +13,7 @@
             <result property="extension" column="extension"/>
             <result property="coverImage" column="cover_image"/>
             <result property="price" column="price"/>
+            <result property="status" column="status"/>
             <result property="downloadCount" column="download_count"/>
             <result property="collectCount" column="collect_count"/>
             <result property="likeCount" column="like_count"/>
@@ -32,6 +33,11 @@
             <result property="isLiked" column="isLiked"/>
             <result property="isCollected" column="isCollected"/>
             <result property="isPurchased" column="isPurchased"/>
+            <result property="isUploaded" column="isUploaded"/>
+            <!-- 添加时间字段 -->
+            <result property="collectTime" column="collect_time"/>
+            <!-- <result property="likeTime" column="like_time"/> -->
+            <result property="purchaseTime" column="purchase_time"/>
         </association>
     </resultMap>
 
@@ -45,6 +51,7 @@
         r.extension,
         r.cover_image,
         r.user_id,
+        r.status,
         r.price,
         r.download_count,
         r.collect_count,
@@ -65,11 +72,29 @@
         WHERE uf.target_id = r.id AND uf.target_type = 1
         AND uf.user_id = #{dto.userId} AND uf.deleted = 0
         ) AS isCollected,
+
         EXISTS(
         SELECT 1 FROM user_purchases up
         WHERE up.target_id = r.id AND up.target_type = 1
         AND up.user_id = #{dto.userId} AND up.deleted = 0
-        ) AS isPurchased
+        ) AS isPurchased,
+
+        -- 是否当前用户上传
+        (r.user_id = #{dto.userId}) AS isUploaded,
+
+        -- 添加时间字段用于排序
+        (SELECT uf.update_time FROM user_collections uf
+        WHERE uf.target_id = r.id AND uf.target_type = 1
+        AND uf.user_id = #{dto.userId} AND uf.deleted = 0) AS collect_time,
+
+        (SELECT ul.update_time FROM user_likes ul
+        WHERE ul.target_id = r.id AND ul.target_type = 1
+        AND ul.user_id = #{dto.userId} AND ul.deleted = 0) AS like_time,
+
+        (SELECT up.update_time FROM user_purchases up
+        WHERE up.target_id = r.id AND up.target_type = 1
+        AND up.user_id = #{dto.userId} AND up.deleted = 0) AS purchase_time
+
         FROM resources r
         LEFT JOIN users u ON r.user_id = u.id AND u.deleted = 0
         WHERE r.deleted = 0
@@ -137,8 +162,40 @@
             OR r.details LIKE CONCAT('%', #{dto.search}, '%')
             )
         </if>
-        GROUP BY
 
+        <!-- 根据排序类型添加额外条件 -->
+        <choose>
+            <!-- 6收藏时间：必须已收藏 -->
+            <when test="dto.orderBy == 6">
+                AND EXISTS(
+                SELECT 1 FROM user_collections uf
+                WHERE uf.target_id = r.id AND uf.target_type = 1
+                AND uf.user_id = #{dto.userId} AND uf.deleted = 0
+                )
+            </when>
+            <!-- 7点赞时间：必须已点赞 -->
+            <when test="dto.orderBy == 7">
+                AND EXISTS(
+                SELECT 1 FROM user_likes ul
+                WHERE ul.target_id = r.id AND ul.target_type = 1
+                AND ul.user_id = #{dto.userId} AND ul.deleted = 0
+                )
+            </when>
+            <!-- 8上传时间：必须是当前用户上传 -->
+            <when test="dto.orderBy == 8">
+                AND r.user_id = #{dto.userId}
+            </when>
+            <!-- 9购买时间：必须已购买 -->
+            <when test="dto.orderBy == 9">
+                AND EXISTS(
+                SELECT 1 FROM user_purchases up
+                WHERE up.target_id = r.id AND up.target_type = 1
+                AND up.user_id = #{dto.userId} AND up.deleted = 0
+                )
+            </when>
+        </choose>
+
+        GROUP BY
         r.id, r.title, r.`right`, r.description, r.size, r.extension,
         r.cover_image, r.user_id, r.price, r.download_count, r.collect_count,
         r.like_count, r.publish_time, r.update_time, u.username, u.avatar
@@ -159,6 +216,22 @@
             </when>
             <when test="dto.orderBy == 5">
                 ORDER BY (r.download_count * 0.3 + r.collect_count * 0.2 + r.like_count * 0.5) DESC
+            </when>
+            <when test="dto.orderBy == 6">
+                <!-- 收藏时间排序 -->
+                ORDER BY collect_time DESC
+            </when>
+            <when test="dto.orderBy == 7">
+                <!-- 点赞时间排序 -->
+                ORDER BY like_time DESC
+            </when>
+            <when test="dto.orderBy == 8">
+                <!-- 上传时间排序 -->
+                ORDER BY r.update_time DESC
+            </when>
+            <when test="dto.orderBy == 9">
+                <!-- 购买时间排序 -->
+                ORDER BY purchase_time DESC
             </when>
             <otherwise>
                 ORDER BY r.publish_time DESC

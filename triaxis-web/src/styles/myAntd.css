@@ -266,3 +266,8 @@ select:hover {
   font-size: var(--ant-badge-text-font-size-sm);
   border-radius: calc(var(--ant-badge-indicator-height-sm) / 2.1);
 }
+
+/* 分割线 */
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item-divider {
+  background-color: var(--bg-gray-light);
+}

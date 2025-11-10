@@ -107,7 +107,7 @@ const Element = () => {
       element: <CreatePost />
     },
     {
-      path: '/user/userinfo',
+      path: '/user',
       element: <Protect> <UserCenter /></Protect>
     },
     {

@@ -25,7 +25,8 @@ public class UserPurchase implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
-
+    @TableField("is_read")
+    private Boolean isRead;
     @TableField("user_id")
     private Integer userId;
     @TableField("target_type")
