@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserLikeMapper">
+
+    <resultMap id="ResourceVOMap" type="com.chiran.vo.UserMessageVO">
+        <!-- 基础字段映射 -->
+        <result property="id" column="id"/>
+        <result property="type" column="type"/> <!-- 对应 ul.target_type -->
+        <result property="sendTime" column="update_time"/>
+        <result property="isRead" column="is_read"/>
+
+        <!-- 消息目标：type1-3 对应资源表（有title），type4 对应评论表（有content） -->
+        <association property="messageTarget" javaType="com.chiran.bo.MessageTargetBo">
+            <id property="targetId" column="msg_target_id"/>  <!-- 动态赋值的目标ID -->
+            <result property="title" column="msg_title"/>      <!-- type1-3有值，type4 null -->
+            <result property="content" column="msg_content"/>  <!-- type4有值，type1-3 null -->
+        </association>
+
+        <!-- 评论关联目标：仅 type4 有值 -->
+        <association property="reviewTarget" javaType="com.chiran.bo.ReviewTargetBo">
+            <id property="reviewTargetId" column="review_target_id"/>
+            <result property="reviewTitle" column="review_title"/>
+            <result property="reviewType" column="review_type"/> <!-- 对应 ur.target_type -->
+        </association>
+
+        <!-- 发送者信息 -->
+        <association property="sender" javaType="com.chiran.bo.UserBO">
+            <result property="userId" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+            <result column="school" property="school"/>
+            <result column="grade" property="grade"/>
+            <result column="major" property="major"/>
+        </association>
+    </resultMap>
+
+    <select id="selectResources" resultMap="ResourceVOMap">
+        SELECT
+        ul.id,
+        ul.is_read,
+        ul.target_type AS type,
+        ul.user_id,
+        ul.update_time,
+        u.username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major,
+
+        <!-- 1. 动态赋值 messageTarget：按 type 区分来源 -->
+        -- msg_target_id：type1-3 取对应资源表ID，type4 取评论表ID
+        CASE
+        WHEN ul.target_type = 1 THEN MAX(r.id)
+        WHEN ul.target_type = 2 THEN MAX(c.id)
+        WHEN ul.target_type = 3 THEN MAX(p.id)
+        WHEN ul.target_type = 4 THEN MAX(ur.id)
+        END AS msg_target_id,
+
+        -- msg_title：type1-3 取资源表title，type4 为null
+        CASE
+        WHEN ul.target_type = 1 THEN MAX(r.title)
+        WHEN ul.target_type = 2 THEN MAX(c.title)
+        WHEN ul.target_type = 3 THEN MAX(p.title)
+        ELSE NULL
+        END AS msg_title,
+
+        -- msg_content：type4 取评论表content，type1-3 为null
+        CASE
+        WHEN ul.target_type = 4 THEN ur.content
+        ELSE NULL
+        END AS msg_content,
+
+        <!-- 2. 动态赋值 reviewTarget：仅 type4 有效 -->
+        -- review_target_id：按 ur.target_type 关联对应表ID
+        CASE
+        WHEN ul.target_type = 4 THEN
+        CASE
+        WHEN ur.target_type = 1 THEN MAX(r2.id)
+        WHEN ur.target_type = 2 THEN MAX(c2.id)
+        WHEN ur.target_type = 3 THEN MAX(p2.id)
+        END
+        ELSE NULL
+        END AS review_target_id,
+
+        -- review_title：按 ur.target_type 关联对应表title
+        CASE
+        WHEN ul.target_type = 4 THEN
+        CASE
+        WHEN ur.target_type = 1 THEN MAX(r2.title)
+        WHEN ur.target_type = 2 THEN MAX(c2.title)
+        WHEN ur.target_type = 3 THEN MAX(p2.title)
+        END
+        ELSE NULL
+        END AS review_title,
+
+        -- review_type：仅 type4 取 ur.target_type
+        CASE WHEN ul.target_type = 4 THEN ur.target_type ELSE NULL END AS review_type
+
+        FROM user_likes ul
+        LEFT JOIN users u
+        ON ul.user_id = u.id AND u.deleted = 0
+
+        -- ========== type1-3 关联对应资源表（条件匹配） ==========
+        LEFT JOIN resources r
+        ON ul.target_type = 1 AND ul.target_id = r.id AND r.deleted = 0
+        LEFT JOIN courses c
+        ON ul.target_type = 2 AND ul.target_id = c.id AND c.deleted = 0
+        LEFT JOIN posts p
+        ON ul.target_type = 3 AND ul.target_id = p.id AND p.deleted = 0
+
+        -- ========== type4 关联评论表 + 评论对应的目标表 ==========
+        -- 关联 user_reviews（评论表）
+        LEFT JOIN user_reviews ur
+        ON ul.target_type = 4 AND ul.target_id = ur.id AND ur.deleted = 0
+        -- 评论目标：resources（ur.target_type=1）
+        LEFT JOIN resources r2
+        ON ul.target_type = 4 AND ur.target_type = 1 AND ur.target_id = r2.id AND r2.deleted = 0
+        -- 评论目标：courses（ur.target_type=2）
+        LEFT JOIN courses c2
+        ON ul.target_type = 4 AND ur.target_type = 2 AND ur.target_id = c2.id AND c2.deleted = 0
+        -- 评论目标：posts（ur.target_type=3）
+        LEFT JOIN posts p2
+        ON ul.target_type = 4 AND ur.target_type = 3 AND ur.target_id = p2.id AND p2.deleted = 0
+
+        WHERE ul.deleted = 0
+        <if test="id != null">
+            AND (
+            -- type1-3：按资源表的 user_id 过滤
+            (ul.target_type = 1 AND r.user_id = #{id}) OR
+            (ul.target_type = 2 AND c.user_id = #{id}) OR
+            (ul.target_type = 3 AND p.user_id = #{id}) OR
+            -- type4：按评论表的 user_id 过滤
+            (ul.target_type = 4 AND ur.user_id = #{id})
+            )
+        </if>
+
+        GROUP BY ul.id, ul.update_time, type, user_id, update_time, username, avatar, school, grade, major, ur.content, ur.target_type
+        ORDER BY ul.update_time DESC
+    </select>
+</mapper>

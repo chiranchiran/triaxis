@@ -82,7 +82,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     public ResourceVO getResourceDetail(Integer id, Integer userId) {
         Resource resource = this.getById(id);
-        if (resource == null || resource.getDeleted() == 1) {
+        if (resource == null) {
             throw ExceptionUtil.create(14001);
         }
 
@@ -94,12 +94,12 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 
         ResourceSearchBO resourceSearchBO = new ResourceSearchBO();
         BeanUtils.copyProperties(resource, resourceSearchBO);
-//查询相关的的缩略图
+        // 查询相关的的缩略图
         LambdaQueryWrapper<ResourceImage> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.select(ResourceImage::getId, ResourceImage::getPath).eq(ResourceImage::getResourceId, id).orderByAsc(ResourceImage::getCreateTime);
         List<ResourceImage> list = resourceImageMapper.selectList(queryWrapper);
         List<CategoryBO> images = BeanUtil.copyList(list, CategoryBO::new);
-        //查询分类信息
+        // 查询分类信息
 
         ResourceCategoryBO resourceCategoryBO = resourceTypesService.selectAllCategories(id);
         resourceCategoryBO.setRight(resource.getRight());
@@ -122,22 +122,22 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean addResource(ResourceDTO dto) {
-        //修改文件大小
+        // 修改文件大小
         getSize(dto);
         Resource resource = new Resource();
         BeanUtils.copyProperties(dto, resource);
         resource.setId(null);
         this.save(resource);
         Integer resourceId = resource.getId();
-        //插入tag标签分类和关系
-        addTags(dto, resourceId,1);
-        //插入资源和分类的关系
+        // 插入tag标签分类和关系
+        addTags(dto, resourceId, 1);
+        // 插入资源和分类的关系
         addCategories(dto, resourceId);
-        //插入文件路径的关系
+        // 插入文件路径的关系
         addPaths(dto, resourceId);
-        //插入文件预览图的关系
+        // 插入文件预览图的关系
         addImages(dto, resourceId);
-        //插入资源和工具的关系
+        // 插入资源和工具的关系
         addTools(dto, resourceId);
         return true;
     }
@@ -146,9 +146,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateResource(ResourceDTO dto) {
         Integer resourceId = dto.getId();
-        //检查权限和资源存在
-        check(resourceId,dto.getUserId(), dto.getRole());
-        //检查文件变化
+        // 检查权限和资源存在
+        check(resourceId, dto.getUserId(), dto.getRole());
+        // 检查文件变化
         dto.setSize(null);
         if (dto.getFiles() != null) {
             getSize(dto);
@@ -159,55 +159,55 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         this.updateById(resource);
         // 更新关联的tag
         if (dto.getTags() != null) {
-            //删除旧的关联
+            // 删除旧的关联
             userTagService.lambdaUpdate()
                     .eq(UserTag::getTagId, resourceId)
                     .eq(UserTag::getTargetType, 1)
                     .remove();
             if (!dto.getTags().isEmpty()) {
-                //插入tag标签分类和关系
-                addTags(dto, resourceId,1);
+                // 插入tag标签分类和关系
+                addTags(dto, resourceId, 1);
             }
         }
-        //更新资源分类关系
+        // 更新资源分类关系
         if (dto.getCategoryIds() != null) {
-            //删除旧的关联
+            // 删除旧的关联
             resourceCategoryService.lambdaUpdate()
                     .eq(ResourceCategory::getResourceId, resourceId)
                     .remove();
             if (!dto.getCategoryIds().isEmpty()) {
-                //插入资源和分类的关系
+                // 插入资源和分类的关系
                 addCategories(dto, resourceId);
             }
         }
-        //更新文件路径的关系
+        // 更新文件路径的关系
         if (dto.getFiles() != null) {
-            //删除旧的关联
+            // 删除旧的关联
             resourcePathService.lambdaUpdate()
                     .eq(ResourcePath::getResourceId, resourceId)
                     .remove();
             if (!dto.getCategoryIds().isEmpty()) {
-                //插入文件路径的关系
+                // 插入文件路径的关系
                 addPaths(dto, resourceId);
             }
         }
-        //更新文件预览图的关系
+        // 更新文件预览图的关系
         if (dto.getImages() != null) {
             resourceImageService.lambdaUpdate()
                     .eq(ResourceImage::getResourceId, resourceId)
                     .remove();
             if (!dto.getCategoryIds().isEmpty()) {
-                //插入文件预览图的关系
+                // 插入文件预览图的关系
                 addImages(dto, resourceId);
             }
         }
-        //更新资源和工具的关系
+        // 更新资源和工具的关系
         if (dto.getToolIds() != null) {
             resourceToolService.lambdaUpdate()
                     .eq(ResourceTool::getResourceId, resourceId)
                     .remove();
             if (!dto.getCategoryIds().isEmpty()) {
-                //插入资源和工具的关系
+                // 插入资源和工具的关系
                 addTools(dto, resourceId);
             }
         }
@@ -217,9 +217,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean removeResource(Integer id, Integer userId, Integer role) {
-        //检查权限和资源存在
-        check(id,userId,role);
-        //删除
+        // 检查权限和资源存在
+        check(id, userId, role);
+        // 删除
         this.removeById(id);
         removeRelation(id);
         return true;
@@ -227,19 +227,20 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean removeResources(List<Integer> ids,Integer userId,Integer role) {
+    public Boolean removeResources(List<Integer> ids, Integer userId, Integer role) {
         if (ids == null || ids.isEmpty()) {
             return true;
         }
-        for(Integer id : ids){
-            check(id,userId,role);
-            //删除
+        for (Integer id : ids) {
+            check(id, userId, role);
+            // 删除
             this.removeById(id);
             removeRelation(id);
         }
         return true;
     }
-    private void addTags(ResourceDTO dto, Integer resourceId,Integer type) {
+
+    private void addTags(ResourceDTO dto, Integer resourceId, Integer type) {
         List<UserTag> userTagList = new ArrayList();
         for (String s : dto.getTags()) {
             Tag tag = new Tag();
@@ -256,6 +257,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         userTagService.saveBatch(userTagList);
     }
+
     private void addCategories(ResourceDTO dto, Integer resourceId) {
         List<ResourceCategory> resourceCategoryList = new ArrayList();
         for (Integer id : dto.getCategoryIds()) {
@@ -266,6 +268,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         resourceCategoryService.saveBatch(resourceCategoryList);
     }
+
     private void addPaths(ResourceDTO dto, Integer resourceId) {
         List<ResourcePath> resourcePathList = new ArrayList();
         for (UploadFileBO uploadFileBO : dto.getFiles()) {
@@ -279,6 +282,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         resourcePathService.saveBatch(resourcePathList);
     }
+
     private void addImages(ResourceDTO dto, Integer resourceId) {
         List<ResourceImage> resourceImageList = new ArrayList();
         for (UploadFileBO uploadFileBO : dto.getImages()) {
@@ -292,6 +296,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         resourceImageService.saveBatch(resourceImageList);
     }
+
     private void addTools(ResourceDTO dto, Integer resourceId) {
         List<ResourceTool> resourceToolList = new ArrayList();
         for (Integer id : dto.getToolIds()) {
@@ -302,6 +307,7 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         resourceToolService.saveBatch(resourceToolList);
     }
+
     private void getSize(ResourceDTO dto) {
         Long size = 0L;
         for (UploadFileBO uploadFileBO : dto.getFiles()) {
@@ -309,8 +315,9 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         }
         dto.setSize(size);
     }
-    private void check(Integer id, Integer userId,Integer role) {
-        //id不能为空
+
+    private void check(Integer id, Integer userId, Integer role) {
+        // id不能为空
         if (id == null) {
             throw ExceptionUtil.create(15000, "资源ID不能为空");
         }
@@ -319,20 +326,20 @@ public class ResourceServiceImpl extends ServiceImpl<ResourceMapper, Resource> i
         if (exist == null || exist.getDeleted() == 1) {
             throw ExceptionUtil.create(15001, "资源不存在或已被删除");
         }
-        //校验权限
+        // 校验权限
         if (exist.getUserId() != userId && role == 0) {
-            throw ExceptionUtil.create(11002,"权限不足,无法删除");
+            throw ExceptionUtil.create(11002, "权限不足,无法删除");
         }
     }
 
     private void removeRelation(Integer id) {
-        //删除旧的关联
+        // 删除旧的关联
         userTagService.lambdaUpdate()
                 .eq(UserTag::getTagId, id)
                 .eq(UserTag::getTargetType, 1)
                 .remove();
 
-        //删除旧的关联
+        // 删除旧的关联
         resourceCategoryService.lambdaUpdate()
                 .eq(ResourceCategory::getResourceId, id)
                 .remove();

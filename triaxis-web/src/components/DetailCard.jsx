@@ -1,4 +1,4 @@
-import { isArrayValid } from "../utils/error/commonUtil";
+import { isArrayValid } from "../utils/commonUtil";
 
 const CustomCard = ({ children, className = '', ...props }) => (
   <div
@@ -41,7 +41,7 @@ const FileTime = ({ count, children }) => {
       return (
         <div className="flex justify-between text-sm p-2 gap-6">
           <span className="text-main text-nowrap">{children}</span>
-          <span className="font-medium text-main flex justify-end gap-2 flex-wrap">
+          <span className="text-secondary flex justify-end gap-2 flex-wrap">
             {count.map((tool, index) => (
               <span
                 key={index}
@@ -59,7 +59,7 @@ const FileTime = ({ count, children }) => {
     return (
       <div className="flex justify-between text-sm p-2 gap-10">
         <span className="text-main text-nowrap">{children}</span>
-        <span className="font-medium text-main">{count}</span>
+        <span className="text-secondary">{count}</span>
       </div>
     )
   }

@@ -21,6 +21,12 @@ import PostDetail from "../pages/PostDetail/index.jsx"
 import { useNotification } from "../components/AppProvider.jsx"
 import { logger } from "../utils/logger.js"
 import EditProfile from "../pages/EditProfile/index.jsx"
+import { Profile } from "../pages/UserCenter/Profile.jsx"
+import { MySettings } from "../pages/UserCenter/MySettings.jsx"
+import { MyResources } from "../pages/UserCenter/MyResources.jsx"
+import { MyMessages } from "../pages/UserCenter/MyMessages.jsx"
+import { MyVip } from "../pages/UserCenter/MyVip.jsx"
+import { MyPoints } from "../pages/UserCenter/MyPoints.jsx"
 
 
 //路由守卫组件
@@ -29,9 +35,11 @@ const Protect = ({ children }) => {
   //检查token是否有效
   const notification = useNotification()
   const { isAuthenticated } = useSelector(state => state.auth)
+  console.log(isAuthenticated)
   const navigate = useNavigate()
   useEffect(() => {
     if (!isAuthenticated) {
+      console.log("当前认证状态", isAuthenticated)
       navigate('/login')
       notification.info({ message: "请先登录!", description: "登录后才能进行操作" })
     }
@@ -108,14 +116,42 @@ const Element = () => {
     },
     {
       path: '/user',
-      element: <Protect> <UserCenter /></Protect>
+      element: <Protect> <UserCenter /></Protect>,
+      children: [{
+        path: 'profile',
+        element: <Profile />
+      }, {
+        path: 'settings',
+        element: <MySettings />
+      }, {
+        path: 'messages',
+        element: <MyMessages />
+      },
+      {
+        path: 'resources',
+        element: <MyResources />
+      },
+      // {
+      //   path: 'courses',
+      //   element: <MyCourses />
+      // },
+      {
+        path: 'vip',
+        element: <MyVip />
+      },
+      {
+        path: 'points',
+        element: <MyPoints />
+      },
+
+      ]
     },
     {
       path: '/user/edit',
       element: <Protect> <EditProfile /></Protect>
     },
     {
-      path: '/user/feedback',
+      path: '/feedback',
       element: <FeedbackDisplay />
     },
     {

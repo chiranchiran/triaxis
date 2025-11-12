@@ -26,7 +26,7 @@ import { logger } from '../../utils/logger';
 import { ResetConfirmButton, SubmitConfirmButton, useToggleConfirm } from '../../components/Mymodal';
 import { UploadFiles } from '../../components/UploadFiles';
 import { useGetPostTypes, useUploadPost } from '../../hooks/api/community';
-import { getFile } from '../../utils/error/commonUtil';
+import { getFile } from '../../utils/commonUtil';
 
 const { TextArea } = Input;
 const { Option } = Select;

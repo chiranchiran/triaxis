@@ -25,6 +25,9 @@ export const getUserVip = () => {
   return service.get('/user/vip')
 }
 //获取我的消息列表
+export const getUserMessagesCount = (params) => {
+  return service.get('/user/messages/count')
+}
 export const getUserMessagesLike = (params) => {
   return service.get('/user/messages/like', { params })
 }
@@ -43,7 +46,7 @@ export const getUserChats = () => {
 }
 //获取单个聊天记录
 export const getUserChat = (id) => {
-  return service.get(`/user/chat/:id`)
+  return service.get(`/user/chat/${id}`)
 }
 
 export const updateProfile = (data) => {

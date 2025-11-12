@@ -4,7 +4,7 @@ import { UserOutlined, EditOutlined } from '@ant-design/icons';
 import { MyButton } from '../../components/MyButton';
 import { ResetConfirmButton, SubmitConfirmButton } from '../../components/Mymodal';
 import { UploadFiles } from '../../components/UploadFiles';
-import { normFile, getFile, isArrayValid } from '../../utils/error/commonUtil';
+import { normFile, getFile, isArrayValid } from '../../utils/commonUtil';
 import { logger } from '../../utils/logger';
 import { useGetResourceTypes } from '../../hooks/api/resources';
 import { useGetUserProfile } from '../../hooks/api/user';

@@ -21,7 +21,7 @@ import { logger } from '../../utils/logger';
 import { uploadFile } from '../../api/modules/common';
 import { useMessage } from '../../components/AppProvider';
 import { useUploadFile } from '../../hooks/api/common';
-import { getFileExtension } from '../../utils/error/commonUtil';
+import { getFileExtension } from '../../utils/commonUtil';
 import service from '../../utils/api/service';
 import { useMutation } from '@tanstack/react-query';
 import { fileConfig } from '../../utils/constant/validate';

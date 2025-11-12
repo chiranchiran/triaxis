@@ -4,9 +4,9 @@ import './index.less'
 import { useGetResource } from '../../hooks/api/resources';
 import { converBytes } from '../../utils/convertUnit';
 import ShowDetail, { renderMutiple, renderSingle, SmallTitle } from '../../components/ShowDetail';
-import { isArrayValid } from '../../utils/error/commonUtil';
+import { isArrayValid } from '../../utils/commonUtil';
 import { CoverImage, FileTime, Statis } from '../../components/DetailCard';
-
+import dayjs from 'dayjs';
 const ResourceDetail = () => {
   // 获取价格标签
   const getPriceTag = (right, pricePoints) => {
@@ -50,6 +50,11 @@ const ResourceDetail = () => {
 
   //     )
   // }
+
+  /**
+   * @description 自定义组件
+   */
+
   const CategoryTag = ({ data = {}, tags }) => {
     const { subject = "", right = "", price = 0, tools = [], categoriesFirst = [], categoriesSecondary = [] } = data
 
@@ -73,7 +78,7 @@ const ResourceDetail = () => {
         <Statis count={downloadCount} >下载</Statis>
         <Statis count={likeCount} >点赞</Statis>
         <Statis count={collectCount} >收藏</Statis>
-        <Statis count={right === 3 ? price : getPriceTag(right, price)[1]} >价格</Statis>
+        <Statis count={right === 3 ? price : right === 1 ? 0 : "VIP"} >价格</Statis>
       </div>
     )
   }
@@ -82,8 +87,8 @@ const ResourceDetail = () => {
     return (
       <div className="space-y-3">
         <FileTime count={converBytes(size)}>文件大小：</FileTime>
-        <FileTime count={publishTime}>上传时间：</FileTime>
-        <FileTime count={updateTime}>更新时间：</FileTime>
+        <FileTime count={dayjs(publishTime).format('YYYY.MM.DD HH:mm:ss')}>上传时间：</FileTime>
+        <FileTime count={dayjs(updateTime).format('YYYY.MM.DD HH:mm:ss')}>更新时间：</FileTime>
       </div>
     )
   }

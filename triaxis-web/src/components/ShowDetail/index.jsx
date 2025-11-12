@@ -23,8 +23,10 @@ import { useCollect, useLike } from '../../hooks/api/common';
 import { throttle } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { AddReview } from '../addReview';
-import { isArrayValid } from '../../utils/error/commonUtil';
+import { isArrayValid } from '../../utils/commonUtil';
+import { MyEmpty } from '../MyEmpty';
 
+//小方块的标题
 export const SmallTitle = ({ children }) => {
   return (
     <div className="flex items-center text-lg">
@@ -35,10 +37,12 @@ export const SmallTitle = ({ children }) => {
   )
 }
 
+//工具、分类等多选用/分割展示
 export const renderMutiple = (list, label) => {
   if (!isArrayValid(list)) return;
   return <span>{label}： <span className='text-secondary'>{list.map(i => i.name).filter(Boolean).join(" / ")}</span></span>
 }
+//学科等单选单个展示
 export const renderSingle = (text, label) => {
   if (text === null || text === undefined || text === "") return;
   return <span>{label}：<span className='text-secondary'>{text}</span></span>
@@ -54,11 +58,11 @@ const ShowDetail = ({
   coverImage: CoverImage = () => { },
   image: Image = () => { },
   handleReturn = {} }) => {
+
   const { titleText = "", detailText = "" } = textContent
   const { id } = useParams()
   const { mutation: dolike } = useLike();
   const { mutation: doCollect } = useCollect();
-
   const downloadRef = useRef(null)
 
   /**
@@ -70,7 +74,7 @@ const ShowDetail = ({
    * @description 获取数据
    */
 
-  const { data = {}, isLoading } = useGetDetail(id, { enabled: !!id });
+  const { data = {}, isLoading, isError } = useGetDetail(id, { enabled: !!id });
 
 
   /**
@@ -91,19 +95,17 @@ const ShowDetail = ({
       }
     }
   };
-
+  // 节流计算
   const handleResize = throttle(() => {
-    updateStickyPosition(); // 屏幕变化时重新计算
+    updateStickyPosition();
   }, 100);
 
   useEffect(() => {
     updateStickyPosition();
     // 监听屏幕变化（包括窗口缩小、旋转等）
     window.addEventListener('resize', handleResize);
-    // 监听滚动（如果滚动也会影响元素位置）
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleResize);
       handleResize.cancel();
     };
 
@@ -116,6 +118,11 @@ const ShowDetail = ({
         <Skeleton active />
         <Skeleton active />
       </div>
+    );
+  }
+  if (isError) {
+    return (
+      <MyEmpty />
     );
   }
   const {
@@ -160,12 +167,11 @@ const ShowDetail = ({
 
 
   return (
-    <section className="max-w-7xl mx-auto py-4">
+    <section className="max-w-7xl mx-auto py-4 mb-6">
       <Row gutter={[32, 32]}>
         {/* 左侧资源信息 */}
         <Col xs={24} lg={16}>
-
-          <CustomCard className="mb-6">
+          <CustomCard>
             <div className="space-y-6">
               {/* 资源简介，描述，封面图，预览图 */}
               <>
@@ -239,10 +245,10 @@ const ShowDetail = ({
                   className="border border-main"
                 />
                 <div className="flex-1 min-w-0 pl-5">
-                  <div className="text-base text-main truncate mb-1">
+                  <div className="text-base text-main font-semibold mb-1">
                     {username}
                   </div>
-                  <div className='flex text-secondary justify-start flex-wrap'>
+                  <div className='flex text-secondary text-sm justify-start flex-wrap'>
                     {[school, major, grade].filter(Boolean).join(" / ")}
                   </div>
                 </div>
@@ -261,6 +267,7 @@ const ShowDetail = ({
                     icon={<DownloadOutlined />}
                     className="flex-1"
                   >立即下载</MyButton>
+                  <a href="https://other-domain.com/remote-file.jpg" download="http//baidu.com/a.pdf">1</a>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <MyButton

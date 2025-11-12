@@ -38,7 +38,7 @@ import { ActionButton, MyButton, OrderButton } from '../../components/MyButton';
 import Category from '../../components/Category';
 import { useGetHot, useGetPosts, useGetPostTypes, useGetSquare } from '../../hooks/api/community';
 import { BOUNTY_ORDER, communityFilterList, SORT_OPTIONS } from '../../utils/constant/order';
-import { addAll, filterNull, subUsername } from '../../utils/error/commonUtil';
+import { addAll, filterNull, subUsername } from '../../utils/commonUtil';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useCollect, useLike } from '../../hooks/api/common';

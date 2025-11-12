@@ -10,7 +10,7 @@ import { ActionButton, MyButton, OrderButton } from './MyButton';
 import { logger } from '../utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { POST_ORDER } from '../utils/constant/order';
-import { subUsername } from '../utils/error/commonUtil';
+import { subUsername } from '../utils/commonUtil';
 import { CancelConfirmButton, SubmitConfirmButton } from './Mymodal';
 
 dayjs.extend(relativeTime);

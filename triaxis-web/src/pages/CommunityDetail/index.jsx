@@ -16,7 +16,7 @@ import { logger } from "../../utils/logger";
 import { MyButton, OrderButton } from "../../components/MyButton";
 import { BOUNTY_ORDER } from "../../utils/constant/order";
 import VirtualList from 'rc-virtual-list';
-import { addAll } from "../../utils/error/commonUtil";
+import { addAll } from "../../utils/commonUtil";
 import { SquarePost } from "../../components/postCard";
 import { returnCommunity } from "../../store/slices/communitySlice";
 

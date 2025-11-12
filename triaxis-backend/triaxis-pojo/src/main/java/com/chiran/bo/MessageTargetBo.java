@@ -11,8 +11,8 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MessageBo implements Serializable {
-    private Integer id;
+public class MessageTargetBo implements Serializable {
+    private Integer targetId;
     private String title;
     private String content;
 }

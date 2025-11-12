@@ -75,3 +75,13 @@ export const normFile = (e) => {
   }
   return e?.fileList;
 };
+export const getLastPathSegment = (pathname) => {
+  // 2. 去除路径首尾的斜杠，避免空字符串（如 "/user/profile/" → "user/profile"）
+  const trimmedPath = pathname.trim('/');
+
+  // 3. 分割路径为片段数组（如 "user/profile" → ["user", "profile"]）
+  const segments = trimmedPath.split('/');
+
+  // 4. 取最后一个片段（空路径返回空字符串）
+  return segments[segments.length - 1] || '';
+}

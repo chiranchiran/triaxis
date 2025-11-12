@@ -16,6 +16,18 @@ export const BOUNTY_ORDER = [
   { id: true, name: '已解决' },
   { id: false, name: '未解决' },
 ];
+export const TARGETTYPE = {
+  1: '资源',
+  2: '课程',
+  3: '帖子',
+  4: '评论',
+}
+export const TARGETCLICK = {
+  1: 'resources',
+  2: 'courses',
+  3: 'community/posts',
+  4: '评论',
+}
 
 export const resourceFilterList = [
   {

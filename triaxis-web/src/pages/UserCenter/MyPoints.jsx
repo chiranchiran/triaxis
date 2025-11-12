@@ -3,7 +3,7 @@ import { ItemLayout, SecondTitle } from '.';
 import { Descriptions, Empty } from 'antd';
 import { POINTS_TYPE } from '../../utils/constant/types';
 import { useGetUserPoints } from '../../hooks/api/user';
-import { isArrayValid } from '../../utils/error/commonUtil';
+import { isArrayValid } from '../../utils/commonUtil';
 
 export const MyPoints = () => {
   /**

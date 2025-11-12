@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserChatMapper">
+    <!-- 结果映射：聊天对象实体 -->
+    <resultMap id="ChatSessionMap" type="com.chiran.vo.UserChatVO">
+        <id property="id" column="other_user_id"/>
+        <result property="unread" column="unread_count"/>
+        <association property="sender" javaType="com.chiran.bo.UserBO">
+            <result property="userId" column="other_user_id"/>
+            <result property="username" column="other_username"/>
+            <result property="avatar" column="other_avatar"/>
+            <result property="school" column="school"/>
+            <result property="major" column="major"/>
+            <result property="grade" column="grade"/>
+            <!-- 可根据UserBO字段补充其他映射 -->
+        </association>
+        <association property="lastMessage" javaType="com.chiran.entity.UserChat">
+            <id property="id" column="last_msg_id"/>
+            <result property="content" column="last_msg_content"/>
+            <result property="sendTime" column="last_msg_send_time"/>
+            <result property="isRead" column="last_msg_is_read"/>
+            <!-- 可根据UserChat字段补充其他映射 -->
+        </association>
+
+    </resultMap>
+
+    <!-- 查询聊天会话列表：按最后一条消息时间倒序，统计未读 -->
+    <select id="getChats" resultMap="ChatSessionMap">
+        SELECT
+            -- 对方用户ID（区分当前用户是发送方还是接收方）
+            CASE
+                WHEN uc.sender_id = #{id} THEN uc.receiver_id
+                ELSE uc.sender_id
+                END AS other_user_id,
+            -- 对方用户信息
+            MAX(u.id) AS other_user_id,
+            MAX(u.username) AS other_username,
+            MAX(u.avatar) AS other_avatar,
+            MAX(u.school) AS school,
+            MAX(u.major) AS major,
+            MAX(u.grade) AS grade,
+            MAX(last_msg.id) AS last_msg_id,
+            MAX(last_msg.content) AS last_msg_content,
+            MAX(last_msg.send_time) AS last_msg_send_time,
+            MAX(last_msg.is_read) AS last_msg_is_read,
+            -- 未读消息数
+            SUM(CASE WHEN uc.is_read = 0 AND uc.receiver_id = #{id} THEN 1 ELSE 0 END) AS unread_count
+        FROM user_chats uc
+                 -- 关联对方用户信息
+                 LEFT JOIN users u ON
+            (uc.sender_id = #{id} AND u.id = uc.receiver_id)
+                OR (uc.receiver_id = #{id} AND u.id = uc.sender_id)
+            -- 子查询获取每个会话的最后一条消息
+                 LEFT JOIN (
+            SELECT
+                CASE
+                    WHEN sender_id = #{id} THEN receiver_id
+                    ELSE sender_id
+                    END AS session_other_id,
+                MAX(send_time) AS max_send_time
+            FROM user_chats
+            WHERE (sender_id = #{id} OR receiver_id = #{id})
+              AND deleted = 0
+            GROUP BY session_other_id
+        ) last_msg_meta ON
+            (uc.sender_id = #{id} AND last_msg_meta.session_other_id = uc.receiver_id)
+                OR (uc.receiver_id = #{id} AND last_msg_meta.session_other_id = uc.sender_id)
+                 LEFT JOIN user_chats last_msg ON
+            last_msg.send_time = last_msg_meta.max_send_time
+                AND ((last_msg.sender_id = #{id} AND last_msg.receiver_id = last_msg_meta.session_other_id)
+                OR (last_msg.receiver_id = #{id} AND last_msg.sender_id = last_msg_meta.session_other_id))
+        WHERE
+            (uc.sender_id = #{id} OR uc.receiver_id = #{id})
+          AND uc.deleted = 0
+        -- 按会话分组，取最后一条消息时间倒序
+        GROUP BY other_user_id,last_msg.send_time
+        ORDER BY last_msg.send_time DESC
+    </select>
+
+</mapper>

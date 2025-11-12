@@ -189,7 +189,7 @@ public class User implements Serializable {
     /**
      * 软删除：1-已删除，0-未删除
      */
-    @TableLogic // MyBatis-Plus 逻辑删除注解
+    @TableLogic
     @TableField("deleted")
     private Integer deleted;
 

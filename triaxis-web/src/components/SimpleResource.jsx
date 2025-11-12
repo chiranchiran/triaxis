@@ -8,10 +8,10 @@ import { getPriceTag } from '../pages/Resource';
 import { useGetResources } from '../hooks/api/resources';
 import { MyButton } from './MyButton';
 import { useNavigate } from 'react-router-dom';
-import { subUsername } from '../utils/error/commonUtil';
+import { subUsername } from '../utils/commonUtil';
 import { converBytes } from '../utils/convertUnit';
 import { orderBy } from 'lodash';
-import { MyRESOURCE_TYPE } from '../utils/constant/types';
+import { MyRESOURCE_ORDER } from '../utils/constant/types';
 import { MyEmpty } from './MyEmpty';
 
 const SimpleResource = ({ type }) => {
@@ -29,8 +29,8 @@ const SimpleResource = ({ type }) => {
    */
 
   //传递筛选条件和排序方式
-  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ orderBy: MyRESOURCE_TYPE[type] }, {
-    enabled: !!MyRESOURCE_TYPE[type]
+  const { data: resources = {}, isFetching: resourcesLoading, isError: resourcesError } = useGetResources({ orderBy: MyRESOURCE_ORDER[type] }, {
+    enabled: !!MyRESOURCE_ORDER[type]
   });
   const records = resources.records || [];
 

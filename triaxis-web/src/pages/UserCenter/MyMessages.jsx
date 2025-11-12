@@ -29,9 +29,43 @@ import {
 } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { ChatMessage, MessageList } from "../../components/Chat";
+import { useGetUserChat, useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesCount, useGetUserMessagesLike, useGetUserMessagesReview, useGetUserMessagesSystem } from "../../hooks/api/user";
+import { useDispatch, useSelector } from "react-redux";
+import { setMessageCount } from "../../store/slices/userCenterSlice";
 
 export const MyMessages = ({ }) => {
+  const { total, chat, like, collect, review, system } = useSelector((state) => state.userCenter.messageCount)
+  const dispatch = useDispatch()
 
+  /**
+   * @description state管理
+   */
+
+  const [activeKey, setActiveKey] = useState("chat");
+
+  /**
+   * @description 数据获取
+    */
+  const { data: counts } = useGetUserMessagesCount({
+    onSuccess: (data) => dispatch(setMessageCount(data)),
+  });;
+
+  const likeQuery = useGetUserMessagesLike({
+    enabled: activeKey === 'like',
+    onSuccess: (data) => dispatch(setMessageCount({ like: data?.total })),
+  });
+  const collectQuery = useGetUserMessagesCollect({
+    enabled: activeKey === 'collect',
+    onSuccess: (data) => dispatch(setMessageCount({ collect: data?.total })),
+  });
+  const reviewQuery = useGetUserMessagesReview({
+    enabled: activeKey === 'review',
+    onSuccess: (data) => dispatch(setMessageCount({ review: data?.total })),
+  });
+  const systemQuery = useGetUserMessagesSystem({
+    enabled: activeKey === 'system',
+    onSuccess: (data) => dispatch(setMessageCount({ system: data?.total })),
+  });
 
   const CustomTabBar = (props) => {
     const { activeKey, onTabClick } = props;
@@ -63,176 +97,65 @@ export const MyMessages = ({ }) => {
     );
   };
 
-  // 消息类型
-  const MESSAGE_TYPES = [
-    { key: 'chat', name: '聊天', icon: <MessageOutlined />, color: '#7fb6f5', count: 5 },
-    { key: 'like', name: '点赞', icon: <HeartOutlined />, color: '#f7a8a8', count: 12 },
-    { key: 'collect', name: '收藏', icon: <StarOutlined />, color: '#f7d6a8', count: 8 },
-    { key: 'follow', name: '关注', icon: <UserOutlined />, color: '#a8d8f7', count: 3 },
-    { key: 'comment', name: '评论', icon: <BellOutlined />, color: '#c8a8f7', count: 7 },
-    { key: 'system', name: '系统', icon: <SafetyCertificateOutlined />, color: '#b8b8b8', count: 2 }
-  ];
-  const [activeMessageType, setActiveMessageType] = useState('chat');
-
-
-  const [createCollectionVisible, setCreateCollectionVisible] = useState(false);
-  const [activeResourceTab, setActiveResourceTab] = useState('collections');
-  const [activeCourseTab, setActiveCourseTab] = useState('collections');
-
-  // 模拟数据
-  const [messages, setMessages] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [courses, setCourses] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [chatList, setChatList] = useState([]);
-  // 过滤消息
-  const filteredMessages = activeMessageType === 'chat'
-    ? chatList
-    : messages.filter(msg => msg.type === activeMessageType);
-  // 加载模拟数据
-  useEffect(() => {
-    // 模拟消息数据
-    const mockMessages = [
-      {
-        id: 1,
-        type: 'like',
-        content: '李华点赞了您的帖子《城市规划设计要点》',
-        createTime: '2小时前',
-        read: false,
-        user: {
-          userId: 1,
-          username: '李华',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2'
-        }
-      },
-      {
-        id: 2,
-        type: 'comment',
-        content: '王伟评论了您的资源：这个资料很有用，谢谢分享！',
-        createTime: '5小时前',
-        read: true,
-        user: {
-          userId: 1,
-          username: '王伟',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3'
-        }
-      },
-      {
-        id: 3,
-        type: 'follow',
-        content: '新用户张丽关注了您',
-        createTime: '1天前',
-        read: false,
-        user: {
-          userId: 1,
-          username: '张丽',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4'
-        }
-      },
-      {
-        id: 4,
-        type: 'system',
-        content: '系统通知：您的会员即将到期，请及时续费',
-        createTime: '2天前',
-        read: true
-      }
-    ];
-
-
-    // 模拟私聊数据
-    const mockChatList = [
-      {
-        id: 1,
-        user: {
-          username: '李华',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-          online: true
-        },
-        lastMessage: {
-          createTime: '10:30',
-          content: '关于那个设计方案，我有一些建议...'
-        },
-        unread: 2
-      },
-      {
-        id: 2,
-        user: {
-          username: '王伟',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-          online: false
-        },
-        lastMessage: {
-          createTime: '10:30',
-          content: '关于那个设计方案，我有一些建议...'
-        },
-        unread: 0
-      }
-    ];
-
-    setMessages(mockMessages);
-    setChatList(mockChatList);
-  }, []);
+  const onChange = (activeKey) => {
+    setActiveKey(activeKey)
+  }
   const tabItems = [
     {
       key: 'chat',
       icon: MessageOutlined,
       label: '聊天',
-      count: 335,
-      children: <ChatMessage chatList={chatList} />
+      count: chat,
+      children: <ChatMessage />
     },
     {
       key: 'like',
       icon: HeartOutlined,
       label: '点赞',
-      count: 3,
+      count: like,
       children: <MessageList
-        filteredMessages={messages}
-        activeType={activeMessageType}
-        messageTypes={MESSAGE_TYPES}
+        data={likeQuery?.data?.records || []}
+        activeKey={activeKey}
       />
     },
     {
       key: 'collect',
       icon: StarOutlined,
       label: '收藏',
-      count: 3,
+      count: collect,
       children: <MessageList
-        filteredMessages={filteredMessages}
-        activeType={activeMessageType}
-        messageTypes={MESSAGE_TYPES}
+        data={collectQuery?.data?.records || []}
+        activeKey={activeKey}
       />
     },
+    // {
+    //   key: 'follow',
+    //   icon: UserOutlined,
+    //   label: '关注',
+    //   count: 3,
+    //   children: <MessageList
+    //     type={3}
+    //     filteredMessages={filteredMessages}
+    //     activeType={activeMessageType}
+    //     messageTypes={MESSAGE_TYPES}
+    //   />
+    // },
     {
-      key: 'follow',
-      icon: UserOutlined,
-      label: '关注',
-      count: 3,
-      children: <MessageList
-        filteredMessages={filteredMessages}
-        activeType={activeMessageType}
-        messageTypes={MESSAGE_TYPES}
-      />
-    },
-    {
-      key: 'comment',
+      key: 'review',
       icon: BellOutlined,
       label: '评论',
-      count: 3,
+      count: review,
       children: <MessageList
-        filteredMessages={filteredMessages}
-        activeType={activeMessageType}
-        messageTypes={MESSAGE_TYPES}
+        data={reviewQuery?.data?.records || []}
+        activeKey={activeKey}
       />
     },
     {
       key: 'system',
       icon: SafetyCertificateOutlined,
       label: '系统',
-      children: <MessageList
-        filteredMessages={filteredMessages}
-        activeType={activeMessageType}
-        messageTypes={MESSAGE_TYPES}
-      />
+      count: system,
+      children: < MessageList data={systemQuery?.data?.records || []} activeKey={activeKey} />
     }
   ];
   return (
@@ -241,6 +164,8 @@ export const MyMessages = ({ }) => {
         tabPosition="top"
         items={tabItems}
         tabBarGutter={4}
+        activeKey={activeKey}
+        onChange={onChange}
         renderTabBar={(props, DefaultTabBar) => <CustomTabBar {...props} />}
       />
     </div>

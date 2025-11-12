@@ -5,6 +5,7 @@ import com.chiran.dto.ReviewSearchDTO;
 import com.chiran.entity.UserLike;
 import com.chiran.entity.UserReview;
 import com.chiran.vo.ReviewSearchVO;
+import com.chiran.vo.UserMessageVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface UserReviewMapper extends BaseMapper<UserReview> {
     List<ReviewSearchVO> getReviews(ReviewSearchDTO reviewSearchDTO);
 
     List<ReviewSearchVO> getReviewReplies(ReviewSearchDTO reviewSearchDTO);
+
+    List<UserMessageVO> selectResources(Integer id);
 }

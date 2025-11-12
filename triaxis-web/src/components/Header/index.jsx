@@ -11,39 +11,39 @@ import Logo from '../Logo';
 import { usePreference } from '../usePreference';
 import { MyButton } from '../MyButton';
 import { useTranslation } from 'react-i18next';
-import { setUserActiveKey } from '../../store/slices/userCenterSlice';
+import { setMessageCount } from '../../store/slices/userCenterSlice';
+import { useGetUserMessagesCount } from '../../hooks/api/user';
 
 const Header = () => {
+
   const { t } = useTranslation()
   const { Search } = Input;
   const navigate = useNavigate()
+  const { total } = useSelector((state) => state.userCenter.messageCount)
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
-  const { mutate: doLogout } = useLogout()
+  const { mutateAsync: doLogout } = useLogout()
   const dispatch = useDispatch();
-  const { username, isAuthenticated, role } = useSelector(state => state.auth);
-
-  const unreadMessageCount = 3;
+  const { username, isAuthenticated, role, avatar } = useSelector(state => state.auth);
+  const { data } = useGetUserMessagesCount({
+    onSuccess: (data) => dispatch(setMessageCount(data)),
+  });;
 
   //导航栏选项，普通用户role为0，管理员role为1，会显示管理的选项
-  const navKeys = role !== 0 ? [
+  const navKeys = [
     { key: 'home', path: '/' },
     { key: 'resources', path: '/resources' },
     { key: 'courses', path: '/courses' },
     { key: 'community', path: '/community' },
     { key: 'about', path: '/about' }
-  ] : [
-    { key: 'home', path: '/' },
-    { key: 'resources', path: '/resources' },
-    { key: 'courses', path: '/courses' },
-    { key: 'community', path: '/community' },
-    { key: 'about', path: '/about' },
-    { key: 'admin', path: '/admin' }
   ];
 
   // 处理下拉菜单点击事件，转跳不同的页面
   const handleMenuClick = ({ key }) => {
-    dispatch(setUserActiveKey({ userActiveKey: key }));
-    navigate('/user')
+    if (!key) return
+    if (key === 'logout') {
+      doLogout()
+    }
+    navigate(`/user/${key}`)
   }
 
   // 用户下拉菜单项
@@ -62,7 +62,7 @@ const Header = () => {
       key: 'messages',
       icon: <BellOutlined />,
       label: (
-        <Badge count={unreadMessageCount} size="small">
+        <Badge count={total} size="small">
           我的消息
         </Badge>
       ),
@@ -196,7 +196,8 @@ const Header = () => {
                 <div className="cursor-pointer">
                   <Avatar
                     size="small"
-                    icon={<UserOutlined />}
+                    src={avatar}
+                    icon={avatar ? null : <UserOutlined />}
                     className="bg-primary hover:bg-primary-dark transition-colors"
                   />
                 </div>

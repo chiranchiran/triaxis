@@ -28,7 +28,7 @@ import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from 
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { UploadFiles } from '../../components/UploadFiles';
-import { getFile, normFile } from '../../utils/error/commonUtil';
+import { getFile, normFile } from '../../utils/commonUtil';
 
 const { Text } = Typography;
 const { TextArea } = Input;

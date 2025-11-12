@@ -4,6 +4,7 @@ import com.chiran.bo.UserBO;
 import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.chiran.result.PageResult;
 import com.chiran.vo.*;
 
 /**
@@ -55,5 +56,7 @@ public interface UserService extends IService<User> {
 
     UserMyVipVO getUserVip(Integer id);
 
-    UserMessageVO getUserMessages(Integer id,Integer type);
+    PageResult<UserMessageVO> getUserMessages(Integer id, Integer type);
+
+    UserChatVO getUserChats(Integer id);
 }

@@ -16,8 +16,9 @@ import { getUserData } from '../../utils/localStorage';
 import { useCollect } from '../../hooks/api/common';
 import { useLike } from '../../hooks/api/common';
 import { MyButton } from '../../components/MyButton';
-import { filterNull, subUsername } from '../../utils/error/commonUtil';
+import { filterNull, subUsername } from '../../utils/commonUtil';
 import { resourceFilterList } from '../../utils/constant/order';
+import dayjs from 'dayjs';
 
 // 获取价格标签
 export const getPriceTag = (isPurchased, right, price) => {
@@ -168,7 +169,7 @@ const Resource = () => {
                     {publishTime && (
                       <span className="flex items-center">
                         <CloudUploadOutlined className="mr-1" />
-                        {publishTime}
+                        {dayjs(publishTime).format('YYYY.MM.DD')}
                       </span>
                     )}
                   </div>

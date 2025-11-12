@@ -39,7 +39,7 @@ export const AddReview = ({ isPurchased = true, targetId, targetType }) => {
   return (
     <DetailCard
       title="发表评价"
-      className='comment shadow-md overflow-visible h-auto'
+      className='review shadow-md overflow-visible h-auto'
     >
 
       <Form

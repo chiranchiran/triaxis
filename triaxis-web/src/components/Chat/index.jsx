@@ -3,22 +3,40 @@ import { Chat, Radio } from '@douyinfe/semi-ui';
 import { Avatar, Empty } from "antd";
 import './index.less'
 import {
+  ArrowLeftOutlined,
   SafetyCertificateOutlined
 } from '@ant-design/icons';
+import { useGetUserChat, useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesLike } from '../../hooks/api/user';
+import { isArrayValid } from '../../utils/commonUtil';
+import { MyMESSAGE_TYPE } from '../../utils/constant/types';
+import { TARGETCLICK, TARGETTYPE } from '../../utils/constant/order';
+import { MyEmpty } from '../MyEmpty';
+import { useNavigate } from 'react-router-dom';
+import { setMessageCount } from '../../store/slices/userCenterSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { MyButton } from '../MyButton';
 
-export const ChatMessage = ({ chatList }) => {
+export const ChatMessage = () => {
+  const dispatch = useDispatch();
+  const [chatOpen, setChatOpen] = useState(null);
+  const { data = {} } = useGetUserChats({
+    onSuccess: (data) => dispatch(setMessageCount({ chat: data?.total })),
+  });
+
+
   // 空状态处理
-  if (chatList.length === 0) {
-    return <Empty description="暂无聊天记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+  if (!isArrayValid(data.records)) {
+    return <MyEmpty description="暂无聊天记录" />;
   }
+
 
   return (
     <div className="pt-3">
-      {chatList.map(item => {
+      {!chatOpen && data.records.map(item => {
         const {
           id,
           unread,
-          user: {
+          sender: {
             userId = 0,
             username = "匿名用户",
             avatar = "",
@@ -28,12 +46,13 @@ export const ChatMessage = ({ chatList }) => {
             online },
           lastMessage: {
             content = "",
-            createTime = "" }
+            sendTime = "" }
         } = item;
         return (
           <div
             key={id}
             className="flex items-center p-3 setting rounded-lg cursor-pointer transition-colors"
+            onClick={() => setChatOpen({ userId, username, avatar })}
           >
             {/* 用户头像 + 在线状态 */}
             <div className="relative mr-4">
@@ -51,12 +70,12 @@ export const ChatMessage = ({ chatList }) => {
                 </div>
                 {[school, major, grade].filter(Boolean).join(" / ")}
               </div>
-              <p className="text-secondary truncate line-clamp-2 leading-5">{content}</p>
-              <div className="text-sm text-secondary mt-1">{createTime}</div>
+              <p className="line-clamp-2 leading-5 my-2">{content}</p>
+              <div className="text-sm text-secondary mt-1">{sendTime}</div>
             </div>
             {/* 未读消息徽章 */}
             {unread > 0 && (
-              <div className="bg-red text-light px-2 text-center rounded-full">
+              <div className="bg-red text-light px-1.5 py-0.5 text-center rounded-full ml-6 text-xs">
                 {unread}
               </div>
             )}
@@ -64,172 +83,122 @@ export const ChatMessage = ({ chatList }) => {
           </div>
         )
       })}
-      {/* <MyChat></MyChat> */}
+      {chatOpen && <MyChat user={chatOpen} onBack={() => setChatOpen(null)} />}
     </div>
   );
 };
 
-export const MyChat = () => {
-  const defaultMessage = [
-    {
-      role: 'system',
-      id: '1',
-      createAt: 1715676751919,
-      content: "Hello, I'm your AI assistant.",
-    },
-    {
-      role: 'user',
-      id: '2',
-      createAt: 1715676751919,
-      content: "介绍一下 Semi design"
-    },
-    {
-      role: 'assistant',
-      id: '3',
-      createAt: 1715676751919,
-      content: `
-Semi Design 是由抖音前端团队和MED产品设计团队设计、开发并维护的设计系统。作为一个全面、易用、优质的现代应用UI解决方案，Semi Design从字节跳动各业务线的复杂场景中提炼而来，目前已经支撑了近千个平台产品，服务了内外部超过10万用户[[1]](https://semi.design/zh-CN/start/introduction)。
-
-Semi Design的特点包括：
-
-1. 设计简洁、现代化。
-`
-    }
-  ];
-
-  const roleInfo = {
-    user: {
-      name: 'User',
-      avatar: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/docs-icon.png'
-    },
-    assistant: {
-      name: 'Assistant',
-      avatar: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/other/logo.png'
-    },
-    system: {
-      name: 'System',
-      avatar: 'https://lf3-static.bytednsdoc.com/obj/eden-cn/ptlz_zlp/ljhwZthlaukjlkulzlp/other/logo.png'
-    }
-  }
+export const MyChat = ({ user, onBack }) => {
   const commonOuterStyle = {
     border: '1px solid var(--semi-color-border)',
     borderRadius: '16px',
-    height: 600,
   }
-  let id = 0;
-  function getId() {
-    return `id-${id++}`
-  }
-  const uploadProps = { action: 'https://api.semi.design/upload' }
+  const { username: myName, avatar: myAvatar, id: myId } = useSelector(state => state.auth);
+  const { userId, username, avatar } = user
+  /**
+   * @description 构建角色和聊天记录
+   */
 
-  const [message, setMessage] = useState(defaultMessage);
-  const intervalId = useRef();
-  const onMessageSend = useCallback((content, attachment) => {
-    setMessage((message) => {
-      return [
-        ...message,
-        {
-          role: 'assistant',
-          status: 'loading',
-          createAt: Date.now(),
-          id: getId()
-        }
-      ]
-    });
-    generateMockResponse(content);
-  }, []);
-
-  const onChatsChange = useCallback((chats) => {
-    setMessage(chats);
-  }, []);
-
-  const generateMockResponse = useCallback((content) => {
-    const id = setInterval(() => {
-      setMessage((message) => {
-        const lastMessage = message[message.length - 1];
-        let newMessage = { ...lastMessage };
-        if (lastMessage.status === 'loading') {
-          newMessage = {
-            ...newMessage,
-            content: `mock Response for ${content} \n`,
-            status: 'incomplete'
-          }
-        } else if (lastMessage.status === 'incomplete') {
-          if (lastMessage.content.length > 200) {
-            clearInterval(id);
-            intervalId.current = null
-            newMessage = {
-              ...newMessage,
-              content: `${lastMessage.content} mock stream message`,
-              status: 'complete'
-            }
-          } else {
-            newMessage = {
-              ...newMessage,
-              content: `${lastMessage.content} mock stream message`
-            }
-          }
-        }
-        return [...message.slice(0, -1), newMessage]
-      })
-    }, 400);
-    intervalId.current = id;
-  }, []);
-
-  const onStopGenerator = useCallback(() => {
-    if (intervalId.current) {
-      clearInterval(intervalId.current);
-      setMessage((message) => {
-        const lastMessage = message[message.length - 1];
-        if (lastMessage.status && lastMessage.status !== 'complete') {
-          const lastMessage = message[message.length - 1];
-          let newMessage = { ...lastMessage };
-          newMessage.status = 'complete';
-          return [
-            ...message.slice(0, -1),
-            newMessage
-          ]
-        } else {
-          return message;
-        }
-      })
+  const roleInfo = {
+    user: {
+      name: myName,
+      avatar: myAvatar
+    },
+    assistant: {
+      name: username,
+      avatar: avatar
     }
-  }, [intervalId]);
+  }
+  // 转换 records为 Chat 组件消息格式
+  const transformRecordsToChats = (records, myId, friendId) => {
+    if (!Array.isArray(records)) return [];
 
+    return records
+      .map(record => ({
+        id: record.id,
+        role: record.senderId === myId ? 'user' : 'assistant',
+        content: record.content,
+        // send_time 转换为毫秒时间戳
+        createAt: new Date(record.sendTime).getTime(),
+        isRead: record.isRead,
+      }));
+  };
+  /**
+ * @description state管理
+ */
+
+  const [message, setMessage] = useState();
+  /**
+   * @description 数据获取
+   */
+
+  const { data = {} } = useGetUserChat(userId, {
+    enabled: !!userId,
+    onSuccess: (data) => {
+      const { total = 0, records = [] } = data;
+      const transformedChats = transformRecordsToChats(records, myId, userId);
+      setMessage(transformedChats);
+    }
+  });
+
+  /**
+   * @description 事件处理
+   */
+  // 发送消息回调
+  const onMessageSend = useCallback((content, attachment) => {
+  }, []);
+  // 消息列表发生改变的回调
+  const onChatsChange = useCallback((chats) => {
+  }, []);
+  //上传文件触发
+  const uploadProps = { action: 'https://api.semi.design/upload' }
   return (
-    <Chat
-      className='mx-7xl'
-      chats={message}
-      showStopGenerate={true}
-      style={commonOuterStyle}
-      onStopGenerator={onStopGenerator}
-      roleConfig={roleInfo}
-      onChatsChange={onChatsChange}
-      onMessageSend={onMessageSend}
-      uploadProps={uploadProps}
-    />
+    <>
+      <MyButton type="black" icon={<ArrowLeftOutlined />} className="mb-3 w-30" onClick={onBack}>返回</MyButton>
+      {!isArrayValid(message) && <MyEmpty description="暂无聊天记录" />}
+      <Chat
+        className='mx-7xl'
+        align="leftRight"
+        selfRole="my"
+        chats={message}
+        style={commonOuterStyle}
+        roleConfig={roleInfo}
+        onChatsChange={onChatsChange}
+        onMessageSend={onMessageSend}
+        uploadProps={uploadProps}
+      />
+    </>
   )
 }
-export const MessageList = ({ filteredMessages, activeType, messageTypes }) => {
-  // 获取当前类型的名称（用于空状态）
-  const currentTypeName = messageTypes.find(t => t.key === activeType)?.name || '消息';
+
+
+
+export const MessageList = ({ activeKey, data }) => {
+  const navigate = useNavigate();
+  //转跳
+  const onClick = (id, type) => {
+    navigate(`/${TARGETCLICK[type]}/${id}`)
+  }
 
   // 空状态处理
-  if (filteredMessages.length === 0) {
-    return <Empty description={`暂无${currentTypeName}`} />;
+  if (data.length === 0) {
+    return <MyEmpty description="暂无消息通知" />
   }
 
   return (
     <div className="pt-3">
-      {filteredMessages.map(item => {
+      {data.map(item => {
         const {
           id,
           type,
-          content = "",
-          createTime = "",
-          read = false,
-          user = {},
-          target = {}
+          senderId = null,
+          receiverId = null,
+          sendTime = "",
+          isRead = false,
+          review = "",
+          sender = {},
+          messageTarget = {},
+          reviewTarget = {}
         } = item;
         const {
           userId,
@@ -238,8 +207,9 @@ export const MessageList = ({ filteredMessages, activeType, messageTypes }) => {
           school = "",
           grade = "",
           major = "",
-          online } = user
-        const { targetId, name } = target
+          online } = sender
+        const { targetId = null, title = "", content = "" } = messageTarget || {}
+        const { reviewTargetId = null, reviewTitle = "", reviewType } = reviewTarget || {}
         return (
           <div
             key={id}
@@ -247,7 +217,7 @@ export const MessageList = ({ filteredMessages, activeType, messageTypes }) => {
           >
             {/* 用户头像 + 在线状态 */}
             <div className="relative mr-4">
-              <Avatar src={avatar} size={56} icon={!user ? <SafetyCertificateOutlined /> : null} />
+              <Avatar src={avatar} size={56} icon={senderId === -1 ? <SafetyCertificateOutlined /> : null} />
               {online && (
                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-dark rounded-full"></div>
               )}
@@ -255,17 +225,45 @@ export const MessageList = ({ filteredMessages, activeType, messageTypes }) => {
             {/* 消息内容 */}
             <div className="flex-1">
               <div className='flex gap-4 items-center text-secondary text-sm'>
-                <div className='cursor-pointer text-main  text-base font-semibold' title={type === "system" ? "系统通知" : username}>
-                  {type === "system" ? "系统通知" : username}
+                <div className='cursor-pointer text-main  text-base font-semibold' title={activeKey === 'system' ? "系统通知" : username}>
+                  {activeKey === 'system' ? "系统通知" : username}
                 </div>
                 {[school, major, grade].filter(Boolean).join(" / ")}
               </div>
               {/* 消息内容（未读加粗） */}
-              <p className="text-secondary truncate line-clamp-2 leading-5">{content}</p>
-              <div className="text-sm text-secondary mt-1">{createTime}</div>
+              {/* {
+                type === 4 ? <p className="text-secondary truncate line-clamp-2 leading-5">{message}</p>
+              } */}
+              <div className="text-secondary line-clamp-2 leading-5 my-2">
+                {
+                  type === 4 && (
+                    <>
+                      {MyMESSAGE_TYPE[activeKey]}了您在{TARGETTYPE[reviewType]}
+                      <span className='text-muted mx-2' onClick={() => onClick(reviewTargetId, reviewType)}>{reviewTitle}</span>的评论
+                      <span className='text-muted ml-2'>
+                        “{content}”
+                      </span>
+
+                    </>
+                  )
+                }
+                {
+                  activeKey === 'system' && <>{item.content}</>
+                }
+                {type !== 4 && activeKey !== 'system' &&
+                  <>
+                    {MyMESSAGE_TYPE[activeKey]}了您的{TARGETTYPE[type]}
+                    <span className='text-muted ml-2' onClick={() => onClick(targetId, type)}>
+                      {title}
+                    </span>
+                  </>}
+
+                {activeKey === 'review' && <p className='pt-2 text-main'>“{review}”</p>}
+              </div>
+              <div className="text-sm text-secondary mt-1">{sendTime}</div>
             </div>
-            {!read && (
-              <div className="bg-red text-light w-3 h-3 text-center rounded-full">
+            {!isRead && (
+              <div className="bg-red text-light w-3 h-3 text-center rounded-full ml-6">
               </div>
             )}
           </div>

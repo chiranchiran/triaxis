@@ -20,7 +20,12 @@ function App() {
   //每次刷新页面滚到顶部
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname])
+    //浏览器默认行为在刷新之后还是会回到原来的位置，可以在10ms后再滚动一次
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [])
 
   //检查是否自动登录
   const checkAutoLogin = useCallback(() => {

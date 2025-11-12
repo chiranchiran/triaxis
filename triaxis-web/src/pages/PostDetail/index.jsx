@@ -2,7 +2,7 @@ import React from 'react';
 import { useGetResource } from '../../hooks/api/resources';
 import { converBytes } from '../../utils/convertUnit';
 import ShowDetail, { renderMutiple, renderSingle, SmallTitle } from '../../components/ShowDetail';
-import { isArrayValid } from '../../utils/error/commonUtil';
+import { isArrayValid } from '../../utils/commonUtil';
 import { CoverImage, FileTime, Image, Statis } from '../../components/DetailCard';
 
 import { useGetPost } from '../../hooks/api/community';

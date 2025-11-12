@@ -1,9 +1,9 @@
 package com.chiran.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.chiran.entity.UserCollection;
-import com.chiran.entity.UserLike;
-import com.chiran.vo.UserMessageVO;
+import com.chiran.entity.UserChat;
+import com.chiran.entity.UserTag;
+import com.chiran.vo.UserChatVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,6 +17,6 @@ import java.util.List;
  * @since 2025-10-07
  */
 @Mapper
-public interface UserCollectionMapper extends BaseMapper<UserCollection> {
-    List<UserMessageVO> selectResources(Integer id);
+public interface UserChatMapper extends BaseMapper<UserChat> {
+    List<UserChatVO> getChats(Integer id);
 }

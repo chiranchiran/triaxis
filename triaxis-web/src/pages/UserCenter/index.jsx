@@ -53,7 +53,7 @@ import {
 } from '@ant-design/icons';
 import { MyButton } from '../../components/MyButton';
 import { Statis } from '../../components/DetailCard';
-import { useGetUserProfile } from '../../hooks/api/user';
+import { useGetUserMessagesCount, useGetUserProfile } from '../../hooks/api/user';
 import { Profile } from './Profile';
 import './index.less'
 import { MySettings } from './MySettings';
@@ -63,8 +63,10 @@ import { MyVip } from './MyVip';
 import { MyMessages } from './MyMessages';
 import { MyResources } from './MyResources';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeUserActiveKey, setUserActiveKey } from '../../store/slices/userCenterSlice';
+import { removeUserActiveKey, setMessageCount, setUserActiveKey } from '../../store/slices/userCenterSlice';
 import { store } from '../../store';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { getLastPathSegment } from '../../utils/commonUtil';
 
 const { Search } = Input;
 const { Meta } = Card;
@@ -132,10 +134,16 @@ export const ButtonOption = ({ title, description, onClick, text }) => {
   )
 }
 const UserCenter = () => {
-  const userActiveKey = useSelector(state => state.userCenter.userActiveKey) || 'profile';
+  const navigate = useNavigate();
+  const pathname = useLocation().pathname
   const dispatch = useDispatch();
+  const { total } = useSelector((state) => state.userCenter.messageCount)
+
   const [createCollectionVisible, setCreateCollectionVisible] = useState(false);
   const [activeCourseTab, setActiveCourseTab] = useState('collections');
+  const { data } = useGetUserMessagesCount({
+    onSuccess: (data) => dispatch(setMessageCount(data)),
+  });;
   // 模拟数据
   const [courses, setCourses] = useState([]);
   const [collections, setCollections] = useState([]);
@@ -205,7 +213,7 @@ const UserCenter = () => {
 
 
   const handleTabChange = (key) => {
-    dispatch(setUserActiveKey({ userActiveKey: key }));
+    navigate(`/user/${key}`)
   };
   const MyCourses = ({ }) => {
     return (
@@ -330,41 +338,41 @@ const UserCenter = () => {
     {
       key: 'profile',
       label: <TabIcon icon={<UserOutlined />}>个人信息</TabIcon>,
-      children: <Profile />
+      children: <Outlet />
     },
     {
       key: 'settings',
       label: <TabIcon icon={<SettingOutlined />}>我的设置</TabIcon>,
-      children: <MySettings />
+      children: <Outlet />
     },
     {
       key: 'messages',
       label: (
-        <Badge count={23} size="small" offset={[-3, 1]} overflowCount={999}>
+        <Badge count={total} size="small" offset={[-3, 1]} overflowCount={999}>
           <TabIcon icon={<BellOutlined />}>我的消息</TabIcon>
         </Badge>
       ),
-      children: <MyMessages />
+      children: <Outlet />
     },
     {
       key: 'resources',
       label: <TabIcon icon={<FolderOutlined />}>我的资源</TabIcon>,
-      children: <MyResources />
+      children: <Outlet />
     },
     {
       key: 'courses',
       label: <TabIcon icon={<BookOutlined />}>我的课程</TabIcon>,
-      children: <MyCourses />
+      children: <Outlet />
     },
     {
       key: 'vip',
       label: <TabIcon icon={<CrownOutlined />}>我的会员</TabIcon>,
-      children: <MyVip />
+      children: <Outlet />
     },
     {
       key: 'points',
       label: <TabIcon icon={<StarOutlined />}>我的积分</TabIcon>,
-      children: <MyPoints />
+      children: <Outlet />
     },
   ];
   return (
@@ -375,7 +383,7 @@ const UserCenter = () => {
       <Tabs
         tabPosition="left"
         items={tabItems}
-        activeKey={userActiveKey}
+        activeKey={getLastPathSegment(pathname)}
         onChange={handleTabChange}
         tabBarGutter={4}
       />

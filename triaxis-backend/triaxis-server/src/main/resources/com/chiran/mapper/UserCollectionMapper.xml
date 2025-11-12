@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chiran.mapper.UserCollectionMapper">
+
+    <resultMap id="ResourceVOMap" type="com.chiran.vo.UserMessageVO">
+        <!-- 映射资源详情 -->
+        <result property="id" column="id"/>
+        <result property="type" column="target_type"/>
+        <result property="sendTime" column="update_time"/>
+        <result property="isRead" column="is_read"/>
+        <association property="messageTarget" javaType="com.chiran.bo.MessageTargetBo">
+            <id property="targetId" column="targetId"/>
+            <result property="title" column="title"/>
+            <result property="content" column="content"/>
+        </association>
+
+        <!-- 映射上传者信息 -->
+        <association property="sender" javaType="com.chiran.bo.UserBO">
+            <result property="userId" column="user_id"/>
+            <result property="username" column="username"/>
+            <result property="avatar" column="avatar"/>
+            <result column="school" property="school"/>
+            <result column="grade" property="grade"/>
+            <result column="major" property="major"/>
+        </association>
+
+    </resultMap>
+
+    <select id="selectResources" resultMap="ResourceVOMap">
+        SELECT
+        uc.id,
+        uc.is_read,
+        uc.target_type,
+        uc.target_id,
+        uc.user_id,
+        uc.update_time,
+        u.username,
+        u.avatar,
+        u.school,
+        u.grade,
+        u.major,
+        r.id AS targetId,
+        r.title
+        FROM user_collections uc
+        LEFT JOIN users u ON uc.user_id = u.id AND u.deleted = 0
+        LEFT JOIN resources r ON uc.target_id = r.id AND r.deleted = 0
+        WHERE uc.deleted = 0
+        <if test="id != null">
+            AND r.user_id = #{id}
+        </if>
+
+        GROUP BY
+        uc.id,uc.update_time
+        ORDER BY uc.update_time
+    </select>
+</mapper>

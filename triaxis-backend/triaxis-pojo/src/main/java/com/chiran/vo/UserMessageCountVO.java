@@ -16,14 +16,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserMessageVO implements Serializable {
-    private Integer id;
-    private Integer type;
-    private String review;
-    private MessageTargetBo messageTarget;
-    private ReviewTargetBo reviewTarget;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime sendTime;
-    private Boolean isRead=false;
-    private UserBO sender;
+public class UserMessageCountVO implements Serializable {
+    private Integer total;
+    private Integer chat;
+    private Integer like;
+    private Integer collect;
+    private Integer review;
+    private Integer system;
 }

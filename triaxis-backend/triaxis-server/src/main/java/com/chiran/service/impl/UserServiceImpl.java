@@ -7,6 +7,7 @@ import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.*;
 import com.chiran.exception.BusinessException;
 import com.chiran.mapper.*;
+import com.chiran.result.PageResult;
 import com.chiran.service.ResourceTypesService;
 import com.chiran.service.UserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static com.chiran.constant.SystemConstant.SYSTEM_SENDID;
 import static com.chiran.constant.UserActionTypeConstant.*;
 
 /**
@@ -49,6 +51,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserLikeMapper userLikeMapper;
     @Autowired
+    private UserReviewMapper userReviewMapper;
+    @Autowired
     private UserCollectionMapper userCollectionMapper;
     @Autowired
     private UserReviewServiceImpl userReviewServiceImpl;
@@ -60,7 +64,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getId, id).select(User::getId, User::getUsername, User::getAvatar, User::getSchool, User::getGrade, User::getMajor);
         User u = userMapper.selectOne(queryWrapper);
-        checkUserIsExist(u, u.getDeleted() == 1);
+        checkUserIsExist(u);
         UserBO userBO = new UserBO();
         BeanUtils.copyProperties(u, userBO);
         userBO.setUserId(u.getId());
@@ -87,7 +91,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
     private User getUser(Integer id) {
         User user = this.getById(id);
-        checkUserIsExist(user, user.getDeleted() == 1);
+        checkUserIsExist(user);
         Integer vip =  checkVip(user);
         user.setVipLevel(vip);
         return user;
@@ -197,21 +201,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserMessageVO getUserMessages(Integer id, Integer type) {
-        // if(type==1){
-        //     LambdaQueryWrapper<UserLike> queryWrapper = new LambdaQueryWrapper<>();
-        //     queryWrapper.eq(UserLike::getUserId,id);
-        // }
-        if(type==2){
-
+    public PageResult<UserMessageVO> getUserMessages(Integer id, Integer type) {
+        if(type==1){
+            List<UserMessageVO> list  =  userLikeMapper.selectResources(id);
+            return new PageResult<>((long)list.size(),list);
         }
-
-
+        if(type==2){
+            List<UserMessageVO> list  =  userCollectionMapper.selectResources(id);
+            return new PageResult<>((long)list.size(),list);
+        }
+        if(type==3){
+            List<UserMessageVO> list  =  userReviewMapper.selectResources(id);
+            return new PageResult<>((long)list.size(),list);
+        }
         return null;
     }
 
-    private static void checkUserIsExist(User user, boolean user1) {
-        if (user == null || user1) {
+    @Override
+    public UserChatVO getUserChats(Integer id) {
+        return null;
+    }
+
+    private static void checkUserIsExist(User user) {
+        if (user == null) {
             // 账号不存在
             log.info("用户不存在");
             throw ExceptionUtil.create(12000);
@@ -222,7 +234,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateUserProfile(Integer id, UserUpdateDTO dto) {
         User user = this.getById(id);
-        checkUserIsExist(user, user.getDeleted() == 1);
+        checkUserIsExist(user);
 
         // 检查用户名是否重复（如果修改了用户名）
         if (StringUtils.isNotBlank(dto.getUsername()) && !dto.getUsername().equals(user.getUsername())) {

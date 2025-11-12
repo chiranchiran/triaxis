@@ -7,7 +7,10 @@ import com.chiran.dto.ResourceSearchDTO;
 import com.chiran.entity.Resource;
 import com.chiran.entity.UserLike;
 import com.chiran.vo.ResourceVO;
+import com.chiran.vo.UserMessageVO;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
  * <p>
@@ -19,4 +22,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface UserLikeMapper extends BaseMapper<UserLike> {
+    List<UserMessageVO> selectResources(Integer id);
 }
