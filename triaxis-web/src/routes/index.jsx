@@ -1,7 +1,7 @@
 import { useRoutes, useNavigate, Navigate } from "react-router-dom"
 import { Button, Result } from "antd"
 import Home from "../pages/Home/index.jsx"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useEffect } from "react"
 import Resource from "../pages/Resource/index.jsx"
 import Course from "../pages/Course/index.jsx"
@@ -27,20 +27,23 @@ import { MyResources } from "../pages/UserCenter/MyResources.jsx"
 import { MyMessages } from "../pages/UserCenter/MyMessages.jsx"
 import { MyVip } from "../pages/UserCenter/MyVip.jsx"
 import { MyPoints } from "../pages/UserCenter/MyPoints.jsx"
+import { logout } from "../api/modules/login.js"
 
 
 //路由守卫组件
 const Protect = ({ children }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+  const notification = useNotification()
   logger.debug("路由组件")
   //检查token是否有效
-  const notification = useNotification()
   const { isAuthenticated } = useSelector(state => state.auth)
-  console.log(isAuthenticated)
-  const navigate = useNavigate()
+
   useEffect(() => {
     if (!isAuthenticated) {
       console.log("当前认证状态", isAuthenticated)
       navigate('/login')
+      dispatch(logout());
       notification.info({ message: "请先登录!", description: "登录后才能进行操作" })
     }
   }, [isAuthenticated])

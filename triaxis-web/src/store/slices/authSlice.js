@@ -30,6 +30,7 @@ export const refreshTokens = createAsyncThunk('auth/refresh',
 // 从本地存储恢复状态的辅助函数
 const getInitialStateFromStorage = () => {
   const userInfo = getUserData() || {};
+  const { accessToken } = getLoginData()
 
   return {
     username: userInfo?.username || '',
@@ -37,7 +38,7 @@ const getInitialStateFromStorage = () => {
     role: userInfo?.role || null,
     rememberMe: userInfo?.rememberMe || false,
     autoLoginExpire: userInfo?.autoLoginExpire || null,
-    isAuthenticated: userInfo?.isAuthenticated || false,
+    isAuthenticated: (userInfo?.isAuthenticated && accessToken) || false,
     avatar: userInfo?.avatar || ""
   }
 }
@@ -86,8 +87,6 @@ const authSlice = createSlice({
       //refresh开始
       .addCase(refreshTokens.pending, (state) => {
         logger.debug("refresh开始，更新redux中auth的状态")
-        state.isAuthenticated = false
-        setAuthenticated(false)
       })
       //refresh成功
       .addCase(refreshTokens.fulfilled, (state, action) => {

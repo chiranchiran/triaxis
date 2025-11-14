@@ -21,6 +21,7 @@
     "antd": "^5.27.4",
     "antd-img-crop": "^4.27.0",
     "axios": "^1.12.2",
+    "dexie": "^4.2.1",
     "i18next": "^25.6.0",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^7.7.15",
@@ -31,6 +32,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.3",
     "reactflow": "^11.11.4",
+    "redux-persist": "^6.0.0",
     "relation-graph": "^2.2.11"
   },
   "devDependencies": {

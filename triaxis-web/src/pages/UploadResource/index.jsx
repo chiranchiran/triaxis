@@ -29,6 +29,8 @@ import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { UploadFiles } from '../../components/UploadFiles';
 import { getFile, normFile } from '../../utils/commonUtil';
+import { removeFormValue, setFormValue } from '../../store/slices/uploadSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -37,9 +39,18 @@ const { Option } = Select;
 const UploadResource = () => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const formValue = useSelector(state => state.upload.formValue)
   const toggleModal = useToggleConfirm();
   const { mutate: doUploadResource, isSuccess: resourceSuccess } = useUploadResource();
   const { mutate: doUploadCourse, isSuccess: courseSuccess } = useUploadCourse();
+  // 页面初始值
+  const initial = formValue ? formValue : {
+    price: 1,
+    level: 2,
+    details: "还没有任何详细介绍,支持Markdown语法编辑~",
+    agreement: true
+  }
   /**
    *  state管理
    */
@@ -55,6 +66,12 @@ const UploadResource = () => {
     subjectId: null,
     parentId: null
   })
+  // 页面卸载删除redux
+  useEffect(() => {
+    return () => {
+      dispatch(removeFormValue());
+    };
+  }, [dispatch]);
   /**
  *  获取数据
  */
@@ -160,7 +177,11 @@ const UploadResource = () => {
   /**
    * 表单事件处理
    */
-
+  //持久化保存
+  // 处理表单输入变化：实时同步到Redux
+  const change = (_, allValues) => {
+    dispatch(setFormValue(allValues));
+  };
   //类型切换
   const toggleType = value => {
     toggleModal(() => {
@@ -255,6 +276,7 @@ const UploadResource = () => {
   //重置
   const formReset = () => {
     form.resetFields();
+    dispatch(removeFormValue())
     setFileList([]);
     setTagState({
       tags: [],
@@ -283,15 +305,11 @@ const UploadResource = () => {
           labelCol={{ span: 3 }}
           wrapperCol={{ span: 20 }}
           form={form}
-          initialValues={{
-            price: 1,
-            level: 2,
-            details: "还没有任何详细介绍,支持Markdown语法编辑~",
-            agreement: true
-          }}
+          initialValues={initial}
           layout="horizontal"
           onFinish={onFinish}
           className="space-y-8"
+          onValuesChange={change}
         >
           <Row gutter={16}>
             <Col span={24}>

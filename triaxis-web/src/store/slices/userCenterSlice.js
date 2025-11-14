@@ -4,7 +4,7 @@ import { logger } from "../../utils/logger"
 const userCenterSlice = createSlice({
   name: 'userCenter',
   initialState: {
-    userActiveKey: null,
+    // userActiveKey: null,
     messageCount: {
       'total': 0,
       'chat': 0,
@@ -12,17 +12,17 @@ const userCenterSlice = createSlice({
       'collect': 0,
       'review': 0,
       'system': 0
-    }
+    },
   },
   reducers: {
-    setUserActiveKey: (state, action) => {
-      logger.debug("修改用户中心活动标签，更新redux中auth的状态", action.payload)
-      state.userActiveKey = action.payload
-    },
-    removeUserActiveKey: (state, action) => {
-      logger.debug("修改用户中心活动标签，更新redux中auth的状态", action.payload)
-      state.userActiveKey = null
-    },
+    // setUserActiveKey: (state, action) => {
+    //   logger.debug("修改用户中心活动标签，更新redux中auth的状态", action.payload)
+    //   state.userActiveKey = action.payload
+    // },
+    // removeUserActiveKey: (state, action) => {
+    //   logger.debug("修改用户中心活动标签，更新redux中auth的状态", action.payload)
+    //   state.userActiveKey = null
+    // },
     setMessageCount: (state, action) => {
       logger.debug("修改用户中心消息数量，更新redux中auth的状态", action.payload)
       const updatedSubCounts = {
@@ -37,5 +37,5 @@ const userCenterSlice = createSlice({
     },
   }
 })
-export const { setUserActiveKey, removeUserActiveKey, setMessageCount } = userCenterSlice.actions
+export const { setMessageCount } = userCenterSlice.actions
 export default userCenterSlice.reducer

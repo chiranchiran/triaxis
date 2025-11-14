@@ -1,6 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
-import { store } from './store/index.js'
+import { persistor, store } from './store/index.js'
 import './utils/i18n'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import './index.css'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PersistGate } from 'redux-persist/integration/react'
 
 const RootApp = () => {
   const { language } = usePreference();
@@ -65,9 +66,11 @@ const RootApp = () => {
         <AppProvider>
           <QueryClientProvider client={queryClient}>
             <Provider store={store}>
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
+              <PersistGate persistor={persistor}>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </PersistGate>
             </Provider>
           </QueryClientProvider>
         </AppProvider>

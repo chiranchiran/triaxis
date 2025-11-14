@@ -63,7 +63,7 @@ import { MyVip } from './MyVip';
 import { MyMessages } from './MyMessages';
 import { MyResources } from './MyResources';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeUserActiveKey, setMessageCount, setUserActiveKey } from '../../store/slices/userCenterSlice';
+import { setMessageCount } from '../../store/slices/userCenterSlice';
 import { store } from '../../store';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getLastPathSegment } from '../../utils/commonUtil';

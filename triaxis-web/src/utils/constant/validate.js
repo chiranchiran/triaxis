@@ -1,13 +1,13 @@
 export const fileConfig = {
   1: { // 资源文件
     maxCount: 10,
-    maxSize: 500 * 1024 * 1024, // 500MB
-    accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.psd',
-    types: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'zip', 'rar', 'jpg', 'jpeg', 'png', 'gif', 'psd']
+    maxSize: 5 * 1024 * 1024 * 1024, // 5G
+    accept: '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.rar,.jpg,.jpeg,.png,.gif,.psd,.vmdk',
+    types: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'zip', 'rar', 'jpg', 'jpeg', 'png', 'gif', 'psd', 'vmdk']
   },
   2: { // 课程文件
     maxCount: 1,
-    maxSize: 2 * 1024 * 1024 * 1024, // 2GB
+    maxSize: 5 * 1024 * 1024 * 1024, // 2GB
     accept: 'video/*,.mp4,.avi,.mov,.wmv,.flv,.mkv',
     types: ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm']
   },

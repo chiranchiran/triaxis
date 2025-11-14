@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import { apiConfigs } from "../../api/config"
-import { getCaptcha, uploadFile } from "../../api/modules/common"
+import { getCaptcha, uploadFile, uploadSimple } from "../../api/modules/common"
 import { uploadResource } from "../../api/modules/resources"
 import { useApi } from "../common/useApi"
 import { useUpload } from "../common/useData"
@@ -25,6 +25,6 @@ export const useCaptcha = (params, options = {}) => {
 }
 //上传
 export const useUploadFile = (options = {}) => {
-  return useUpload(uploadFile, null, null, options)
+  return useUpload(uploadSimple, null, null, options)
 }
 

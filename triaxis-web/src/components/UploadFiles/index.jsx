@@ -25,12 +25,21 @@ import { getFileExtension } from '../../utils/commonUtil';
 import service from '../../utils/api/service';
 import { useMutation } from '@tanstack/react-query';
 import { fileConfig } from '../../utils/constant/validate';
+import { useDispatch } from 'react-redux';
+import { UploadManager } from '../../utils/filehandler/uploadManager';
 const { Dragger } = Upload;
 
+
+// 初始化上传管理器
+const uploadManager = new UploadManager();
+
+// 初始化
+await uploadManager.initialize();
 export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
   const form = Form.useFormInstance();
   const messageApi = useMessage();
   const { mutateAsync: doUpload, handleSuccess, handleError } = useUploadFile();
+
 
   const getType = (type) => {
     switch (type) {
@@ -56,7 +65,7 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     }
     // 文件数量校验,注意首次上传的时候fileList是undefined
     const list = form.getFieldValue(getType(type)) || [];
-    console.log(list);
+    logger.debug(list);
     if (list.length >= config.maxCount) {
       messageApi.error(`最多只能上传 ${config.maxCount} 个文件`);
       return Upload.LIST_IGNORE;
@@ -72,45 +81,69 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     logger.debug("文件校验成功")
     return true;
   };
-  //上传单个文件、图片
-  const uploadSingleFile = async (file, onProgress) => {
-    logger.debug("上传文件或图片", file);
-    const formData = new FormData();
-    formData.append('file', file);
-    return doUpload({
-      formData, onProgress: (progressEvent) => {
-        if (progressEvent.total) {
-          const percent = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          onProgress({ percent }, file);
-        }
-      }
-    })
-  };
+
   //文件上传
   const fileCustomRequest = async (options) => {
     logger.debug("文件上传的配置", options);
     const { file, onProgress, onSuccess, onError } = options;
     try {
-      const filePath = await uploadSingleFile(file, onProgress);
-      const updatedFile = {
-        ...file,
-        status: 'done',
-        path: filePath,
-        type: getFileExtension(file.name),
-        response: { path: filePath }
-      };
-      const index = fileList.findIndex(i => i.uid === file.uid)
-      const newFileList = [...fileList];
-      newFileList[index] = updatedFile;
-      setFileList(newFileList)
-      form.setFieldValue("file", newFileList);
-      onSuccess(updatedFile, file);
+      //   const formData = new FormData();
+      //   formData.append('file', file);
+      const timeStart = Date.now();
+      //   await doUpload({
+      //     formData, onProgress: (progressEvent) => {
+      //       if (progressEvent.total) {
+      //         const percent = Math.round(
+      //           (progressEvent.loaded * 100) / progressEvent.total
+      //         );
+      //         onProgress({ percent }, file);
+      //       }
+      //     }
+      //   })
+      //   const timeEnd = Date.now();
+      //   logger.debug("上传成功，共耗时秒数", (timeEnd - timeStart) / 1000)
+      //   onSuccess(updatedFile, file);
+      const task = await uploadManager.addFile(file);
+
+      //绑定自定义progress回调
+      task.on('progress', (progress, taskInfo) => {
+        const percent = Math.round(progress * 100) / 100
+        logger.debug(`上传进度：${percent}%`, '任务信息：', taskInfo);
+        onProgress({ percent }, file);
+      });
+      // 5. 绑定自定义success回调（拿到URL）
+      task.on('success', (taskInfo) => {
+        const timeEnd = Date.now();
+        logger.debug("上传成功，共耗时秒数", (timeEnd - timeStart) / 1000)
+        logger.debug('上传成功！');
+        const url = taskInfo.fileUrl
+        logger.debug('文件URL：', url); // 直接拿到后端返回的URL
+        logger.debug('任务详情：', taskInfo);
+        const updatedFile = {
+          ...file,
+          status: 'done',
+          path: url,
+          type: getFileExtension(file.name),
+          response: { path: url }
+        };
+        const index = fileList.findIndex(i => i.uid === file.uid)
+        const newFileList = [...fileList];
+        newFileList[index] = updatedFile;
+        setFileList(newFileList)
+        form.setFieldValue("file", newFileList);
+        onSuccess(updatedFile, file);
+      });
+      task.on('error', (error) => {
+        const timeEnd = Date.now();
+        logger.debug("上传失败，共耗时秒数", (timeEnd - timeStart) / 1000)
+        logger.debug("失败", error)
+        onError(error);
+        messageApi.error(`${file.name} 上传失败`);
+      })
+
+
     } catch (error) {
-      console.log("失败")
-      onError(error);
-      messageApi.error(`${file.name} 上传失败`);
+
     }
   }
 
