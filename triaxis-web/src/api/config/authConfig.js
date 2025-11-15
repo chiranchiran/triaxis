@@ -12,7 +12,7 @@ const onAutoSuccess = (data, dispatch, navigate) => {
   dispatch(loginSuccess(data))
 }
 const onAutoError = (error, dispatch, navigate) => {
-  dispatch(logout())
+  // dispatch(logout())
 }
 const onCaptcha = (data, dispatch, navigate) => {
   authconfig.captcha.success.description = data

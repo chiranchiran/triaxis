@@ -85,3 +85,38 @@ export const getLastPathSegment = (pathname) => {
   // 4. 取最后一个片段（空路径返回空字符串）
   return segments[segments.length - 1] || '';
 }
+
+// utils/serializableUtil.js
+/**
+ * 清理文件对象中的不可序列化字段，确保可存入Redux
+ * @param {Array} fileList - Upload组件的fileList数组
+ * @returns {Array} 处理后的可序列化文件列表
+ */
+export const cleanFileList = (fileList) => {
+  if (!Array.isArray(fileList)) return [];
+
+  return fileList.map(file => {
+    // 只保留需要的可序列化字段，过滤Date对象和非必要属性
+    const {
+      uid,
+      name,
+      status,
+      url,
+      response,
+      percent,
+      size,
+      lastModified, // 保留时间戳（数字，可序列化），丢弃lastModifiedDate（Date对象）
+      // 移除originFileObj（原始文件对象，可能包含非序列化属性）
+    } = file;
+
+    return {
+      uid,
+      name,
+      status,
+      url: url || (response?.path || ''), // 确保url有效
+      percent: percent || 0,
+      size: size || 0,
+      lastModified: lastModified || 0, // 用时间戳替代Date对象
+    };
+  });
+};

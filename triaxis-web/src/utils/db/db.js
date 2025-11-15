@@ -5,7 +5,7 @@ export class UploadDatabase extends Dexie {
   constructor() {
     super('初始化数据库');
     this.version(1).stores({
-      uploads: '&id, fileHash, fileName, status, createdAt'
+      uploads: '&id, fileHash, fileName, status, createdAt,url'
     });
   }
   // 保存已上传chunks列表
@@ -32,6 +32,12 @@ export class UploadDatabase extends Dexie {
       updatedAt: Date.now()
     });
   }
+  async updateUploadFileUrl(id, url) {
+    await this.uploads.update(id, {
+      url,
+      updatedAt: Date.now()
+    });
+  }
   // 获得某文件本地已上传chunk列表
   async getUploadRecord(fileHash) {
     return this.uploads.where('fileHash').equals(fileHash).first();
@@ -47,6 +53,13 @@ export class UploadDatabase extends Dexie {
   async deleteUploadRecord(id) {
     await this.uploads.delete(id);
   }
+  // 清空所有上传任务记录
+  async clearAllUploadRecords() {
+    // 直接调用Dexie表的clear方法，自动处理事务和清空逻辑
+    await this.uploads.clear();
+    console.log('已清空uploads表中所有数据');
+  }
 }
+
 
 export const db = new UploadDatabase();

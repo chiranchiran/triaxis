@@ -27,7 +27,7 @@ import { MyResources } from "../pages/UserCenter/MyResources.jsx"
 import { MyMessages } from "../pages/UserCenter/MyMessages.jsx"
 import { MyVip } from "../pages/UserCenter/MyVip.jsx"
 import { MyPoints } from "../pages/UserCenter/MyPoints.jsx"
-import { logout } from "../api/modules/login.js"
+import { logout } from "../store/slices/authSlice.js"
 
 
 //路由守卫组件

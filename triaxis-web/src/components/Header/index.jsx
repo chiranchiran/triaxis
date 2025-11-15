@@ -62,7 +62,7 @@ const Header = () => {
       key: 'messages',
       icon: <BellOutlined />,
       label: (
-        <Badge count={total} size="small">
+        <Badge count={total} size="small" offset={[8, -3]}>
           我的消息
         </Badge>
       ),
@@ -192,6 +192,7 @@ const Header = () => {
                 }}
                 trigger={['click']}
                 placement="bottomRight"
+                className='user'
               >
                 <div className="cursor-pointer">
                   <Avatar

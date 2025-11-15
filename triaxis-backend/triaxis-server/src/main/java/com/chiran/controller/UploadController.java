@@ -73,10 +73,9 @@ public class UploadController {
             @RequestParam("chunk") MultipartFile chunk,
             @RequestParam("index") int index,
             @RequestParam("hash") String hash,
-            @RequestParam("fileName") String fileName,
-            @RequestParam("attempt") int attempt
+            @RequestParam("fileName") String fileName
     ) throws IOException {
-        Boolean b = uploadService.uploadChunk(chunk, index, hash, fileName, attempt);
+        Boolean b = uploadService.uploadChunk(chunk, index, hash, fileName);
         return Result.success(null);
     }
 

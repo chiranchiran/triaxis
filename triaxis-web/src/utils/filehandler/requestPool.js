@@ -1,6 +1,9 @@
 import { logger } from '../logger.js';
 
-// 全局单例请求连接池
+/**
+ * 全局请求连接池：统一管控所有分片请求的并发，避免请求拥堵
+ * 单例模式，确保全应用唯一实例
+ */
 export class RequestPool {
   constructor() {
     this.maxConcurrent = 8; // 全局最大并发请求数
@@ -27,13 +30,14 @@ export class RequestPool {
           reject(error);
         } finally {
           this.runningCount--;
-          this.processNext(); // 执行下一个请求
+          this.processNext(); // 请求完成，执行下一个请求
         }
       };
 
       // 给请求绑定任务ID，方便取消时过滤
       wrappedRequest.taskId = taskId;
       this.pendingQueue.push(wrappedRequest);
+      // 立即执行，如果上一下请求一直没执行完，其他请求执行完了，位置空出来可能
       this.processNext();
     });
   }
@@ -48,7 +52,7 @@ export class RequestPool {
     }
   }
 
-  // 动态调整最大并发数（联动NetworkMonitor）
+  // 动态调整最大并发数
   setMaxConcurrent(max) {
     this.maxConcurrent = Math.max(1, Math.min(max, 10));
     this.processNext();
@@ -61,5 +65,4 @@ export class RequestPool {
   }
 }
 
-// 导出全局单例
 export const requestPool = RequestPool.getInstance();

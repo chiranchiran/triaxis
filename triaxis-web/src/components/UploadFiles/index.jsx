@@ -21,12 +21,14 @@ import { logger } from '../../utils/logger';
 import { uploadFile } from '../../api/modules/common';
 import { useMessage } from '../../components/AppProvider';
 import { useUploadFile } from '../../hooks/api/common';
-import { getFileExtension } from '../../utils/commonUtil';
+import { cleanFileList, getFileExtension } from '../../utils/commonUtil';
 import service from '../../utils/api/service';
 import { useMutation } from '@tanstack/react-query';
 import { fileConfig } from '../../utils/constant/validate';
 import { useDispatch } from 'react-redux';
 import { UploadManager } from '../../utils/filehandler/uploadManager';
+import { converBytes } from '../../utils/convertUnit';
+import { setFormValue } from '../../store/slices/uploadSlice';
 const { Dragger } = Upload;
 
 
@@ -35,8 +37,10 @@ const uploadManager = new UploadManager();
 
 // 初始化
 await uploadManager.initialize();
+
 export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
   const form = Form.useFormInstance();
+  const dispatch = useDispatch()
   const messageApi = useMessage();
   const { mutateAsync: doUpload, handleSuccess, handleError } = useUploadFile();
 
@@ -81,11 +85,14 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     logger.debug("文件校验成功")
     return true;
   };
-
+  const fn = {}
   //文件上传
   const fileCustomRequest = async (options) => {
     logger.debug("文件上传的配置", options);
     const { file, onProgress, onSuccess, onError } = options;
+    fn.onSuccess = onSuccess;
+    fn.onError = onError;
+    fn.onProgress = onProgress;
     try {
       //   const formData = new FormData();
       //   formData.append('file', file);
@@ -104,7 +111,7 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
       //   logger.debug("上传成功，共耗时秒数", (timeEnd - timeStart) / 1000)
       //   onSuccess(updatedFile, file);
       const task = await uploadManager.addFile(file);
-
+      file.taskId = task.taskId;
       //绑定自定义progress回调
       task.on('progress', (progress, taskInfo) => {
         const percent = Math.round(progress * 100) / 100
@@ -122,9 +129,9 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
         const updatedFile = {
           ...file,
           status: 'done',
-          path: url,
+          url: url,
           type: getFileExtension(file.name),
-          response: { path: url }
+          response: { url: url }
         };
         const index = fileList.findIndex(i => i.uid === file.uid)
         const newFileList = [...fileList];
@@ -155,25 +162,36 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     });
 
     const filteredFileList = newFileList.map(item => {
-      if (item.status === 'done' && item.response?.path) {
+      if (item.status === 'done' && item.response?.url) {
         return {
           ...item,
-          path: item.response.path
+          url: item.response.url
         };
       }
       return item;
     });
-
-    form.setFieldValue("file", filteredFileList);
+    form.setFieldValue('file', filteredFileList);
     setFileList(filteredFileList);
-
+    dispatch(setFormValue({ file: cleanFileList(filteredFileList) }))
   };
+
+  const changeStatus = (id, status) => {
+    const list = form.getFieldValue('file');
+    const item = list.find(i => i.uid === id);
+    item.status = status;
+    const newList = [...list]
+    form.setFieldValue('file', newList);
+    setFileList(newList);
+    dispatch(setFormValue({ file: cleanFileList(newList) }))
+  }
+
   // 文件删除处理
   const handleFileRemove = (file) => {
     logger.debug("删除文件:", file);
     const newFileList = fileList.filter(item => item.uid !== file.uid);
     setFileList(newFileList);
     form.setFieldValue("file", newFileList);
+    uploadManager.cancelUpload(file.taskId)
     return true;
   };
   //文件上传配置
@@ -198,7 +216,7 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
       format: (percent) => percent && `${parseFloat(percent.toFixed(2))}%`,
     },
     itemRender: (originNode, file) => (
-      <DraggableUploadListItem originNode={originNode} file={file} />
+      <DraggableUploadListItem originNode={originNode} file={file} uploadManager={uploadManager} fn={fn} onStatusChange={changeStatus} />
     ),
   });
 
@@ -223,24 +241,44 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
   // 图片上传
   const imageCustomRequest = async (options, imageType = 3) => {
     const { file, onProgress, onSuccess, onError } = options;
-
+    const timeStart = Date.now();
+    const task = await uploadManager.addFile(file);
     try {
-      const imagePath = await uploadSingleFile(file, onProgress);
-      const updatedFile = {
-        ...file,
-        status: 'done',
-        path: imagePath,
-        response: { path: imagePath }
-      };
-      const list = form.getFieldValue(getType(imageType))
-      const index = list.findIndex(i => i.uid === file.uid)
-      const newFileList = [...list];
-      newFileList[index] = updatedFile;
-      form.setFieldValue(getType(imageType), updatedFile);
-      onSuccess(updatedFile, file);
+      task.on('progress', (progress, taskInfo) => {
+        const percent = Math.round(progress * 100) / 100
+        logger.debug(`上传进度：${percent}%`, '任务信息：', taskInfo);
+        onProgress({ percent }, file);
+      });
+      // 5. 绑定自定义success回调（拿到URL）
+      task.on('success', (taskInfo) => {
+        const timeEnd = Date.now();
+        logger.debug("上传成功，共耗时秒数", (timeEnd - timeStart) / 1000)
+        logger.debug('上传成功！');
+        const url = taskInfo.fileUrl
+        logger.debug('文件URL：', url); // 直接拿到后端返回的URL
+        logger.debug('任务详情：', taskInfo);
+        const updatedFile = {
+          ...file,
+          status: 'done',
+          url: url,
+          type: getFileExtension(file.name),
+          response: { url: url }
+        };
+        const list = form.getFieldValue(getType(imageType))
+        const index = list.findIndex(i => i.uid === file.uid)
+        const newFileList = [...list];
+        newFileList[index] = updatedFile;
+        form.setFieldValue(getType(imageType), updatedFile);
+        onSuccess(updatedFile, file);
+      });
+      task.on('error', (error) => {
+        const timeEnd = Date.now();
+        logger.debug("上传失败，共耗时秒数", (timeEnd - timeStart) / 1000)
+        logger.debug("失败", error)
+        onError(error);
+        messageApi.error(`${file.name} 上传失败`);
+      })
     } catch (error) {
-      onError(error);
-      messageApi.error(`${file.name} 上传失败`);
     }
   };
 
@@ -254,11 +292,12 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
       form.setFieldValue("coverImage", []);
       return
     }
-    // 更新文件状态，确保 path 被正确设置
-    if (file.status === 'done' && file.response?.path) {
-      file.path = file.response.path
+    // 更新文件状态，确保 url 被正确设置
+    if (file.status === 'done' && file.response?.url) {
+      file.url = file.response.url
     }
     form.setFieldValue("coverImage", [file]);
+    dispatch(setFormValue({ coverImage: cleanFileList([file]) }))
   };
 
   // 预览图片变化处理
@@ -267,16 +306,17 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
     let fileLists = [...info.fileList];
 
     fileLists = fileLists.map(file => {
-      if (file.status === 'done' && file.response?.path) {
+      if (file.status === 'done' && file.response?.url) {
         return {
           ...file,
-          path: file.response.path
+          url: file.response.url
         };
       }
       return file;
     });
 
     form.setFieldValue("images", fileLists);
+    dispatch(setFormValue({ images: cleanFileList(fileLists) }))
   };
   // 图片删除处理
   const handleImageRemove = (file, type) => {
@@ -344,7 +384,7 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
             <p className="text-xs text-secondary">
               {type === 2
                 ? `支持视频格式，单个文件大小不超过${fileConfig[2].maxSize / 1024 / 1024}MB`
-                : `支持多种格式，最多可上传${fileConfig[1].maxCount}个文件，单个文件大小不超过 ${fileConfig[1].maxSize / 1024 / 1024}MB`
+                : `支持多种格式，最多可上传${fileConfig[1].maxCount}个文件，单个文件大小不超过 ${converBytes(fileConfig[type].maxSize)}`
               }
             </p>
           </Dragger>
@@ -362,7 +402,7 @@ export const UploadFiles = ({ fileList = [], setFileList = {}, type }) => {
             <PlusOutlined />
             <div className='mt-1 text-sm'>上传封面</div>
             <div className="text-xs text-gray-400 mt-1">
-              建议尺寸: 16:9，不超过{fileConfig[type].maxSize / 1024 / 1024}MB
+              建议尺寸: 16:9，不超过{converBytes(fileConfig[type].maxSize)}
             </div>
           </div>
 

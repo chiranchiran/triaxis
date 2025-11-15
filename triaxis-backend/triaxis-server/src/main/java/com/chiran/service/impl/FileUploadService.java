@@ -71,7 +71,7 @@ public class FileUploadService {
     /**
      * 3. 分片上传接口
      */
-    public Boolean uploadChunk(MultipartFile chunk, int index, String hash, String fileName, int attempt) throws IOException {
+    public Boolean uploadChunk(MultipartFile chunk, int index, String hash, String fileName) throws IOException {
         // 保存分片到临时目录
         FileUploadUtil.saveChunk(
                 chunk,

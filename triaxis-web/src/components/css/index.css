@@ -1,4 +1,20 @@
-.semi-chat {
-  max-width: none;
-  max-height: 40rem;
+header .nav-top a:not([aria-current]):hover {
+  background-color: var(--bg-hover) !important;
+  color: inherit;
+}
+header .nav-top a[aria-current]:hover {
+  color: var(--text-light);
+}
+header input.ant-input-outlined,
+header .ant-input-search-button {
+  font-size: medium;
+  border-color: var(--bg-dark);
+  border-radius: 8px;
+}
+header button.change {
+  margin-right: 0;
+}
+.ant-dropdown-menu-item {
+  text-align: center;
+  width: 8rem;
 }

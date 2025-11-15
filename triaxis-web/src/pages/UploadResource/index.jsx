@@ -28,9 +28,10 @@ import { useGetResourceTypes, useGetSecondaryCategory, useUploadResource } from 
 import { useGetCourseTypes, useUploadCourse } from '../../hooks/api/courses';
 import { useQueryClient } from '@tanstack/react-query';
 import { UploadFiles } from '../../components/UploadFiles';
-import { getFile, normFile } from '../../utils/commonUtil';
+import { cleanFileList, getFile, normFile } from '../../utils/commonUtil';
 import { removeFormValue, setFormValue } from '../../store/slices/uploadSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { values } from 'lodash';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -69,9 +70,18 @@ const UploadResource = () => {
   // 页面卸载删除redux
   useEffect(() => {
     return () => {
+      logger.debug("页面卸载删除数据")
       dispatch(removeFormValue());
     };
   }, [dispatch]);
+  useEffect(() => {
+    if (formValue) {
+      // 从 Redux 的 formValue.file 中恢复文件列表
+      form.setFieldsValue(formValue);
+      setFileList(formValue.file || []);
+    }
+
+  }, []);
   /**
  *  获取数据
  */
@@ -180,7 +190,16 @@ const UploadResource = () => {
   //持久化保存
   // 处理表单输入变化：实时同步到Redux
   const change = (_, allValues) => {
-    dispatch(setFormValue(allValues));
+    console.log(allValues)
+    const cleanedValues = {
+      ...allValues,
+      // 对file字段单独处理（如果存在）
+      file: allValues.file ? cleanFileList(allValues.file) : [],
+      coverImage: allValues.coverImage ? cleanFileList(allValues.coverImage) : null,
+      images: allValues.images ? cleanFileList(allValues.images) : []
+    };
+    // 同步清理后的值到Redux
+    dispatch(setFormValue(cleanedValues));
   };
   //类型切换
   const toggleType = value => {
@@ -536,6 +555,7 @@ const UploadResource = () => {
                     }),
                   ]}
                   getValueFromEvent={normFile}
+
 
                 >
                   <UploadFiles fileList={fileList} setFileList={setFileList} type={type} />

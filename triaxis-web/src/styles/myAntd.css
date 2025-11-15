@@ -260,10 +260,11 @@ select:hover {
 /* 徽标数字 */
 .ant-badge .ant-badge-count-sm {
   min-width: var(--ant-badge-indicator-height-sm);
-  height: 1.2rem;
-  line-height: 1.2rem;
+  z-index: 100000;
+  height: 1rem;
+  line-height: 0.9rem;
   text-align: center;
-  font-size: var(--ant-badge-text-font-size-sm);
+  font-size: small;
   border-radius: calc(var(--ant-badge-indicator-height-sm) / 2.1);
 }
 

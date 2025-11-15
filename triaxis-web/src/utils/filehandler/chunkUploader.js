@@ -2,136 +2,111 @@
 import { uploadChunk } from "../../api/modules/common";
 import { logger } from "../logger";
 import { NetworkMonitor } from "./networkMonitor";
+import { requestPool } from "./requestPool";
 
 
-// 切片批量上传函数
+/**
+ * 分片上传管理器：处理单个文件的分片上传、重试、事件触发
+ * 依赖全局连接池管控并发
+ */
 export class ChunkUploader {
-  constructor(config) {
-    this.currentConcurrency = config.concurrency;
-    //最多并发chunck数量
-    // this.maxConcurrent = config.maxConcurrent;
+  constructor(config, addCancelFn) {
     //一个chunck最大重试次数
-    this.maxRetries = config.maxRetries;
-    this.isPaused = false;
-    this.isCancelled = false;
-    //控制并发chunk的数量
-    this.activeUploads = 0;
+    this.maxRetries = config.maxRetries || 3;
+    // 事件回调存储（progress/chunkSuccess等）
     this.eventCallbacks = new Map();
-  }
-  //批量上传chuncks
-  async uploadChunks(chunks, fileHash, fileName) {
+    this.addCancelFn = addCancelFn;
+    this.taskId = config.taskId;
     this.isPaused = false;
-    this.isCancelled = false;
+  }
 
-    const queue = [...chunks];
-    // 当待上传chuncks的数量>0、文件未暂停、取消上传的时候才上传
-    //结合delay构成轮询
-    while (queue.length > 0 && !this.isCancelled && !this.isPaused) {
-      // 当前发送中的chunck数量大于最大并发数量的延迟100ms等待，注意可能这2行代码中间文件上传暂停或取消，再确保一次
-      // 等待并发槽位
-      while (this.activeUploads >= this.currentConcurrency && !this.isCancelled && !this.isPaused) {
-        await this.delay(100);
-      }
 
-      if (this.isCancelled || this.isPaused) break;
-      //从数组头部取一个chunk取传输
-      const chunk = queue.shift();
-      if (chunk) {
-        // 单个分片上传 + 重试逻辑，失败时触发指数退避延迟
-        this.uploadChunkWithRetry(chunk, fileHash, fileName).catch(error => {
-          this.emit('切片上传失败', chunk.index, error);
-        });
-      }
-    }
-    //当前上传中的thunck数量>0和未取消、暂停的时候等待
-    while (this.activeUploads > 0 && !this.isCancelled && !this.isPaused) {
-      await this.delay(100);
-    }
-
-    if (!this.isCancelled && !this.isPaused) {
+  //批量上传chuncks
+  async uploadChunks(chunks, fileHash, fileName, file) {
+    console.log(chunks, fileHash, fileName, file)
+    if (chunks.length === 0) {
       this.emit('complete');
+      return;
     }
-  }
-  // 单个分片上传+重试逻辑
-  async uploadChunkWithRetry(chunk, fileHash, fileName) {
-    let lastError;
-
-    //attempt为发送次数
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      //检查当前文件的状态
-      if (this.isCancelled || this.isPaused) {
-        return;
-      }
-
-      try {
-        chunk.status = 'uploading';
-        this.emit('chunkStart', chunk.index);
-        // 上传单个切片
-        await this.uploadSingleChunk(chunk, fileHash, fileName, attempt);
-        // 成功修改状态
-        chunk.status = 'success';
-        this.emit('chunkSuccess', chunk.index);
-        return;
-
-      } catch (error) {
-        //失败记录错误、修改状态
-        lastError = error;
-        chunk.retryCount = attempt;
-        chunk.status = 'error';
-
-        logger.debug(`Chunk ${chunk.index} 上传失败(attempt ${attempt}):`, error);
-        //重试，等待时间为指数退避策略
-        if (attempt < this.config.maxRetries) {
-          // 指数退避 + 网络状况考虑
-          const backoffTime = 1000 * Math.pow(2, attempt - 1);
-          const networkFactor = this.networkMonitor.getNetworkLevel() === 'poor' ? 2 : 1;
-          await this.delay(backoffTime * networkFactor);
-        }
-      }
+    if (this.isPaused) {
+      return;
     }
 
-    this.emit('error', new Error(`Chunk ${chunk.index} 上传失败在重试 ${this.config.maxRetries} 次之后，错误原因为 ${lastError.message}`));
-  }
-  // 真正上传单个切片的函数
-  async uploadSingleChunk(chunk, fileHash, fileName, attempt) {
-    this.activeUploads++;
+    // 所有分片请求包装成Promise函数，通过连接池调度
+    const chunkPromises = chunks.map(chunk => {
+      return async () => {
+        // 执行单个分片上传（带重试）
+        return await this.uploadSingleChunk(chunk, fileHash, fileName, file);
+      };
+    });
 
+    // 批量添加到连接池，等待执行
+    await Promise.all(
+      chunkPromises.map(promiseFn => requestPool.addRequest(promiseFn, this.taskId))
+    );
+    // 全部完成后触发complete
+    this.emit('complete');
+  }
+  // 上传单个分片+重试
+  async uploadSingleChunk(chunk, fileHash, fileName, file) {
+    if (this.isPaused) return;
+    // const { index, blob } = chunk;
+    // const formData = new FormData();
+    // formData.append('chunk', blob);
+    // formData.append('hash', fileHash);
+    // formData.append('fileName', fileName);
+    // formData.append('index', index);
+    const { index, start, end } = chunk;
+    // 上传时才动态切分Blob（流式核心：按需生成，不上传不占用内存）
+    const blob = file.slice(start, end);
+    const formData = new FormData();
+    formData.append('chunk', blob);
+    formData.append('hash', fileHash);
+    formData.append('fileName', fileName);
+    formData.append('index', index);
     try {
-      const formData = new FormData();
-      formData.append('chunk', chunk.blob);
-      formData.append('index', chunk.index.toString());
-      formData.append('hash', fileHash);
-      formData.append('fileName', fileName);
-      formData.append('attempt', attempt.toString());
-
-      const response = await uploadChunk({
-        formData, onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const progress = (progressEvent.loaded / progressEvent.total) * 100;
-            // 更新网络速度监控
-            this.emit('progress', progress, chunk.index);
-          }
-        }
-      })
-
-    } catch (e) { throw new Error(`chuck上传服务器失败 ${e.message}`) }
-    finally {
-      this.activeUploads--;
+      // 调用后端分片上传接口
+      const response = await uploadChunk(formData, (onCancelFunc) => {
+        // 在调用接口的同时，相当于同时调用了传入的这个函数，又能同时拿到返回的取消方法去赋值
+        this.addCancelFn(onCancelFunc);
+        logger.debug(`任务[${this.taskId}]分片[${index}]取消函数已存储`);
+      });
+      this.emit('chunkSuccess', index); // 触发分片成功事件
+      return response;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        logger.debug(`任务[${taskId}]分片[${index}]上传已取消`);
+        throw error;
+      }
+      // 重试逻辑
+      if (chunk.retryCount < this.maxRetries) {
+        chunk.retryCount++;
+        logger.debug(`分片[${index}]上传失败，重试第${chunk.retryCount}次（原因：${error.message}）`);
+        return await this.uploadSingleChunk(chunk, fileHash, fileName); // 递归重试
+      }
+      // 重试耗尽，触发失败事件
+      this.emit('chunkError', index, error);
+      throw new Error(`分片[${index}]上传失败（已重试${this.maxRetries}次）`);
     }
   }
 
-  pause() {
+  pause(taskId) {
     this.isPaused = true;
+    requestPool.clearQueueByTaskId(taskId);// 清空连接池中的待执行请求
+    this.emit('paused');
+    logger.debug('分片上传已暂停');
+  }
+  retry() {
+    this.isPaused = false;
   }
 
-  cancel() {
-    this.isCancelled = true;
+  cancel(taskId) {
+    this.isPaused = true;
+    requestPool.clearQueueByTaskId(taskId); // 清空连接池中的待执行请求
+    this.emit('cancelled');
+    logger.debug(`任务[${taskId}]的分片上传已取消`);
   }
 
-  //并发等待
-  delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
   //事件订阅,监听分片进度、失败，把回调函数加入数组
   on(event, callback) {
     if (!this.eventCallbacks.has(event)) {
