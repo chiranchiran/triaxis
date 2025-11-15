@@ -48,14 +48,22 @@ service.interceptors.response.use(
       data: res.data
     })
     //处理业务错误，正确code为0
-    if (res.data.code !== 0) {
-      const error = ErrorFactory.business(res.data, res)
-      logger.error(res.data.message || error.message, error)
-      return Promise.reject(error)
+    if (res.status === 200 && res.data.code === undefined) {
+      //成功
+      logger.debug("无业务错误")
+      return res.data
+
     }
-    //成功
-    logger.debug("无业务错误")
-    return res.data.data
+    //处理业务错误，正确code为0
+    if (res.data.code === 0) {
+      //成功
+      logger.debug("无业务错误")
+      return res.data.data
+
+    }
+    const error = ErrorFactory.business(res.data, res)
+    logger.error(res.data?.message || error.message, error)
+    return Promise.reject(error)
   },
   async (error) => {
     logger.debug("请求错误进入响应拦截器", error)

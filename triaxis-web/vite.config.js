@@ -19,5 +19,9 @@ export default defineConfig({
         // rewrite: (path) => path.replace(/^\/api/, ''), 
       }
     }
+  },
+  define: {
+    // 关键：在浏览器中把 global 指向 window
+    global: 'window'
   }
 })

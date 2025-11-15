@@ -1,6 +1,7 @@
 
-import { useGet } from "../common/useData";
-import { getUserChat, getUserChats, getUserDetail, getUserMessagesCollect, getUserMessagesCount, getUserMessagesLike, getUserMessagesReview, getUserMessagesSystem, getUserPoints, getUserProfile, getUserSettings, getUserVip } from '../../api/modules/user'
+import { useAdd, useGet } from "../common/useData";
+import { getUserChat, getUserChats, getUserDetail, getUserMessagesCollect, getUserMessagesCount, getUserMessagesLike, getUserMessagesReview, getUserMessagesSystem, getUserPoints, getUserProfile, getUserSettings, getUserVip, sendChat } from '../../api/modules/user'
+import { useApi } from "../common/useApi";
 
 export const useGetUserProfile = (options) => useGet(getUserProfile, ['user', 'profile'], null, options)
 export const useGetUserDetail = (options) => useGet(getUserDetail, ['user', 'detail'], null, options)
@@ -15,3 +16,9 @@ export const useGetUserMessagesReview = (options) => useGet(getUserMessagesRevie
 export const useGetUserMessagesSystem = (options) => useGet(getUserMessagesSystem, ['user', 'messages', 'system'], null, options)
 export const useGetUserChats = (options) => useGet(getUserChats, ['user', 'chats'], null, options)
 export const useGetUserChat = (id, options) => useGet(getUserChat, ['user', 'chat', id], id, options)
+export const useSendChat = (data, options) => useApi(sendChat, {
+  queryKey: ['user', 'chat', data?.receiverId],
+  params: data,
+  isMutation: true,
+  ...options
+})

@@ -304,7 +304,7 @@ export class UploadTaskManager {
         return { needUpload: true, uploadedChunks: [] };
       }
       logger.error(`任务[${this.taskId}]小文件上传失败：`, error);
-      throw new error("文件上传失败")
+      throw new Error("文件上传失败")
     }
   }
   // 分片上传
@@ -357,7 +357,7 @@ export class UploadTaskManager {
         return { needUpload: true, uploadedChunks: [] };
       }
       logger.error(`任务[${this.taskId}]后端合并失败：`, error);
-      throw new error("文件上传失败")
+      throw new Error("文件上传失败")
     }
   }
   //计算分片进度

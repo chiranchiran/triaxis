@@ -1,5 +1,6 @@
 import { logger } from "../logger";
 import { logout } from "../../store/slices/authSlice";
+import { store } from "../../store";
 
 // 全局错误处理
 export const handleGlobalError = () => {
@@ -73,7 +74,7 @@ export function handlePromiseError(error, showMessage, notification, messageApi,
   }
 }
 function handleAuthError(error, showMessage, notification, navigate) {
-  const { code } = error;
+  const { code, message } = error;
   if (code === 11000 || 11001) {
     if (showMessage) notification.info({ message: "请登录！", description: message })
     store.dispatch(logout())

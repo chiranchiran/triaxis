@@ -120,3 +120,23 @@ export const cleanFileList = (fileList) => {
     };
   });
 };
+// 格式化时间
+export const formatTime = (timestamp) => {
+  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// 防抖函数
+export const debounce = (func, wait) => {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};

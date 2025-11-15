@@ -1,6 +1,7 @@
 package com.chiran.controller;
 
 import com.chiran.JwtUtil;
+import com.chiran.dto.ChatSendDTO;
 import com.chiran.entity.UserChat;
 import com.chiran.result.PageResult;
 import com.chiran.result.Result;
@@ -155,6 +156,14 @@ public class UserController {
         Integer userId = (Integer) request.getAttribute("userId");
         PageResult<UserChat> chat = userChatService.getUserChat(id,userId);
         return Result.success(chat);
+    }
+    @PostMapping("/chat")
+    public Result addUserChat(HttpServletRequest request, @RequestBody ChatSendDTO chatSendDTO) {
+        log.debug("增加用户聊天记录");
+        Integer userId = (Integer) request.getAttribute("userId");
+        chatSendDTO.setSenderId(userId);
+        userChatService.addUserChat(chatSendDTO);
+        return Result.success();
     }
     // /**
     //  * 更新用户信息

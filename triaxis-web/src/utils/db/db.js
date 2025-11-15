@@ -5,7 +5,8 @@ export class UploadDatabase extends Dexie {
   constructor() {
     super('初始化数据库');
     this.version(1).stores({
-      uploads: '&id, fileHash, fileName, status, createdAt,url'
+      uploads: '&id, fileHash, fileName, status, createdAt,url',
+      downloads: 'id, fileName, status, progress, createdAt'
     });
   }
   // 保存已上传chunks列表
@@ -58,6 +59,60 @@ export class UploadDatabase extends Dexie {
     // 直接调用Dexie表的clear方法，自动处理事务和清空逻辑
     await this.uploads.clear();
     console.log('已清空uploads表中所有数据');
+  }
+  // 下载相关方法
+  async saveDownloadRecord(record) {
+    record.createdAt = new Date();
+    record.updatedAt = new Date();
+    return await this.downloads.put(record);
+  }
+
+  async getDownloadRecord(taskId) {
+    return await this.downloads.get(taskId);
+  }
+
+  async getDownloadRecordByFileId(fileId) {
+    return await this.downloads.where('fileId').equals(fileId).first();
+  }
+
+  async getAllActiveDownloads() {
+    return await this.downloads
+      .where('status')
+      .anyOf(['pending', 'downloading', 'paused', 'error'])
+      .toArray();
+  }
+
+  async updateDownloadProgress(taskId, progress, downloadedChunks) {
+    return await this.downloads.update(taskId, {
+      progress,
+      downloadedChunks,
+      updatedAt: new Date()
+    });
+  }
+
+  async updateDownloadStatus(taskId, status) {
+    return await this.downloads.update(taskId, {
+      status,
+      updatedAt: new Date()
+    });
+  }
+
+  async updateDownloadFileInfo(taskId, fileId, fileName, fileSize, totalChunks) {
+    return await this.downloads.update(taskId, {
+      fileId,
+      fileName,
+      fileSize,
+      totalChunks,
+      updatedAt: new Date()
+    });
+  }
+
+  async deleteDownloadRecord(taskId) {
+    return await this.downloads.delete(taskId);
+  }
+
+  async clearAllDownloadRecords() {
+    return await this.downloads.clear();
   }
 }
 

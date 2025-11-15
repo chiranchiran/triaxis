@@ -3,6 +3,7 @@ package com.chiran.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.chiran.bo.CategoryBO;
+import com.chiran.dto.ChatSendDTO;
 import com.chiran.entity.Tag;
 import com.chiran.entity.UserChat;
 import com.chiran.entity.UserTag;
@@ -15,6 +16,7 @@ import com.chiran.service.UserTagService;
 import com.chiran.utils.BeanUtil;
 import com.chiran.vo.UserChatVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,5 +80,12 @@ public class UserChatServiceImpl extends ServiceImpl<UserChatMapper, UserChat> i
 
         // 返回分页结果（总数为消息列表长度，数据为消息列表）
         return new PageResult<>((long) chatList.size(), chatList);
+    }
+
+    @Override
+    public void addUserChat(ChatSendDTO chatSendDTO) {
+        UserChat userChat = new UserChat();
+        BeanUtils.copyProperties(chatSendDTO,userChat);
+        this.save(userChat);
     }
 }

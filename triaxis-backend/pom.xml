@@ -171,6 +171,12 @@
                 <artifactId>commons-codec</artifactId>
                 <version>1.15</version>
             </dependency>
+            <!-- websocket -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-websocket</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Chat, Radio } from '@douyinfe/semi-ui';
 import { Avatar, Empty } from "antd";
 import './index.less'
@@ -6,7 +6,7 @@ import {
   ArrowLeftOutlined,
   SafetyCertificateOutlined
 } from '@ant-design/icons';
-import { useGetUserChat, useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesLike } from '../../hooks/api/user';
+import { useGetUserChat, useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesLike, useSendChat } from '../../hooks/api/user';
 import { isArrayValid } from '../../utils/commonUtil';
 import { MyMESSAGE_TYPE } from '../../utils/constant/types';
 import { TARGETCLICK, TARGETTYPE } from '../../utils/constant/order';
@@ -15,9 +15,13 @@ import { useNavigate } from 'react-router-dom';
 import { setMessageCount } from '../../store/slices/userCenterSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { MyButton } from '../MyButton';
+import { useMessage } from '../AppProvider';
+import WebSocketService from '../../api/websocket/webSocketService';
+import chatApiService from '../../api/websocket/chatApiService';
 
 export const ChatMessage = () => {
   const dispatch = useDispatch();
+
   const [chatOpen, setChatOpen] = useState(null);
   const { data = {} } = useGetUserChats({
     onSuccess: (data) => dispatch(setMessageCount({ chat: data?.total })),
@@ -44,10 +48,10 @@ export const ChatMessage = () => {
             grade = "",
             major = "",
             online },
-          lastMessage: {
-            content = "",
-            sendTime = "" }
+          lastMessage = {}
         } = item;
+        const { content = "",
+          sendTime = "" } = lastMessage || {}
         return (
           <div
             key={id}
@@ -92,13 +96,151 @@ export const MyChat = ({ user, onBack }) => {
   const commonOuterStyle = {
     border: '1px solid var(--semi-color-border)',
     borderRadius: '16px',
-  }
-  const { username: myName, avatar: myAvatar, id: myId } = useSelector(state => state.auth);
-  const { userId, username, avatar } = user
-  /**
-   * @description 构建角色和聊天记录
-   */
+  };
 
+  const { username: myName, avatar: myAvatar, id: myId } = useSelector(state => state.auth);
+  const { userId, username, avatar } = user;
+  const messageApi = useMessage();
+
+  // State管理
+  const [messages, setMessages] = useState([]);
+  const [connectionState, setConnectionState] = useState('disconnected'); // 'disconnected', 'connecting', 'connected'
+
+  // WebSocket连接和消息处理
+  useEffect(() => {
+    console.log('初始化聊天组件，用户ID:', userId);
+
+    // 初始化聊天API服务
+    chatApiService.init({
+      newMessage: handleNewMessage,
+      messageSent: handleMessageSent,
+      messageCountUpdate: handleMessageCountUpdate,
+      notification: handleNotification,
+      chatDetail: handleChatDetail
+    });
+
+    // 连接WebSocket
+    setConnectionState('connecting');
+    chatApiService.connect(
+      handleConnect,
+      handleError
+    );
+
+    return () => {
+      console.log('清理聊天组件');
+      chatApiService.disconnect();
+    };
+  }, [userId]);
+
+  // 连接成功后获取聊天记录
+  useEffect(() => {
+    if (connectionState === 'connected' && userId) {
+      console.log('连接成功，获取聊天详情:', userId);
+      chatApiService.getChatDetail(userId);
+    }
+  }, [connectionState, userId]);
+
+  // 消息处理函数
+  const handleNewMessage = useCallback((message) => {
+    console.log('收到新消息:', message);
+
+    if (message.senderId === userId || message.receiverId === userId) {
+      const newMessage = {
+        id: message.id || Date.now(),
+        role: message.senderId === myId ? 'user' : 'assistant',
+        content: message.content,
+        createAt: new Date(message.timestamp || new Date()).getTime(),
+        isRead: true,
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+    }
+  }, [userId, myId]);
+
+  const handleMessageSent = useCallback((message) => {
+    console.log('消息发送确认:', message);
+    messageApi.success('发送成功');
+  }, [messageApi]);
+
+  const handleMessageCountUpdate = useCallback((countData) => {
+    console.log('消息数量更新:', countData);
+  }, []);
+
+  const handleNotification = useCallback((notification) => {
+    console.log('收到通知:', notification);
+    messageApi.info(notification.content);
+  }, [messageApi]);
+
+  const handleChatDetail = useCallback((chatData) => {
+    console.log('收到聊天详情:', chatData);
+    if (chatData && chatData.records) {
+      const transformedChats = transformRecordsToChats(chatData.records, myId, userId);
+      setMessages(transformedChats);
+    }
+  }, [myId, userId]);
+
+  const handleError = useCallback((error) => {
+    console.error('WebSocket连接错误:', error);
+    setConnectionState('disconnected');
+    messageApi.error('连接失败: ' + error.message);
+  }, [messageApi]);
+
+  const handleConnect = useCallback(() => {
+    console.log('WebSocket连接成功');
+    setConnectionState('connected');
+
+    // 连接成功后获取消息数量
+    chatApiService.getMessageCount();
+  }, []);
+
+  // 转换聊天记录格式
+  const transformRecordsToChats = useCallback((records, myId, friendId) => {
+    if (!Array.isArray(records)) return [];
+
+    return records.map(record => ({
+      id: record.id,
+      role: record.senderId === myId ? 'user' : 'assistant',
+      content: record.content,
+      createAt: new Date(record.sendTime).getTime(),
+      isRead: record.isRead,
+    }));
+  }, []);
+
+  // 发送消息回调
+  const onMessageSend = useCallback(async (content, attachment) => {
+    if (!content.trim()) return;
+
+    // 检查连接状态
+    if (connectionState !== 'connected') {
+      messageApi.warning('正在连接中，请稍后发送...');
+      return;
+    }
+
+    try {
+      const success = chatApiService.sendMessage(content, userId);
+
+      if (success) {
+        // 乐观更新
+        const optimisticMessage = {
+          id: Date.now(),
+          role: 'user',
+          content: content,
+          createAt: Date.now(),
+          isRead: true,
+        };
+
+        setMessages(prev => [...prev, optimisticMessage]);
+      } else {
+        messageApi.warning('消息发送失败，请检查连接状态');
+      }
+
+    } catch (error) {
+      console.error('发送消息错误:', error);
+      messageApi.error('发送失败，请重试');
+    }
+  }, [userId, messageApi, connectionState]);
+
+  // 构建角色配置
   const roleInfo = {
     user: {
       name: myName,
@@ -108,68 +250,62 @@ export const MyChat = ({ user, onBack }) => {
       name: username,
       avatar: avatar
     }
-  }
-  // 转换 records为 Chat 组件消息格式
-  const transformRecordsToChats = (records, myId, friendId) => {
-    if (!Array.isArray(records)) return [];
-
-    return records
-      .map(record => ({
-        id: record.id,
-        role: record.senderId === myId ? 'user' : 'assistant',
-        content: record.content,
-        // send_time 转换为毫秒时间戳
-        createAt: new Date(record.sendTime).getTime(),
-        isRead: record.isRead,
-      }));
   };
-  /**
- * @description state管理
- */
 
-  const [message, setMessage] = useState();
-  /**
-   * @description 数据获取
-   */
+  const uploadProps = {
+    action: 'https://api.semi.design/upload'
+  };
 
-  const { data = {} } = useGetUserChat(userId, {
-    enabled: !!userId,
-    onSuccess: (data) => {
-      const { total = 0, records = [] } = data;
-      const transformedChats = transformRecordsToChats(records, myId, userId);
-      setMessage(transformedChats);
+  // 获取连接状态文本和颜色
+  const getConnectionStatus = () => {
+    switch (connectionState) {
+      case 'connected': return { text: '已连接', color: 'bg-green-500' };
+      case 'connecting': return { text: '连接中...', color: 'bg-yellow-500' };
+      default: return { text: '未连接', color: 'bg-red-500' };
     }
-  });
+  };
 
-  /**
-   * @description 事件处理
-   */
-  // 发送消息回调
-  const onMessageSend = useCallback((content, attachment) => {
-  }, []);
-  // 消息列表发生改变的回调
-  const onChatsChange = useCallback((chats) => {
-  }, []);
-  //上传文件触发
-  const uploadProps = { action: 'https://api.semi.design/upload' }
+  const status = getConnectionStatus();
+
   return (
     <>
-      <MyButton type="black" icon={<ArrowLeftOutlined />} className="mb-3 w-30" onClick={onBack}>返回</MyButton>
-      {!isArrayValid(message) && <MyEmpty description="暂无聊天记录" />}
-      <Chat
-        className='mx-7xl'
-        align="leftRight"
-        selfRole="my"
-        chats={message}
-        style={commonOuterStyle}
-        roleConfig={roleInfo}
-        onChatsChange={onChatsChange}
-        onMessageSend={onMessageSend}
-        uploadProps={uploadProps}
-      />
+      <div className="flex items-center justify-between mb-4">
+        <MyButton
+          type="black"
+          icon={<ArrowLeftOutlined />}
+          className="w-30"
+          onClick={onBack}
+        >
+          返回
+        </MyButton>
+
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${status.color}`}></div>
+          <span className="text-sm text-gray-600">
+            {status.text}
+          </span>
+        </div>
+      </div>
+
+      {!isArrayValid(messages) ? (
+        <MyEmpty description={connectionState === 'connected' ? "暂无聊天记录，开始一段对话吧！" : "正在连接..."} />
+      ) : (
+        <Chat
+          className='mx-7xl'
+          align="leftRight"
+          selfRole="user"
+          chats={messages}
+          style={commonOuterStyle}
+          roleConfig={roleInfo}
+          onMessageSend={onMessageSend}
+          uploadProps={uploadProps}
+          placeholder={connectionState === 'connected' ? "输入消息..." : "连接中，请稍候..."}
+          disabled={connectionState !== 'connected'}
+        />
+      )}
     </>
-  )
-}
+  );
+};
 
 
 

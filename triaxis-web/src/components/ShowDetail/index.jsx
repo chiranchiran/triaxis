@@ -25,7 +25,12 @@ import { useParams } from 'react-router-dom';
 import { AddReview } from '../addReview';
 import { isArrayValid } from '../../utils/commonUtil';
 import { MyEmpty } from '../MyEmpty';
-
+import { downloadManager } from '../../utils/filehandler/downloadManager';
+import { useMessage } from '../AppProvider';
+import { logger } from '../../utils/logger';
+import service from '../../utils/api/service';
+import axios from 'axios';
+await downloadManager.initialize();
 //小方块的标题
 export const SmallTitle = ({ children }) => {
   return (
@@ -36,6 +41,8 @@ export const SmallTitle = ({ children }) => {
     </div>
   )
 }
+
+
 
 //工具、分类等多选用/分割展示
 export const renderMutiple = (list, label) => {
@@ -64,7 +71,7 @@ const ShowDetail = ({
   const { mutation: dolike } = useLike();
   const { mutation: doCollect } = useCollect();
   const downloadRef = useRef(null)
-
+  const messageApi = useMessage()
   /**
    * @description state管理
    */
@@ -110,6 +117,60 @@ const ShowDetail = ({
     };
 
   }, [data]);
+
+  const handleDownload = async (id) => {
+    const timeStart = Date.now();
+    //测试接口
+    const response = await fetch('/api/download/full', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    const timeEnd = Date.now();
+    logger.debug("下载成功，共耗时秒数", (timeEnd - timeStart) / 1000)
+    const fileBlob = await response.blob();
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const fileName = contentDisposition
+      ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+      : 'test-file.psd'; // 默认文件名（与后端文件类型一致）
+    const url = URL.createObjectURL(fileBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    // const taskManager = await downloadManager.addDownload(id);
+
+    // // 监听下载事件
+    // taskManager.on('progress', (progress, task) => {
+    //   console.log(`下载进度: ${progress}%`);
+    //   // 更新UI进度条
+    // });
+
+    // taskManager.on('success', (task) => {
+    //   const timeEnd = Date.now();
+    //   logger.debug("下载成功，共耗时秒数", (timeEnd - timeStart) / 1000)
+    //   console.log('下载完成!');
+    //   messageApi.success("下载完成")
+
+    //   // 创建下载链接并触发下载，使用后端返回的原始文件名
+    //   const a = document.createElement('a');
+    //   a.href = task.fileUrl;
+    //   a.download = task.fileName; // 使用后端返回的原始文件名
+    //   document.body.appendChild(a);
+    //   a.click();
+    //   document.body.removeChild(a);
+    //   // 释放URL
+    //   URL.revokeObjectURL(task.fileUrl);
+    // });
+
+    // taskManager.on('error', (error, task) => {
+    //   console.error('下载失败:', error);
+    // });
+  }
 
   if (isLoading) {
     return (
@@ -266,8 +327,8 @@ const ShowDetail = ({
                     type="black"
                     icon={<DownloadOutlined />}
                     className="flex-1"
+                    onClick={() => handleDownload(id)}
                   >立即下载</MyButton>
-                  <a href="https://other-domain.com/remote-file.jpg" download="http//baidu.com/a.pdf">1</a>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <MyButton

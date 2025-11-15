@@ -67,3 +67,42 @@ export const checkFile = (data, onCancel) => {
   return service.post('/upload/check', data, { signal }
   )
 }
+
+
+export const checkDownloadFile = (data, onCancel) => {
+  const controller = new AbortController()
+  const signal = controller.signal
+  if (typeof onCancel === 'function') {
+    onCancel(() => controller.abort())
+  }
+  return service.post('/download/check', data, { signal })
+}
+
+/**
+ * 下载分片
+ */
+export const downloadChunk = (id, index, chunkSize, onCancel) => {
+  const controller = new AbortController()
+  const signal = controller.signal
+  if (typeof onCancel === 'function') {
+    onCancel(() => controller.abort())
+  }
+  return service.get('/download/chunk', {
+    params: { id, index, chunkSize },
+    responseType: 'blob',
+    timeout: 3600000,
+    signal
+  })
+}
+
+/**
+ * 标记下载完成
+ */
+export const completeDownload = (data, onCancel) => {
+  const controller = new AbortController()
+  const signal = controller.signal
+  if (typeof onCancel === 'function') {
+    onCancel(() => controller.abort())
+  }
+  return service.post('/download/complete', data, { signal })
+}

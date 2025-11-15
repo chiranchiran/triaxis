@@ -48,6 +48,10 @@ export const getUserChats = () => {
 export const getUserChat = (id) => {
   return service.get(`/user/chat/${id}`)
 }
+//发送消息
+export const sendChat = (data) => {
+  return service.post(`/user/chat`, data)
+}
 
 export const updateProfile = (data) => {
   return service.put('/user/info', data)
