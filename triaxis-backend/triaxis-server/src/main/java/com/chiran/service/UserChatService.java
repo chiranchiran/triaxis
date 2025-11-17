@@ -24,5 +24,5 @@ public interface UserChatService extends IService<UserChat> {
     PageResult<UserChatVO> getUserChats(Integer id);
     PageResult<UserChat> getUserChat(Integer id,Integer userId);
 
-    void addUserChat(ChatSendDTO chatSendDTO);
+    UserChat addUserChat(ChatSendDTO chatSendDTO);
 }

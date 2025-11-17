@@ -123,7 +123,7 @@ public class ChatController {
     @SendToUser("/queue/messages.review")
     public PageResult<UserMessageVO> getReviewMessages(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
-        log.info("用户 {} 获取审核消息", userId);
+        log.info("用户 {} 获取评论消息", userId);
         return userService.getUserMessages(userId, 3);
     }
 
@@ -143,7 +143,7 @@ public class ChatController {
     /**
      * 获取聊天会话列表
      */
-    @MessageMapping("/chats.get")
+    @MessageMapping("/chats.list")
     @SendToUser("/queue/chats.list")
     public PageResult<UserChatVO> getChatSessions(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
@@ -154,12 +154,12 @@ public class ChatController {
     /**
      * 获取特定聊天记录
      */
-    @MessageMapping("/chat.get")
+    @MessageMapping("/chat.detail")
     @SendToUser("/queue/chat.detail")
     public PageResult<UserChat> getChatDetail(@Payload ChatRequest request, Principal principal) {
         System.out.println("控制器收到的Principal：" + (principal == null ? "null" : principal.getName()));
         Integer userId = Integer.parseInt(principal.getName());
-        Integer chatId = request.getChatId();
+        Integer chatId = request.getId();
         log.info("用户 {} 获取聊天 {} 的记录", userId, chatId);
         return userChatService.getUserChat(chatId, userId);
     }
@@ -175,27 +175,118 @@ public class ChatController {
         log.info("用户 {} 发送消息给用户 {}: {}", userId, chatSendDTO.getReceiverId(), chatSendDTO.getContent());
 
         // 保存聊天记录
-        userChatService.addUserChat(chatSendDTO);
+        UserChat userChat = userChatService.addUserChat(chatSendDTO);
 
+        changeChat(chatSendDTO.getReceiverId(), userId, userChat);
+    }
+
+    /**
+     * 删除聊天消息
+     */
+    @MessageMapping("/chat.delete")
+    public void delChatMessage(@Payload ChatRequest request, Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
+        Integer id = request.getId();
+        userChatService.removeById(id);
+        // 更新发送者的消息计数
+        UserMessageCountVO senderCount = getUserMessagesCount(userId);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/messages.count",
+                senderCount
+        );
+        PageResult<UserChatVO> senderChats = userChatService.getUserChats(userId);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chats.list",
+                senderChats
+        );
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chat.delete",
+                id
+        );
+        log.info("用户 {} 删除消息给用户", userId );
+    }
+
+    /**
+     * 撤回聊天消息
+     */
+    @MessageMapping("/chat.revoke")
+    public void removeChatMessage(@Payload ChatRequest request, Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
+        Integer id = request.getId();
+        // UserChat chat = userChatService.getById(id);
+        // chat.setIsRevoke(true);
+        // userChatService.updateById(chat);
+        userChatService.removeById(id);
+        // 更新双方的消息计数
+        updateMessageCounts(userId, id);
+        PageResult<UserChatVO> senderChats = userChatService.getUserChats(userId);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chats.list",
+                senderChats
+        );
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chat.revoke",
+                id
+        );
+        PageResult<UserChatVO> receiverChats = userChatService.getUserChats(id);
+        messagingTemplate.convertAndSendToUser(
+                id.toString(),
+                "/queue/chats.list", // 对应前端订阅的会话列表路径
+                receiverChats
+        );
+        PageResult<UserChat> detail = userChatService.getUserChat(id, userId);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chats.list", // 对应前端订阅的会话列表路径
+                detail
+        );
+        messagingTemplate.convertAndSendToUser(
+                id.toString(),
+                "/queue/chats.list", // 对应前端订阅的会话列表路径
+                detail
+        );
+        log.info("用户 {} 撤回消息给用户 {}", userId, id);
+    }
+    private void changeChat(Integer recevier, Integer userId, UserChat userChat) {
         // 实时推送给接收者
         messagingTemplate.convertAndSendToUser(
-                chatSendDTO.getReceiverId().toString(),
+                recevier.toString(),
                 "/queue/chat.new",
-                chatSendDTO
+                userChat
         );
 
         // 同时推送给发送者（确认发送成功）
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chat.sent",
-                chatSendDTO
+                userChat
         );
 
         // 更新双方的消息计数
-        updateMessageCounts(userId, chatSendDTO.getReceiverId());
-    }
+        updateMessageCounts(userId, userChat.getReceiverId());
 
-    // ==================== 实时通知推送 ====================
+        PageResult<UserChatVO> receiverChats = userChatService.getUserChats(recevier);
+        messagingTemplate.convertAndSendToUser(
+                recevier.toString(),
+                "/queue/chats.list", // 对应前端订阅的会话列表路径
+                receiverChats
+        );
+
+// 5. 推送给发送者：更新聊天会话列表
+        PageResult<UserChatVO> senderChats = userChatService.getUserChats(userId);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chats.list",
+                senderChats
+        );
+
+    }
+// ==================== 实时通知推送 ====================
 
     /**
      * 当有新消息时推送通知
@@ -235,7 +326,7 @@ public class ChatController {
         );
     }
 
-    // ==================== 心跳检测 ====================
+// ==================== 心跳检测 ====================
 
     /**
      * 处理心跳
@@ -252,7 +343,7 @@ public class ChatController {
 
 @Data
 class ChatRequest {
-    private Integer chatId;
+    private Integer id;
 }
 
 @Data

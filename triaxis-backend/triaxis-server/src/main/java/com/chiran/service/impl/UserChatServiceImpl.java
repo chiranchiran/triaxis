@@ -83,9 +83,14 @@ public class UserChatServiceImpl extends ServiceImpl<UserChatMapper, UserChat> i
     }
 
     @Override
-    public void addUserChat(ChatSendDTO chatSendDTO) {
+    public UserChat addUserChat(ChatSendDTO chatSendDTO) {
         UserChat userChat = new UserChat();
         BeanUtils.copyProperties(chatSendDTO,userChat);
-        this.save(userChat);
+        boolean save = this.save(userChat);
+        if(save) {
+            return userChat;
+        }
+        return null;
+
     }
 }
