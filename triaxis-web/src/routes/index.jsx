@@ -28,6 +28,7 @@ import { MyMessages } from "../pages/UserCenter/MyMessages.jsx"
 import { MyVip } from "../pages/UserCenter/MyVip.jsx"
 import { MyPoints } from "../pages/UserCenter/MyPoints.jsx"
 import { logout } from "../store/slices/authSlice.js"
+import Resume from "../pages/Resume/index.jsx"
 
 
 //路由守卫组件
@@ -60,6 +61,10 @@ const Element = () => {
     }, {
       path: '/home',
       element: <Navigate to="/" />
+    },
+    {
+      path: '/resume',
+      element: <Resume />
     },
     {
       path: '/resources',

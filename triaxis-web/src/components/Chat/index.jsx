@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Chat, Modal, Radio } from '@douyinfe/semi-ui';
+import { Button, Chat, Icon, Modal, Radio } from '@douyinfe/semi-ui';
+import { IconUndo } from '@douyinfe/semi-icons';
 import { Avatar, Empty } from "antd";
 import './index.less'
 import {
@@ -12,23 +13,43 @@ import { MyMESSAGE_TYPE } from '../../utils/constant/types';
 import { TARGETCLICK, TARGETTYPE } from '../../utils/constant/order';
 import { MyEmpty } from '../MyEmpty';
 import { useNavigate } from 'react-router-dom';
-import { setMessageCount } from '../../store/slices/userCenterSlice';
+import { setMessageCount, setWebsocketStatus } from '../../store/slices/userCenterSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { MyButton } from '../MyButton';
 import { useMessage } from '../AppProvider';
-import chatService, { SubscriptionTypes } from '../../api/websocket/chatService';
+import _ from 'lodash';
+import { useChat } from '../../hooks/api/useChat';
+import MyChat from './MyChat';
 
 export const ChatMessage = () => {
   const dispatch = useDispatch();
-
+  const messageApi = useMessage();
+  const { username, avata, id: userId } = useSelector(state => state.auth);
   const [chatOpen, setChatOpen] = useState(null);
-  const { data = {} } = useGetUserChats({
-    onSuccess: (data) => dispatch(setMessageCount({ chat: data?.total })),
-  });
+  const [data, setData] = useState(null);
+  const { getChats, SubscriptionTypes, subscribeChats } = useChat()
+  // const { data = {} } = useGetUserChats({
+  //   onSuccess: (data) => dispatch(setMessageCount({ chat: data?.total })),
+  // });
+  /**
+     * @description websocket连接与状态检查
+     */
+  // 订阅消息
+  useEffect(() => {
+    if (!userId) return;
+    console.log('初始化聊天列表，用户ID:', userId);
+    const id = subscribeChats('chats', {
+      [SubscriptionTypes.CHAT_LISTS]: handleChats,
+    })
+    getChats(userId)
+  }, [userId]);
 
+  const handleChats = useCallback((message) => {
+    setData(pre => message)
+  }, [messageApi])
 
   // 空状态处理
-  if (!isArrayValid(data.records)) {
+  if (!isArrayValid(data?.records)) {
     return <MyEmpty description="暂无聊天记录" />;
   }
 
@@ -50,6 +71,7 @@ export const ChatMessage = () => {
           lastMessage = {}
         } = item;
         const { content = "",
+          isRevoke = false,
           sendTime = "" } = lastMessage || {}
         return (
           <div
@@ -73,7 +95,7 @@ export const ChatMessage = () => {
                 </div>
                 {[school, major, grade].filter(Boolean).join(" / ")}
               </div>
-              <p className="line-clamp-2 leading-5 my-2">{content}</p>
+              <p className="line-clamp-2 leading-5 my-2">{isRevoke ? "[该消息已撤回]" : content}</p>
               <div className="text-sm text-secondary mt-1">{sendTime}</div>
             </div>
             {/* 未读消息徽章 */}
@@ -91,369 +113,358 @@ export const ChatMessage = () => {
   );
 };
 
-export const MyChat = ({ user, onBack }) => {
-  const commonOuterStyle = {
-    border: '1px solid var(--semi-color-border)',
-    borderRadius: '16px',
-    height: 800,
-  };
+// export const MyChat = ({ user, onBack }) => {
+//   const commonOuterStyle = {
+//     border: '1px solid var(--semi-color-border)',
+//     borderRadius: '16px',
+//     height: 800,
+//   };
 
-  const { username: myName, avatar: myAvatar, id: myId } = useSelector(state => state.auth);
-  const { userId, username, avatar } = user;
-  const messageApi = useMessage();
-  // 构建角色配置
-  const roleInfo = {
-    user: {
-      name: myName,
-      avatar: myAvatar
-    },
-    assistant: {
-      name: username,
-      avatar: avatar
-    }
-  };
-
-  const uploadProps = {
-    action: 'https://api.semi.design/upload'
-  };
-
-  /**
- * @description State管理
- */
-
-  const [messages, setMessages] = useState([]);
-  const [connectionState, setConnectionState] = useState(2); // 2=disconnected, 0=connecting, 1=connected
-
-  // 转换聊天记录格式
-  const transformRecordsToChats = useCallback((records) => {
-    if (!Array.isArray(records)) return [];
-
-    return records.map(record => ({
-      id: record.id,
-      role: record.senderId === myId ? 'user' : 'assistant',
-      content: record.content,
-      createAt: new Date(record.sendTime).getTime(),
-      isRead: record.isRead,
-    }));
-  }, [messages]);
-  /**
-   * @description websocket连接
-   */
-
-  const checkConnection = () => {
-    const currentStatus = chatService.getStatus();
-    console.log(currentStatus, connectionState)
-    if (currentStatus !== connectionState) {
-      setConnectionState(currentStatus);
-    }
-  };
-  // 监听连接状态变化
-  useEffect(() => {
-    // 初始检查
-    checkConnection();
-    // 定期检查连接状态
-    const interval = setInterval(checkConnection, 3000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [connectionState]);
-
-  // 连接WebSocket（如果未连接）
-  useEffect(() => {
-    if (connectionState === 2) { // disconnected
-      console.log('尝试连接WebSocket...');
-      chatService.connect(
-        () => {
-          console.log('聊天组件：WebSocket连接成功');
-          setConnectionState(1);
-        },
-        (error) => {
-          console.error('聊天组件：WebSocket连接失败:', error);
-          setConnectionState(2);
-          messageApi.error('连接服务器失败，请检查网络');
-        }
-      );
-    }
-  }, [connectionState, messageApi]);
-  // 订阅消息
-  useEffect(() => {
-    if (connectionState !== 1 || !userId) return;
-    console.log('初始化聊天组件，用户ID:', userId);
-    const id = chatService.subscribeChat('chat', {
-      [SubscriptionTypes.CHAT_DETAIL]: handleChatDetail,
-      [SubscriptionTypes.CHAT_NEW_MESSAGE]: handleNewMessage,
-      [SubscriptionTypes.CHAT_MESSAGE_SENT]: handleMessageSent,
-      [SubscriptionTypes.CHAT_DELETE]: handleDel,
-      [SubscriptionTypes.CHAT_REVOKE]: handleRevoke
-    })
-    chatService.getChatDetail(userId)
-
-    return () => {
-      console.log('清理聊天组件');
-      chatService.unregister(id);
-    };
-  }, [connectionState, userId]);
-
-  /**
-   * @description 获取数据
-   */
-
-  // 获取聊天详情
-  const fetchChatDetail = useCallback(async () => {
-    if (!userId || connectionState !== 1) return;
-    try {
-      const success = chatService.getChatDetail(userId);
-      if (!success) {
-        throw new Error('获取聊天记录失败');
-      }
-    } catch (error) {
-      console.error('获取聊天详情错误:', error);
-      messageApi.error('获取聊天记录失败，请重试');
-    } finally {
-    }
-  }, [userId, connectionState, messageApi]);
-
-  // 当userId变化时重新获取聊天记录
-  useEffect(() => {
-    if (userId && connectionState === 1) {
-      fetchChatDetail();
-    }
-  }, [userId, connectionState, fetchChatDetail]);
-
-  /**
-   * @description 事件处理
-   */
+//   const { username: myName, avatar: myAvatar, id: myId } = useSelector(state => state.auth);
+//   const websocketStatus = useSelector(state => state.userCenter.websocketStatus)
+//   const { userId, username, avatar } = user;
+//   const messageApi = useMessage();
 
 
-  // 收到新消息
-  const handleNewMessage = useCallback((message) => {
-    console.log('收到新消息:', message);
+//   // 构建角色配置
+//   const roleInfo = {
+//     user: {
+//       name: myName,
+//       avatar: myAvatar
+//     },
+//     assistant: {
+//       name: username,
+//       avatar: avatar
+//     }
+//   };
 
-    if (message.senderId === userId || message.receiverId === userId) {
-      const newMessage = {
-        id: message.id || Date.now(),
-        role: message.senderId === myId ? 'user' : 'assistant',
-        content: message.content,
-        createAt: new Date(message.timestamp || new Date()).getTime(),
-        isRead: true,
-      };
+//   const uploadProps = {
+//     action: 'https://api.semi.design/upload'
+//   };
 
-      setMessages(prev => [...prev, newMessage]);
-    }
-  }, [userId, myId]);
+//   /**
+//  * @description State管理
+//  */
 
-  // 消息发送的回调函数
-  const handleMessageSent = useCallback((message) => {
-    console.log('消息发送确认:', message);
+//   const [messages, setMessages] = useState([]);
 
-    if (message.id) {
-      messageApi.success('发送成功');
-      // 转换消息
-      const newMessage = transformRecordsToChats([message])[0];
-      setMessages(prev => {
-        if (prev.length === 0) {
-          return [newMessage];
-        }
-        const updatedList = [...prev];
-        updatedList[prev.length - 1] = newMessage;
-        return updatedList;
-      });
-    } else {
-      // 发送失败处理：同样基于最新状态
-      setMessages(prev => {
-        if (prev.length === 0) return [];
-        const updatedList = [...prev];
-        const lastMsg = updatedList[prev.length - 1];
-        updatedList[prev.length - 1] = { ...lastMsg, id: 'error', status: 'error' };
-        return updatedList;
-      });
-      messageApi.error("发送失败");
-    }
-  }, [messageApi, transformRecordsToChats]);
+//   const { SubscriptionTypes, subscribeChat, getChatDetail, connect, delChatMessage, sendChatMessage, revokeChatMessage, readChatMessage, disconnect } = useChat(true)
+//   // 转换聊天记录格式
+//   const transformRecordsToChats = useCallback((records) => {
+//     if (!Array.isArray(records)) return [];
 
-  // 聊天详情改变
-  const handleChatDetail = useCallback((chatData) => {
-    console.log('收到聊天详情:', chatData);
-    if (chatData && chatData.records) {
-      const transformedChats = transformRecordsToChats(chatData.records, myId, userId);
-      setMessages(transformedChats);
-    } else {
-      setMessages([]);
-    }
-  }, [myId, userId]);
-  // 删除消息回调
-  const handleDel = useCallback((message) => {
+//     return records.map(record => ({
+//       id: record.id,
+//       role: record.senderId === myId ? 'user' : 'assistant',
+//       content: record.isRevoke ? '[该消息已撤回]' : record.content,
+//       createAt: new Date(record.sendTime).getTime(),
+//       isRead: record.isRead,
+//       isRevoke: record.isRevoke,
+//     }));
+//   }, [messages]);
+//   /**
+//    * @description websocket连接与状态检查
+//    */
+//   // 订阅消息
+//   useEffect(() => {
+//     if (websocketStatus !== 1 || !userId) return;
+//     console.log('初始化聊天组件，用户ID:', userId);
+//     const id = subscribeChat('chat', {
+//       [SubscriptionTypes.CHAT_DETAIL]: handleChatDetail,
+//       [SubscriptionTypes.CHAT_NEW_MESSAGE]: handleNewMessage,
+//       [SubscriptionTypes.CHAT_MESSAGE_SENT]: handleMessageSent,
+//       [SubscriptionTypes.CHAT_DELETE]: handleDel,
+//       [SubscriptionTypes.CHAT_REVOKE]: handleRevoke
+//     })
+//     getChatDetail(userId)
+//   }, [websocketStatus, userId]);
 
-    console.log('消息删除确认:', message);
-    if (message) {
-      messageApi.success('删除成功');
-      setMessages(prev => [...prev.filter(item => item.id !== message)]);
-    } else {
-      messageApi.error("删除失败")
-    }
-  }, [messageApi]);
-  // 撤回消息回调
-  const handleRevoke = useCallback((message) => {
-    console.log('消息撤回确认:', message);
-    if (message) {
-      messageApi.success('撤回成功');
-      setMessages(prev => [...prev.filter(item => item.id !== message)]);
-    } else {
-      messageApi.error("撤回失败")
-    }
-  }, [messageApi]);
+//   /**
+//    * @description 获取数据
+//    */
 
-  // 手动重连
-  const handleReconnect = useCallback(() => {
-    if (connectionState === 0) {
-      messageApi.info('正在连接中，请稍候...');
-      return;
-    }
+//   // 获取聊天详情
+//   const fetchChatDetail = useCallback(async () => {
+//     if (!userId || websocketStatus !== 1) return;
+//     try {
+//       const success = getChatDetail(userId);
+//       if (!success) {
+//         throw new Error('获取聊天记录失败');
+//       }
+//     } catch (error) {
+//       console.error('获取聊天详情错误:', error);
+//       messageApi.error('获取聊天记录失败，请重试');
+//     } finally {
+//     }
+//   }, [userId, websocketStatus, messageApi]);
 
-    setConnectionState(2); // 设置为断开状态，触发重连
-    messageApi.info('正在重新连接...');
+//   // 当userId变化时重新获取聊天记录
+//   useEffect(() => {
+//     if (userId && websocketStatus === 1) {
+//       fetchChatDetail();
+//       readChatMessage(userId)
+//     }
+//   }, [userId, websocketStatus, fetchChatDetail]);
 
-    console.log('尝试连接WebSocket...');
-    chatService.connect(
-      () => {
-        console.log('聊天组件：WebSocket连接成功');
-        setConnectionState(1);
-      },
-      (error) => {
-        console.error('聊天组件：WebSocket连接失败:', error);
-        setConnectionState(2);
-        messageApi.error('连接服务器失败，请检查网络');
-      }
-    );
-
-  }, [connectionState, messageApi]);
-
-  // 发送消息
-  const onMessageSend = useCallback(async (content, attachment) => {
-    if (!content.trim()) return;
-
-    // 检查连接状态
-    if (connectionState !== 1) {
-      messageApi.warning('正在连接服务器中，请稍后发送...');
-      return;
-    }
-    chatService.sendChatMessage(content, userId);
-    const optimisticMessage = {
-      id: 'loading',
-      content: content,
-      role: 'user',
-      createAt: Date.now(),
-      isRead: true,
-      status: 'loading'
-    };
-    setMessages(prev => [...prev, optimisticMessage]);
-  }, [userId, messageApi, connectionState]);
-  // 删除消息
-  const onMessageDelete = useCallback(async (content) => {
-    if (!content.id) return;
-    const findPopconfirmDom = () => {
-      return document.querySelector('.semi-tooltip-content');
-    };
-    // 检查连接状态
-    if (connectionState !== 1) {
-      messageApi.warning('正在连接服务器中，请稍后删除...');
-      setTimeout(() => {
-        const modalDom = findPopconfirmDom();
-        if (modalDom) {
-          modalDom.remove(); // 直接从DOM中删除弹框
-          console.log('弹框已强制删除');
-        }
-      }, 100);
-      return;
-    }
-    chatService.delChatMessage(content.id);
-    setTimeout(() => {
-      const modalDom = findPopconfirmDom();
-      if (modalDom) {
-        modalDom.remove();
-        console.log('弹框已强制删除');
-      }
-    }, 100);
-  }, [userId, messageApi, connectionState]);
-
-  const onChatsChange = useCallback((chats) => {
-    setMessages(chats);
-  }, []);
-  // 撤回消息
-  const onRevole = useCallback(async (content) => {
-    if (!content.id || content.role !== 'user') return;
-
-    // 检查连接状态
-    if (connectionState !== 1) {
-      messageApi.warning('正在连接服务器中，请稍后撤回...');
-      return;
-    }
-    chatService.revokeChatMessage(content.id);
-  }, [userId, messageApi, connectionState]);
+//   /**
+//    * @description 事件处理
+//    */
 
 
-  // 获取连接状态文本和颜色
-  const getConnectionStatus = () => {
-    switch (connectionState) {
-      case 1: return { text: '已连接服务器', color: 'bg-green' };
-      case 0: return { text: '连接服务器中...', color: 'bg-orange' };
-      default: return { text: '未连接服务器', color: 'bg-red' };
-    }
-  };
+//   // 收到新消息
+//   const handleNewMessage = useCallback((message) => {
+//     console.log('收到新消息:', message);
 
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <MyButton
-          type="black"
-          icon={<ArrowLeftOutlined />}
-          className="w-30"
-          onClick={onBack}
-        >
-          返回
-        </MyButton>
-        <div className='flex gap-4'>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${getConnectionStatus().color}`}></div>
-            <span className="text-sm text-gray-600">
-              {getConnectionStatus().text}
-            </span>
-          </div>
-          {connectionState === 2 && (
-            <MyButton
-              type="black"
-              size="small"
-              onClick={handleReconnect}
-            >
-              重新连接
-            </MyButton>
-          )}
-        </div>
+//     if (message.senderId === userId || message.receiverId === userId) {
+//       const newMessage = transformRecordsToChats([message])[0];
+//       setMessages(prev => {
+//         if (prev.length === 0) {
+//           return [newMessage];
+//         }
+//         const updatedList = [...prev];
+//         updatedList[prev.length - 1] = newMessage;
+//         return updatedList;
+//       });
+//     }
+//   }, [userId, myId]);
 
-      </div>
+//   // 消息发送的回调函数
+//   const handleMessageSent = useCallback((message) => {
+//     console.log('消息发送确认:', message);
 
-      {!isArrayValid(messages) ? (
-        <MyEmpty description={connectionState === 1 ? "暂无聊天记录，开始一段对话吧！" : "正在连接..."} />
-      ) : (
-        <Chat
-          className='mx-7xl'
-          align="leftRight"
-          selfRole="user"
-          chats={messages}
-          style={commonOuterStyle}
-          onMessageCopy={onRevole}
-          roleConfig={roleInfo}
-          // onChatsChange={onChatsChange}
-          onMessageDelete={onMessageDelete}
-          onMessageSend={onMessageSend}
-          uploadProps={uploadProps}
-          placeholder={connectionState === 1 ? "输入消息..." : "获取消息中，请稍候..."}
-        />
-      )}
-    </>
-  );
-};
+//     if (message.id) {
+//       messageApi.success('发送成功');
+//       // 转换消息
+//       const newMessage = transformRecordsToChats([message])[0];
+//       setMessages(prev => {
+//         if (prev.length === 0) {
+//           return [newMessage];
+//         }
+//         const updatedList = [...prev];
+//         updatedList[prev.length - 1] = newMessage;
+//         return updatedList;
+//       });
+//     } else {
+//       // 发送失败处理：同样基于最新状态
+//       setMessages(prev => {
+//         if (prev.length === 0) return [];
+//         const updatedList = [...prev];
+//         const lastMsg = updatedList[prev.length - 1];
+//         updatedList[prev.length - 1] = { ...lastMsg, id: 'error', status: 'error' };
+//         return updatedList;
+//       });
+//       messageApi.error("发送失败");
+//     }
+//   }, [messageApi, transformRecordsToChats]);
+
+//   // 聊天详情改变
+//   const handleChatDetail = useCallback((chatData) => {
+//     console.log('收到聊天详情:', chatData);
+//     if (chatData && Array.isArray(chatData.records)) {
+//       const transformedChats = transformRecordsToChats(chatData.records, myId, userId);
+//       setMessages(transformedChats);
+//     } else {
+//       console.error('获取聊天详情错误:', error);
+//       messageApi.error('获取聊天记录失败，请重试');
+//       setMessages([]);
+//     }
+//   }, [myId, userId]);
+//   // 删除消息回调
+//   const handleDel = useCallback((message) => {
+
+//     console.log('消息删除确认:', message);
+//     if (message) {
+//       messageApi.success('删除成功');
+//       setMessages(prev => [...prev.filter(item => item.id !== message)]);
+//     } else {
+//       messageApi.error("删除失败")
+//     }
+//   }, [messageApi]);
+//   // 撤回消息回调
+//   const handleRevoke = useCallback((message) => {
+//     console.log('消息撤回确认:', message);
+//     if (message) {
+//       messageApi.success('撤回成功');
+//       setMessages(prev => {
+//         const updatedList = [...prev];
+//         const newMessage = updatedList.find(item => item.id === message);
+//         newMessage.isRevoke = true;
+//         newMessage.content = '[该消息已撤回]'
+//         return updatedList;
+//       });
+//     } else {
+//       messageApi.error("撤回失败")
+//     }
+//   }, [messageApi]);
+
+//   // 手动重连
+//   const handleReconnect = useCallback(() => {
+//     if (websocketStatus === 0) {
+//       messageApi.info('正在连接中，请稍候...');
+//       return;
+//     }
+//     disconnect();
+//     dispatch(setWebsocketStatus(2))// 设置为断开状态，触发重连
+//     messageApi.info('正在重新连接...');
+//     console.log('尝试连接WebSocket...');
+//   }, [websocketStatus, messageApi]);
+
+//   // 发送消息
+//   const onMessageSend = useCallback(async (content, attachment) => {
+//     if (!content.trim()) return;
+
+//     // 检查连接状态
+//     if (websocketStatus !== 1) {
+//       messageApi.warning('正在连接服务器中，请稍后发送...');
+//       return;
+//     }
+//     sendChatMessage(content, userId);
+//     const optimisticMessage = {
+//       id: 'loading',
+//       content: content,
+//       role: 'user',
+//       createAt: Date.now(),
+//       isRead: true,
+//       status: 'loading'
+//     };
+//     setMessages(prev => [...prev, optimisticMessage]);
+//   }, [userId, messageApi, websocketStatus]);
+//   // 删除消息
+//   const onMessageDelete = useCallback(async (content) => {
+//     if (!content.id) return;
+//     const findPopconfirmDom = () => {
+//       return document.querySelector('.semi-tooltip-content');
+//     };
+//     // 检查连接状态
+//     if (websocketStatus !== 1) {
+//       messageApi.warning('正在连接服务器中，请稍后删除...');
+//       setTimeout(() => {
+//         const modalDom = findPopconfirmDom();
+//         if (modalDom) {
+//           modalDom.remove(); // 直接从DOM中删除弹框
+//           console.log('弹框已强制删除');
+//         }
+//       }, 100);
+//       return;
+//     }
+//     delChatMessage(content.id);
+//     setTimeout(() => {
+//       const modalDom = findPopconfirmDom();
+//       if (modalDom) {
+//         modalDom.remove();
+//         console.log('弹框已强制删除');
+//       }
+//     }, 100);
+//   }, [userId, messageApi, websocketStatus]);
+
+//   const onMessageCopy = useCallback((message) => {
+//     navigator.clipboard.writeText(message.content).then(() => {
+//       messageApi.success('已复制到剪贴板');
+//     }).catch(error => {
+//       messageApi.error('复制失败');
+//       console.error('复制消息错误:', error);
+//     });
+//   }, [messageApi]);
+//   const onChatsChange = useCallback((chats) => {
+//     setMessages(chats);
+//   }, []);
+//   // 撤回消息
+//   const onRevoke = useCallback(async (content) => {
+//     if (!content.id || content.role !== 'user') return;
+
+//     // 检查连接状态
+//     if (websocketStatus !== 1) {
+//       messageApi.warning('正在连接服务器中，请稍后撤回...');
+//       return;
+//     }
+//     revokeChatMessage(content.id);
+//   }, [userId, messageApi, websocketStatus]);
+
+
+//   // 获取连接状态文本和颜色
+//   const getConnectionStatus = () => {
+//     switch (websocketStatus) {
+//       case 1: return { text: '已连接服务器', color: 'bg-green' };
+//       case 0: return { text: '连接服务器中...', color: 'bg-orange' };
+//       default: return { text: '未连接服务器', color: 'bg-red' };
+//     }
+//   };
+//   const renderChatBoxAction = useCallback((message) => {
+//     // 判断是否为“自己的消息”（selfRole 配置为 "user"，所以 message.role === "user" 时是自己）
+
+//     const isSelfMessage = message.message.role === 'user';
+//     return (
+//       <div style={{ display: 'flex', gap: '4px' }}>
+//         {isSelfMessage ? (
+//           <>
+//             {message.defaultActionsObj.copyNode}
+//             {message.defaultActionsObj.deleteNode}
+//             {message.defaultActionsObj.resetNode}
+//             <IconUndo className='cursor-pointer' onClick={() => onRevoke(message.message)} />
+//           </>
+
+//         ) : (
+//           // 他人的消息：渲染「拷贝」和「删除」按钮
+//           <>
+//             {message.defaultActionsObj.copyNode}
+//             {message.defaultActionsObj.deleteNode}
+//           </>
+//         )}
+//       </div>
+//     );
+//   }, [onMessageCopy, onMessageDelete, onRevoke]);
+
+//   return (
+//     <>
+//       <div className="flex items-center justify-between mb-4">
+//         <MyButton
+//           type="black"
+//           icon={<ArrowLeftOutlined />}
+//           className="w-30"
+//           onClick={onBack}
+//         >
+//           返回
+//         </MyButton>
+//         <div className='flex gap-4'>
+//           <div className="flex items-center gap-2">
+//             <div className={`w-3 h-3 rounded-full ${getConnectionStatus().color}`}></div>
+//             <span className="text-sm text-gray-600">
+//               {getConnectionStatus().text}
+//             </span>
+//           </div>
+//           {websocketStatus !== 1 && (
+//             <MyButton
+//               type="black"
+//               size="small"
+//               onClick={handleReconnect}
+//             >
+//               重新连接
+//             </MyButton>
+//           )}
+//         </div>
+
+//       </div>
+
+//       {!isArrayValid(messages) ? (
+//         <MyEmpty description={websocketStatus === 1 ? "暂无聊天记录，开始一段对话吧！" : "正在连接..."} />
+//       ) : (
+//         <Chat
+//           className='mx-7xl'
+//           align="leftRight"
+//           selfRole="user"
+//           chats={messages}
+//           style={commonOuterStyle}
+//           chatBoxRenderConfig={{ renderChatBoxAction }}
+//           roleConfig={roleInfo}
+//           onMessageDelete={onMessageDelete}
+//           onMessageSend={onMessageSend}
+//           uploadProps={uploadProps}
+//           placeholder={websocketStatus === 1 ? "输入消息..." : "获取消息中，请稍候..."}
+//         />
+//       )}
+//     </>
+//   );
+// };
 
 
 

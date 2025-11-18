@@ -39,7 +39,7 @@ const getInitialStateFromStorage = () => {
     rememberMe: userInfo?.rememberMe || false,
     autoLoginExpire: userInfo?.autoLoginExpire || null,
     isAuthenticated: (userInfo?.isAuthenticated && accessToken) || false,
-    avatar: userInfo?.avatar || ""
+    avatar: userInfo?.avatar || "",
   }
 }
 const initialState = getInitialStateFromStorage()

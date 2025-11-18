@@ -1,8 +1,10 @@
 package com.chiran.controller;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.chiran.dto.ChatSendDTO;
 import com.chiran.entity.UserChat;
 import com.chiran.result.PageResult;
+import com.chiran.result.Result;
 import com.chiran.service.UserChatService;
 import com.chiran.service.UserService;
 import com.chiran.vo.UserChatVO;
@@ -49,10 +51,10 @@ public class ChatController {
      * 订阅用户消息数量 - 当用户订阅时会立即推送当前数量
      */
     @SubscribeMapping("/user/queue/messages.count")
-    public UserMessageCountVO subscribeMessageCount(Principal principal) {
+    public Result<UserMessageCountVO> subscribeMessageCount(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 订阅消息数量", userId);
-        return getUserMessagesCount(userId);
+        return Result.success(getUserMessagesCount(userId));
     }
 
     /**
@@ -60,9 +62,9 @@ public class ChatController {
      */
     @MessageMapping("/messages.count.get")
     @SendToUser("/queue/messages.count")
-    public UserMessageCountVO getMessageCount(Principal principal) {
+    public Result<UserMessageCountVO> getMessageCount(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
-        return getUserMessagesCount(userId);
+        return Result.success(getUserMessagesCount(userId));
     }
 
     /**
@@ -79,10 +81,14 @@ public class ChatController {
         long collectCount = collect.getTotal();
         long reviewCount = review.getTotal();
         long systemCount = system.getTotal();
-        long chatCount = chats.getTotal();
+        long chatCount = 0;
+        for (UserChatVO i : chats.getRecords()) {
+            chatCount += i.getUnread();
+        }
+        log.debug("消息数量{}", chatCount);
         long totalCount = likeCount + collectCount + reviewCount + systemCount + chatCount;
 
-        return UserMessageCountVO.builder()
+        UserMessageCountVO user = UserMessageCountVO.builder()
                 .like((int) likeCount)
                 .collect((int) collectCount)
                 .system((int) systemCount)
@@ -90,6 +96,7 @@ public class ChatController {
                 .review((int) reviewCount)
                 .total((int) totalCount)
                 .build();
+        return user;
     }
 
     // ==================== 各类消息列表实时推送 ====================
@@ -99,10 +106,11 @@ public class ChatController {
      */
     @MessageMapping("/messages.like.get")
     @SendToUser("/queue/messages.like")
-    public PageResult<UserMessageVO> getLikeMessages(Principal principal) {
+    public Result<PageResult> getLikeMessages(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 获取点赞消息", userId);
-        return userService.getUserMessages(userId, 1);
+        PageResult<UserMessageVO> like = userService.getUserMessages(userId, 1);
+        return Result.success(like);
     }
 
     /**
@@ -110,10 +118,11 @@ public class ChatController {
      */
     @MessageMapping("/messages.collect.get")
     @SendToUser("/queue/messages.collect")
-    public PageResult<UserMessageVO> getCollectMessages(Principal principal) {
+    public Result<PageResult> getCollectMessages(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 获取收藏消息", userId);
-        return userService.getUserMessages(userId, 2);
+        PageResult<UserMessageVO> collect = userService.getUserMessages(userId, 2);
+        return Result.success(collect);
     }
 
     /**
@@ -121,10 +130,11 @@ public class ChatController {
      */
     @MessageMapping("/messages.review.get")
     @SendToUser("/queue/messages.review")
-    public PageResult<UserMessageVO> getReviewMessages(Principal principal) {
+    public Result<PageResult> getReviewMessages(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 获取评论消息", userId);
-        return userService.getUserMessages(userId, 3);
+        PageResult<UserMessageVO> review = userService.getUserMessages(userId, 3);
+        return Result.success(review);
     }
 
     /**
@@ -132,10 +142,11 @@ public class ChatController {
      */
     @MessageMapping("/messages.system.get")
     @SendToUser("/queue/messages.system")
-    public PageResult<UserChat> getSystemMessages(Principal principal) {
+    public Result<PageResult> getSystemMessages(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 获取系统消息", userId);
-        return userChatService.getMessageSystem(userId);
+        PageResult<UserChat> system = userChatService.getMessageSystem(userId);
+        return Result.success(system);
     }
 
     // ==================== 聊天功能实时推送 ====================
@@ -145,10 +156,11 @@ public class ChatController {
      */
     @MessageMapping("/chats.list")
     @SendToUser("/queue/chats.list")
-    public PageResult<UserChatVO> getChatSessions(Principal principal) {
+    public Result<PageResult> getChatSessions(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         log.info("用户 {} 获取聊天会话列表", userId);
-        return userChatService.getUserChats(userId);
+        PageResult<UserChatVO> chats = userChatService.getUserChats(userId);
+        return Result.success(chats);
     }
 
     /**
@@ -156,12 +168,13 @@ public class ChatController {
      */
     @MessageMapping("/chat.detail")
     @SendToUser("/queue/chat.detail")
-    public PageResult<UserChat> getChatDetail(@Payload ChatRequest request, Principal principal) {
+    public Result<PageResult> getChatDetail(@Payload ChatRequest request, Principal principal) {
         System.out.println("控制器收到的Principal：" + (principal == null ? "null" : principal.getName()));
         Integer userId = Integer.parseInt(principal.getName());
         Integer chatId = request.getId();
         log.info("用户 {} 获取聊天 {} 的记录", userId, chatId);
-        return userChatService.getUserChat(chatId, userId);
+        PageResult<UserChat> chat = userChatService.getUserChat(chatId, userId);
+        return Result.success(chat);
     }
 
     /**
@@ -181,6 +194,28 @@ public class ChatController {
     }
 
     /**
+     * 查看聊天消息
+     */
+    @MessageMapping("/chat.read")
+    public Result sendChatMessage(@Payload ChatRequest request, Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
+        Integer id = request.getId();
+
+        log.info("用户 {} 查看消息给用户", userId);
+        // 保存聊天记录
+        UpdateWrapper<UserChat> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("sender_id", id)
+                .eq("receiver_id", userId)
+                // 优化：只更新未读的（is_read = false），减少不必要的更新
+                .eq("is_read", false);
+        UserChat updateEntity = new UserChat();
+        updateEntity.setIsRead(true);
+        userChatService.update(updateEntity, updateWrapper);
+        changeAllChat(userId, id);
+        return Result.success();
+    }
+
+    /**
      * 删除聊天消息
      */
     @MessageMapping("/chat.delete")
@@ -189,24 +224,24 @@ public class ChatController {
         Integer id = request.getId();
         userChatService.removeById(id);
         // 更新发送者的消息计数
-        UserMessageCountVO senderCount = getUserMessagesCount(userId);
+        UserMessageCountVO userMessagesCount = getUserMessagesCount(userId);
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/messages.count",
-                senderCount
+                Result.success(userMessagesCount)
         );
         PageResult<UserChatVO> senderChats = userChatService.getUserChats(userId);
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chats.list",
-                senderChats
+                Result.success(senderChats)
         );
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chat.delete",
-                id
+                Result.success(id)
         );
-        log.info("用户 {} 删除消息给用户", userId );
+        log.info("用户 {} 删除消息给用户", userId);
     }
 
     /**
@@ -216,55 +251,63 @@ public class ChatController {
     public void removeChatMessage(@Payload ChatRequest request, Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
         Integer id = request.getId();
-        // UserChat chat = userChatService.getById(id);
-        // chat.setIsRevoke(true);
-        // userChatService.updateById(chat);
-        userChatService.removeById(id);
+        UserChat chat = userChatService.getById(id);
+        Integer receiverId = chat.getReceiverId();
+        chat.setIsRevoke(true);
+        userChatService.updateById(chat);
+        // userChatService.removeById(id);
+        messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/chat.revoke",
+                Result.success(id)
+        );
+        changeAllChat(userId, receiverId);
+        log.info("用户 {} 撤回消息给用户 {}", userId, id);
+    }
+
+    private void changeAllChat(Integer userId, Integer receiverId) {
         // 更新双方的消息计数
-        updateMessageCounts(userId, id);
+        updateMessageCounts(userId, receiverId);
         PageResult<UserChatVO> senderChats = userChatService.getUserChats(userId);
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chats.list",
-                senderChats
+                Result.success(senderChats)
         );
+
+        PageResult<UserChatVO> receiverChats = userChatService.getUserChats(receiverId);
+        messagingTemplate.convertAndSendToUser(
+                receiverId.toString(),
+                "/queue/chats.list", // 对应前端订阅的会话列表路径
+                Result.success(receiverChats)
+        );
+        PageResult<UserChat> detail = userChatService.getUserChat(receiverId, userId);
+
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
-                "/queue/chat.revoke",
-                id
-        );
-        PageResult<UserChatVO> receiverChats = userChatService.getUserChats(id);
-        messagingTemplate.convertAndSendToUser(
-                id.toString(),
-                "/queue/chats.list", // 对应前端订阅的会话列表路径
-                receiverChats
-        );
-        PageResult<UserChat> detail = userChatService.getUserChat(id, userId);
-        messagingTemplate.convertAndSendToUser(
-                userId.toString(),
-                "/queue/chats.list", // 对应前端订阅的会话列表路径
-                detail
+                "/queue/chat.detail", // 对应前端订阅的会话列表路径
+                Result.success(detail)
         );
         messagingTemplate.convertAndSendToUser(
-                id.toString(),
-                "/queue/chats.list", // 对应前端订阅的会话列表路径
-                detail
+                receiverId.toString(),
+                "/queue/chat.detail", // 对应前端订阅的会话列表路径
+                Result.success(detail)
         );
-        log.info("用户 {} 撤回消息给用户 {}", userId, id);
     }
+
     private void changeChat(Integer recevier, Integer userId, UserChat userChat) {
         // 实时推送给接收者
         messagingTemplate.convertAndSendToUser(
                 recevier.toString(),
                 "/queue/chat.new",
-                userChat
+                Result.success(userChat)
         );
 
         // 同时推送给发送者（确认发送成功）
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chat.sent",
-                userChat
+                Result.success(userChat)
         );
 
         // 更新双方的消息计数
@@ -274,7 +317,7 @@ public class ChatController {
         messagingTemplate.convertAndSendToUser(
                 recevier.toString(),
                 "/queue/chats.list", // 对应前端订阅的会话列表路径
-                receiverChats
+                Result.success(receiverChats)
         );
 
 // 5. 推送给发送者：更新聊天会话列表
@@ -282,7 +325,7 @@ public class ChatController {
         messagingTemplate.convertAndSendToUser(
                 userId.toString(),
                 "/queue/chats.list",
-                senderChats
+                Result.success(senderChats)
         );
 
     }
@@ -310,19 +353,19 @@ public class ChatController {
      */
     private void updateMessageCounts(Integer senderId, Integer receiverId) {
         // 更新接收者的消息计数
-        UserMessageCountVO receiverCount = getUserMessagesCount(receiverId);
+        UserMessageCountVO userMessagesCount = getUserMessagesCount(receiverId);
         messagingTemplate.convertAndSendToUser(
                 receiverId.toString(),
                 "/queue/messages.count",
-                receiverCount
+                Result.success(userMessagesCount)
         );
 
         // 更新发送者的消息计数
-        UserMessageCountVO senderCount = getUserMessagesCount(senderId);
+        UserMessageCountVO messagesCount = getUserMessagesCount(senderId);
         messagingTemplate.convertAndSendToUser(
                 senderId.toString(),
                 "/queue/messages.count",
-                senderCount
+                Result.success(messagesCount)
         );
     }
 

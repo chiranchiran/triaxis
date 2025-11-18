@@ -27,16 +27,29 @@ import {
   ManOutlined,
   WomanOutlined
 } from '@ant-design/icons';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ChatMessage, MessageList } from "../../components/Chat";
 import { useGetUserChat, useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesCount, useGetUserMessagesLike, useGetUserMessagesReview, useGetUserMessagesSystem } from "../../hooks/api/user";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessageCount } from "../../store/slices/userCenterSlice";
+import { useChat } from "../../hooks/api/useChat";
 
 export const MyMessages = ({ }) => {
   const { total, chat, like, collect, review, system } = useSelector((state) => state.userCenter.messageCount)
   const dispatch = useDispatch()
+  // const { getMessagesCount, SubscriptionTypes, subscribeMessageCount } = useChat()
+  // useEffect(() => {
+  //   if (!userId) return;
+  //   console.log('初始化聊天列表，用户ID:', userId);
+  //   const id = subscribeMessageCount('chats', {
+  //     [SubscriptionTypes.MESSAGE_COUNT]: handleChats,
+  //   })
+  //   getMessagesCount(userId)
+  // }, [userId]);
 
+  // const handleChats = useCallback((message) => {
+  //   dispatch(setMessageCount(message));
+  // }, [])
   /**
    * @description state管理
    */

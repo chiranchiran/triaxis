@@ -19,6 +19,7 @@
             <result property="content" column="last_msg_content"/>
             <result property="sendTime" column="last_msg_send_time"/>
             <result property="isRead" column="last_msg_is_read"/>
+            <result property="isRevoke" column="last_msg_is_revoke"/>
             <!-- 可根据UserChat字段补充其他映射 -->
         </association>
 
@@ -43,6 +44,7 @@
             MAX(last_msg.content) AS last_msg_content,
             MAX(last_msg.send_time) AS last_msg_send_time,
             MAX(last_msg.is_read) AS last_msg_is_read,
+            MAX(last_msg.is_revoke) AS last_msg_is_revoke,
             -- 未读消息数
             SUM(CASE WHEN uc.is_read = 0 AND uc.receiver_id = #{id} THEN 1 ELSE 0 END) AS unread_count
         FROM user_chats uc

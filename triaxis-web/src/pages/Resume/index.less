@@ -11,6 +11,7 @@
   display: flex;
   flex-direction: column;
 }
+
 /* 头部信息 */
 .resume-header {
   display: flex;
@@ -20,48 +21,58 @@
   padding-bottom: 20px;
   border-bottom: 1px solid #eaeaea;
 }
+
 .name-title h1 {
   font-size: 28px;
   color: #2c3e50;
   margin-bottom: 5px;
   font-weight: 600;
 }
+
 .name-title h2 {
   font-size: 18px;
   color: #7f8c8d;
   font-weight: 400;
 }
+
 .contact-info {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .contact-item {
   display: flex;
   align-items: center;
   font-size: 14px;
   color: #555;
 }
+
 .contact-item .icon {
   margin-right: 8px;
   font-size: 14px;
 }
+
 /* 主要内容区域 */
 .resume-content {
   display: flex;
   flex: 1;
   gap: 30px;
 }
+
 .left-column {
   flex: 1;
 }
+
 .right-column {
   flex: 1.5;
 }
+
 /* 通用部分样式 */
 section {
   margin-bottom: 25px;
 }
+
 h3 {
   font-size: 18px;
   color: #2c3e50;
@@ -70,37 +81,44 @@ h3 {
   border-bottom: 1px solid #eaeaea;
   font-weight: 600;
 }
+
 h4 {
   font-size: 16px;
   color: #34495e;
   margin-bottom: 8px;
   font-weight: 500;
 }
+
 /* 教育背景 */
 .education-item h4 {
   color: #2980b9;
 }
+
 .degree {
   font-size: 15px;
   color: #555;
   margin-bottom: 5px;
 }
+
 .period,
 .gpa {
   font-size: 14px;
   color: #7f8c8d;
   margin-bottom: 5px;
 }
+
 .courses p {
   font-size: 14px;
   margin-bottom: 8px;
   color: #555;
 }
+
 .course-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .course-tag {
   background-color: #f1f8ff;
   color: #2980b9;
@@ -108,20 +126,24 @@ h4 {
   border-radius: 4px;
   font-size: 13px;
 }
+
 /* 技能部分 */
 .skill-category {
   margin-bottom: 15px;
 }
+
 .skill-category h4 {
   font-size: 15px;
   margin-bottom: 8px;
   color: #555;
 }
+
 .skill-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .skill-tag {
   background-color: #f8f9fa;
   color: #495057;
@@ -130,29 +152,35 @@ h4 {
   font-size: 14px;
   border: 1px solid #e9ecef;
 }
+
 /* 项目经验 */
 .project-item {
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #f0f0f0;
 }
+
 .project-item:last-child {
   border-bottom: none;
 }
+
 .project-item h4 {
   color: #2980b9;
 }
+
 .project-item p {
   font-size: 14px;
   color: #555;
   margin-bottom: 10px;
   line-height: 1.6;
 }
+
 .project-tech {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .tech-tag {
   background-color: #e8f4fd;
   color: #2980b9;
@@ -160,39 +188,47 @@ h4 {
   border-radius: 3px;
   font-size: 13px;
 }
+
 /* 实践经验 */
 .experience-item {
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #f0f0f0;
 }
+
 .experience-item:last-child {
   border-bottom: none;
 }
+
 .exp-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 8px;
 }
+
 .exp-header h4 {
   color: #2980b9;
   margin-bottom: 0;
 }
+
 .exp-period {
   font-size: 14px;
   color: #7f8c8d;
   white-space: nowrap;
 }
+
 .experience-item ul {
   padding-left: 20px;
 }
+
 .experience-item li {
   font-size: 14px;
   color: #555;
   margin-bottom: 5px;
   line-height: 1.5;
 }
+
 /* 页脚 */
 .resume-footer {
   margin-top: 20px;
@@ -203,11 +239,13 @@ h4 {
   font-size: 14px;
   font-style: italic;
 }
+
 /* 打印样式 */
 @media print {
   body {
     background: white;
   }
+
   .resume-container {
     box-shadow: none;
     margin: 0;
@@ -215,24 +253,29 @@ h4 {
     max-width: 100%;
   }
 }
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .resume-container {
     margin: 10px;
     padding: 20px;
   }
+
   .resume-header {
     flex-direction: column;
     gap: 15px;
   }
+
   .resume-content {
     flex-direction: column;
     gap: 20px;
   }
+
   .exp-header {
     flex-direction: column;
     gap: 5px;
   }
+
   .exp-period {
     margin-bottom: 8px;
   }

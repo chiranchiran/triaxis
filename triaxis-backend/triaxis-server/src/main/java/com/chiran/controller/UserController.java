@@ -108,7 +108,10 @@ public class UserController {
         long collectCount = collect.getTotal();
         long reviewCount = review.getTotal();
         long systemCount = system.getTotal();
-        long chatCount = chats.getTotal();
+        long chatCount = 0;
+        for (UserChatVO i:chats.getRecords()){
+            chatCount+=i.getUnread();
+        }
 
         long counts = likeCount + collectCount + reviewCount + systemCount + chatCount;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Input, Button, Tooltip, Dropdown, Avatar, Menu, Divider, Badge, InputNumber } from 'antd';
 import {
   SearchOutlined, CrownOutlined, GlobalOutlined, UserOutlined, MoonOutlined, SunOutlined, SettingOutlined, BellOutlined, UploadOutlined, FolderOutlined, BookOutlined, StarOutlined, LogoutOutlined
@@ -13,6 +13,7 @@ import { MyButton } from '../MyButton';
 import { useTranslation } from 'react-i18next';
 import { setMessageCount } from '../../store/slices/userCenterSlice';
 import { useGetUserMessagesCount } from '../../hooks/api/user';
+import { useChat } from '../../hooks/api/useChat';
 
 const Header = () => {
 
@@ -23,11 +24,23 @@ const Header = () => {
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
   const { mutateAsync: doLogout } = useLogout()
   const dispatch = useDispatch();
-  const { username, isAuthenticated, role, avatar } = useSelector(state => state.auth);
-  const { data } = useGetUserMessagesCount({
-    onSuccess: (data) => dispatch(setMessageCount(data)),
-  });;
+  const { username, isAuthenticated, role, avatar, id: userId } = useSelector(state => state.auth);
+  // const { data } = useGetUserMessagesCount({
+  //   onSuccess: (data) => dispatch(setMessageCount(data)),
+  // });;
+  const { getMessagesCount, SubscriptionTypes, subscribeMessageCount } = useChat(false)
+  useEffect(() => {
+    if (!userId) return;
+    console.log('初始化聊天列表，用户ID:', userId);
+    const id = subscribeMessageCount('chats', {
+      [SubscriptionTypes.MESSAGE_COUNT]: handleChats,
+    })
+    getMessagesCount(userId)
+  }, [userId]);
 
+  const handleChats = useCallback((message) => {
+    dispatch(setMessageCount(message));
+  }, [])
   //导航栏选项，普通用户role为0，管理员role为1，会显示管理的选项
   const navKeys = [
     { key: 'home', path: '/' },

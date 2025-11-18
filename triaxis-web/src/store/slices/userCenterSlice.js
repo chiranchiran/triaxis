@@ -13,6 +13,7 @@ const userCenterSlice = createSlice({
       'review': 0,
       'system': 0
     },
+    websocketStatus: 2
   },
   reducers: {
     // setUserActiveKey: (state, action) => {
@@ -35,7 +36,11 @@ const userCenterSlice = createSlice({
         updatedSubCounts.review + updatedSubCounts.system;
       state.messageCount = updatedSubCounts;
     },
+    setWebsocketStatus: (state, action) => {
+      state.websocketStatus = action.payload
+    }
+
   }
 })
-export const { setMessageCount } = userCenterSlice.actions
+export const { setMessageCount, setWebsocketStatus } = userCenterSlice.actions
 export default userCenterSlice.reducer

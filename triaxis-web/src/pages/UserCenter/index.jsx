@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   Avatar,
@@ -67,6 +67,7 @@ import { setMessageCount } from '../../store/slices/userCenterSlice';
 import { store } from '../../store';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getLastPathSegment } from '../../utils/commonUtil';
+import { useChat } from '../../hooks/api/useChat';
 
 const { Search } = Input;
 const { Meta } = Card;
@@ -138,12 +139,27 @@ const UserCenter = () => {
   const pathname = useLocation().pathname
   const dispatch = useDispatch();
   const { total } = useSelector((state) => state.userCenter.messageCount)
-
+  const { username, avata, id: userId } = useSelector(state => state.auth);
   const [createCollectionVisible, setCreateCollectionVisible] = useState(false);
   const [activeCourseTab, setActiveCourseTab] = useState('collections');
-  const { data } = useGetUserMessagesCount({
-    onSuccess: (data) => dispatch(setMessageCount(data)),
-  });;
+  // const { data } = useGetUserMessagesCount({
+  //   onSuccess: (data) => dispatch(setMessageCount(data)),
+  // });
+  const { getMessagesCount, SubscriptionTypes, subscribeMessageCount } = useChat(true)
+  useEffect(() => {
+    if (!userId) return;
+    console.log('初始化聊天列表，用户ID:', userId);
+    const id = subscribeMessageCount('messages', {
+      [SubscriptionTypes.MESSAGE_COUNT]: handleChats,
+    })
+    getMessagesCount(userId)
+  }, [userId]);
+
+  const handleChats = useCallback((message) => {
+    console.log(message)
+    dispatch(setMessageCount(message));
+  }, [])
+
   // 模拟数据
   const [courses, setCourses] = useState([]);
   const [collections, setCollections] = useState([]);
@@ -178,36 +194,36 @@ const UserCenter = () => {
   const { data: user = {} } = useGetUserProfile();
 
 
-  const {
-    id = null,
-    username = "",
-    email = "",
-    phone = "",
-    avatar = "",
-    wechatOpenid = "",
-    qqOpenid = "",
-    weiboUid = "",
-    githubId = "",
-    bio = "",
-    gender = 0,//0未知，1男2女
-    school = "",
-    major = "",
-    grade = "",
-    subject = "",
-    vipLevel = 0,
-    vipTime = "",
-    createTime = "",
-    points = 0,
-    pointsGet = 0,
-    pointsSpent = 0,
-    resourceCount = 0,
-    postCount = 0,
-    courseCount = 0,
-    likeCount = 0,
-    purchaseCount = 0,
-    status = 1,//0禁用
-    role = 0,//0普通
-  } = user
+  // const {
+  //   id = null,
+  //   username = "",
+  //   email = "",
+  //   phone = "",
+  //   avatar = "",
+  //   wechatOpenid = "",
+  //   qqOpenid = "",
+  //   weiboUid = "",
+  //   githubId = "",
+  //   bio = "",
+  //   gender = 0,//0未知，1男2女
+  //   school = "",
+  //   major = "",
+  //   grade = "",
+  //   subject = "",
+  //   vipLevel = 0,
+  //   vipTime = "",
+  //   createTime = "",
+  //   points = 0,
+  //   pointsGet = 0,
+  //   pointsSpent = 0,
+  //   resourceCount = 0,
+  //   postCount = 0,
+  //   courseCount = 0,
+  //   likeCount = 0,
+  //   purchaseCount = 0,
+  //   status = 1,//0禁用
+  //   role = 0,//0普通
+  // } = user
 
   // Tab项配置
 

@@ -16,6 +16,7 @@ import SockJS from 'sockjs-client';
 class WebSocketService {
   constructor() {
     this.client = null;
+    this.socket = null;
     // 当前连接状态，0 conneting，1open，2 closed
     this.status = 2;
     // 时间上的配置，定时器
@@ -57,7 +58,36 @@ class WebSocketService {
     console.log('开始建立WebSocket连接...');
 
     try {
-      const socket = new SockJS('http://localhost:8080/chat');
+      if (this.socket) {
+        this.socket.close(1000, '重连前主动关闭旧连接'); // 1000是正常关闭码
+        this.socket = null;
+      }
+      const socket = new SockJS('http://localhost:8080/chat', null, {
+        debug: true, // 关键：打印内部详细日志
+        transports: ['websocket', 'xhr-streaming', 'xhr-polling']
+      });
+      this.socket = socket;
+
+      socket.onerror = (error) => {
+        console.error('❌ SockJS连接建立失败（onerror触发）:', error);
+        // 强制更新状态为断开
+        this.status = 2;
+        // 触发外部错误回调
+        onError && onError(new Error('服务器连接失败，请检查服务器是否启动'));
+        // 触发重连
+        this.scheduleReconnect();
+      };
+
+      // 2. 监听“已建立的连接关闭”（仅当连接成功后才可能触发）
+      socket.onclose = (event) => {
+        console.error('⚠️ SockJS已建立连接关闭（onclose触发）:', event.code, event.reason);
+        this.status = 2;
+        this.handleDisconnect();
+      };
+      // 底层事件监听（确保覆盖所有情况）
+      socket.onopen = (event) => {
+        console.log('✅ SockJS底层连接成功打开:', event);
+      };
 
       this.client = new Client({
         webSocketFactory: () => socket,
@@ -70,7 +100,7 @@ class WebSocketService {
             console.log('STOMP:', str);
           }
         },
-        reconnectDelay: 5000,
+        reconnectDelay: 0,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         onConnect: (frame) => this.handleConnect(frame, onConnect),
@@ -121,6 +151,17 @@ class WebSocketService {
     console.log('WebSocket连接断开');
     this.status = 2;
     this.cleanupSubscriptions();
+    // 彻底销毁旧Client和SockJS实例（避免干扰新连接）
+    if (this.client) {
+      this.client.deactivate(); // 关闭STOMP Client
+      this.client = null;
+    }
+    // 清理重连定时器（避免重复触发）
+    if (this.reconnectInterval) {
+      clearTimeout(this.reconnectInterval);
+      this.reconnectInterval = null;
+    }
+    this.scheduleReconnect();
   }
   // websocket错误重试连接
   scheduleReconnect() {
@@ -128,14 +169,13 @@ class WebSocketService {
       console.error('达到最大重连次数，停止重连');
       return;
     }
-
+    this.status = 2;
     this.reconnectAttempts++;
     console.log(`计划重连，尝试次数: ${this.reconnectAttempts}`);
 
     if (this.reconnectInterval) {
       clearTimeout(this.reconnectInterval);
     }
-    this.status = 0;
     // 每5秒重连一次
     this.reconnectInterval = setTimeout(() => {
       if (this.status !== 1) {
@@ -248,7 +288,7 @@ class WebSocketService {
           try {
             const parsedMessage = JSON.parse(message.body);
             console.log(`[${componentId}] 收到消息 [${path}]:`, parsedMessage);
-            callback(parsedMessage);
+            callback(parsedMessage.data);
           } catch (error) {
             console.error(`[${componentId}] 解析消息错误:`, error, message.body);
           }
