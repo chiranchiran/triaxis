@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.chiran.mapper.UserChatMapper">
-    <!-- 结果映射：聊天对象实体 -->
     <resultMap id="ChatSessionMap" type="com.chiran.vo.UserChatVO">
+        <!-- 结果映射保持不变 -->
         <id property="id" column="other_user_id"/>
         <result property="unread" column="unread_count"/>
         <association property="sender" javaType="com.chiran.bo.UserBO">
@@ -12,7 +12,6 @@
             <result property="school" column="school"/>
             <result property="major" column="major"/>
             <result property="grade" column="grade"/>
-            <!-- 可根据UserBO字段补充其他映射 -->
         </association>
         <association property="lastMessage" javaType="com.chiran.entity.UserChat">
             <id property="id" column="last_msg_id"/>
@@ -20,21 +19,15 @@
             <result property="sendTime" column="last_msg_send_time"/>
             <result property="isRead" column="last_msg_is_read"/>
             <result property="isRevoke" column="last_msg_is_revoke"/>
-            <!-- 可根据UserChat字段补充其他映射 -->
         </association>
-
     </resultMap>
 
-    <!-- 查询聊天会话列表：按最后一条消息时间倒序，统计未读 -->
     <select id="getChats" resultMap="ChatSessionMap">
         SELECT
-            -- 对方用户ID（区分当前用户是发送方还是接收方）
             CASE
-                WHEN uc.sender_id = #{id} THEN uc.receiver_id
+                WHEN uc.sender_id = #{userId} THEN uc.receiver_id
                 ELSE uc.sender_id
                 END AS other_user_id,
-            -- 对方用户信息
-            MAX(u.id) AS other_user_id,
             MAX(u.username) AS other_username,
             MAX(u.avatar) AS other_avatar,
             MAX(u.school) AS school,
@@ -45,38 +38,47 @@
             MAX(last_msg.send_time) AS last_msg_send_time,
             MAX(last_msg.is_read) AS last_msg_is_read,
             MAX(last_msg.is_revoke) AS last_msg_is_revoke,
-            -- 未读消息数
-            SUM(CASE WHEN uc.is_read = 0 AND uc.receiver_id = #{id} THEN 1 ELSE 0 END) AS unread_count
+            SUM(CASE WHEN uc.is_read = 0 AND uc.receiver_id = #{userId} THEN 1 ELSE 0 END) AS unread_count
         FROM user_chats uc
-                 -- 关联对方用户信息
                  LEFT JOIN users u ON
-            (uc.sender_id = #{id} AND u.id = uc.receiver_id)
-                OR (uc.receiver_id = #{id} AND u.id = uc.sender_id)
-            -- 子查询获取每个会话的最后一条消息
+            (uc.sender_id = #{userId} AND u.id = uc.receiver_id)
+                OR (uc.receiver_id = #{userId} AND u.id = uc.sender_id)
                  LEFT JOIN (
             SELECT
                 CASE
-                    WHEN sender_id = #{id} THEN receiver_id
+                    WHEN sender_id = #{userId} THEN receiver_id
                     ELSE sender_id
                     END AS session_other_id,
                 MAX(send_time) AS max_send_time
             FROM user_chats
-            WHERE (sender_id = #{id} OR receiver_id = #{id})
+            WHERE
+              -- 子查询需同步添加删除状态条件（否则可能关联到已删除的消息）
+                (sender_id = #{userId} OR receiver_id = #{userId})
               AND deleted = 0
+              AND sender_id > 0
+              -- 新增：子查询的删除状态过滤
+              AND (
+                (sender_id = #{userId} AND sender_del = false)  -- 发送者未删除
+                    OR (receiver_id = #{userId} AND receiver_del = false)  -- 接收者未删除
+                )
             GROUP BY session_other_id
         ) last_msg_meta ON
-            (uc.sender_id = #{id} AND last_msg_meta.session_other_id = uc.receiver_id)
-                OR (uc.receiver_id = #{id} AND last_msg_meta.session_other_id = uc.sender_id)
+            (uc.sender_id = #{userId} AND last_msg_meta.session_other_id = uc.receiver_id)
+                OR (uc.receiver_id = #{userId} AND last_msg_meta.session_other_id = uc.sender_id)
                  LEFT JOIN user_chats last_msg ON
             last_msg.send_time = last_msg_meta.max_send_time
-                AND ((last_msg.sender_id = #{id} AND last_msg.receiver_id = last_msg_meta.session_other_id)
-                OR (last_msg.receiver_id = #{id} AND last_msg.sender_id = last_msg_meta.session_other_id))
+                AND ((last_msg.sender_id = #{userId} AND last_msg.receiver_id = last_msg_meta.session_other_id)
+                OR (last_msg.receiver_id = #{userId} AND last_msg.sender_id = last_msg_meta.session_other_id))
         WHERE
-            (uc.sender_id = #{id} OR uc.receiver_id = #{id})
+            (uc.sender_id = #{userId} OR uc.receiver_id = #{userId})
           AND uc.deleted = 0
-        -- 按会话分组，取最后一条消息时间倒序
-        GROUP BY other_user_id,last_msg.send_time
+          AND uc.sender_id > 0
+          -- 新增：主查询的删除状态过滤（核心条件）
+          AND (
+            (uc.sender_id = #{userId} AND uc.sender_del = false)  -- 当userId是发送者时，发送者未删除
+                OR (uc.receiver_id = #{userId} AND uc.receiver_del = false)  -- 当userId是接收者时，接收者未删除
+            )
+        GROUP BY other_user_id, last_msg.send_time
         ORDER BY last_msg.send_time DESC
     </select>
-
 </mapper>

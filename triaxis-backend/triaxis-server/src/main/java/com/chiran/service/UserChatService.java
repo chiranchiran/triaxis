@@ -3,6 +3,7 @@ package com.chiran.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.chiran.bo.CategoryBO;
 import com.chiran.dto.ChatSendDTO;
+import com.chiran.dto.MessageDTO;
 import com.chiran.entity.UserChat;
 import com.chiran.entity.UserTag;
 import com.chiran.result.PageResult;
@@ -19,10 +20,10 @@ import java.util.List;
  * @since 2025-10-07
  */
 public interface UserChatService extends IService<UserChat> {
-    PageResult<UserChat> getMessageSystem(Integer id);
+    PageResult<UserChat> getMessageSystem(MessageDTO dto);
 
-    PageResult<UserChatVO> getUserChats(Integer id);
-    PageResult<UserChat> getUserChat(Integer id,Integer userId);
+    PageResult<UserChatVO> getUserChats(MessageDTO dto, Integer userId);
+    PageResult<UserChat> getUserChat(MessageDTO dto, Integer userId);
 
     UserChat addUserChat(ChatSendDTO chatSendDTO);
 }

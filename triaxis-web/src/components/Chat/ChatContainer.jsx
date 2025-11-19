@@ -25,7 +25,7 @@ export const ChatContainer = ({
 }) => {
   // 处理虚拟列表事件
   const handleRowsRendered = useCallback(({ shouldLoadMore }) => {
-    if (shouldLoadMore && onLoadMore) {
+    if (shouldLoadMore && onLoadMore && hasMore) {
       onLoadMore();
     }
   }, [onLoadMore]);
@@ -33,7 +33,7 @@ export const ChatContainer = ({
   // 处理滚动事件
   const handleScroll = useCallback((scrollData) => {
     // 可以在这里实现更复杂的滚动逻辑
-    console.log('Scroll position:', scrollData.scrollTop);
+    // console.log('Scroll position:', scrollData.scrollTop);
   }, []);
 
   // 渲染单条消息

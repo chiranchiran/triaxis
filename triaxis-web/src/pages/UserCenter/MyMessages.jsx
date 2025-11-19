@@ -59,9 +59,9 @@ export const MyMessages = ({ }) => {
   /**
    * @description 数据获取
     */
-  const { data: counts } = useGetUserMessagesCount({
-    onSuccess: (data) => dispatch(setMessageCount(data)),
-  });;
+  // const { data: counts } = useGetUserMessagesCount({
+  //   onSuccess: (data) => dispatch(setMessageCount(data)),
+  // });;
 
   const likeQuery = useGetUserMessagesLike({
     enabled: activeKey === 'like',

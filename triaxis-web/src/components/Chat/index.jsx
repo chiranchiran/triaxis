@@ -7,7 +7,7 @@ import {
   ArrowLeftOutlined,
   SafetyCertificateOutlined
 } from '@ant-design/icons';
-import { useGetUserChats } from '../../hooks/api/user';
+import { useGetUserChats, useGetUserMessagesCollect, useGetUserMessagesLike, useGetUserMessagesReview, useGetUserMessagesSystem } from '../../hooks/api/user';
 import { isArrayValid } from '../../utils/commonUtil';
 import { MyMESSAGE_TYPE } from '../../utils/constant/types';
 import { TARGETCLICK, TARGETTYPE } from '../../utils/constant/order';
@@ -20,6 +20,7 @@ import { useMessage } from '../AppProvider';
 import _ from 'lodash';
 import { useChat } from '../../hooks/api/useChat';
 import MyChat from './MyChat';
+import MyList from '../MyList';
 
 export const ChatMessage = () => {
   const dispatch = useDispatch();
@@ -469,101 +470,256 @@ export const ChatMessage = () => {
 
 
 export const MessageList = ({ activeKey, data }) => {
-  const navigate = useNavigate();
-  //转跳
-  const onClick = (id, type) => {
-    navigate(`/${TARGETCLICK[type]}/${id}`)
-  }
+  const MessageItem = ({ item, activeKey, onClick }) => {
+    const {
+      id,
+      type,
+      senderId = null,
+      receiverId = null,
+      sendTime = "",
+      isRead = false,
+      review = "",
+      sender = {},
+      messageTarget = {},
+      reviewTarget = {}
+    } = item;
 
-  // 空状态处理
-  if (data.length === 0) {
-    return <MyEmpty description="暂无消息通知" />
+    const {
+      userId,
+      username = "匿名用户",
+      avatar = "",
+      school = "",
+      grade = "",
+      major = "",
+      online
+    } = sender;
+
+    const { targetId = null, title = "", content = "" } = messageTarget || {};
+    const { reviewTargetId = null, reviewTitle = "", reviewType } = reviewTarget || {};
+
+    return (
+      <div
+        className="flex items-center p-3 setting rounded-lg cursor-pointer transition-colors"
+        onClick={() => onClick && onClick(item)}
+      >
+        {/* 用户头像 + 在线状态 */}
+        <div className="relative mr-4">
+          <Avatar src={avatar} size={56} icon={senderId === -1 ? <SafetyCertificateOutlined /> : null} />
+          {online && (
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-dark rounded-full"></div>
+          )}
+        </div>
+
+        {/* 消息内容 */}
+        <div className="flex-1">
+          <div className='flex gap-4 items-center text-secondary text-sm'>
+            <div className='cursor-pointer text-main text-base font-semibold' title={activeKey === 'system' ? "系统通知" : username}>
+              {activeKey === 'system' ? "系统通知" : username}
+            </div>
+            {[school, major, grade].filter(Boolean).join(" / ")}
+          </div>
+
+          {/* 消息内容（未读加粗） */}
+          <div className="text-secondary line-clamp-2 leading-5 my-2">
+            {type === 4 && (
+              <>
+                {MyMESSAGE_TYPE[activeKey]}了您在{TARGETTYPE[reviewType]}
+                <span
+                  className='text-muted mx-2 cursor-pointer'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick && onClick({ ...item, targetId: reviewTargetId, type: reviewType });
+                  }}
+                >
+                  {reviewTitle}
+                </span>的评论
+                <span className='text-muted ml-2'>“{content}”</span>
+              </>
+            )}
+
+            {activeKey === 'system' && <>{item.content}</>}
+
+            {type !== 4 && activeKey !== 'system' && (
+              <>
+                {MyMESSAGE_TYPE[activeKey]}了您的{TARGETTYPE[type]}
+                <span
+                  className='text-muted ml-2 cursor-pointer'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClick && onClick(item);
+                  }}
+                >
+                  {title}
+                </span>
+              </>
+            )}
+
+            {activeKey === 'review' && <p className='pt-2 text-main'>“{review}”</p>}
+          </div>
+
+          <div className="text-sm text-secondary mt-1">{sendTime}</div>
+        </div>
+
+        {!isRead && (
+          <div className="bg-red text-light w-3 h-3 text-center rounded-full ml-6"></div>
+        )}
+      </div>
+    );
+  };
+  const navigate = useNavigate();
+  const getFn = () => {
+    switch (activeKey) {
+      case 'like':
+        return useGetUserMessagesLike;
+      case 'collect':
+        return useGetUserMessagesCollect;
+      case 'review':
+        return useGetUserMessagesReview;
+      case 'system':
+        return useGetUserMessagesSystem;
+    }
   }
+  // 处理消息项点击事件
+  const handleItemClick = (item) => {
+    if (onItemClick) {
+      onItemClick(item);
+      return;
+    }
+
+    // 默认点击行为：跳转到对应页面
+    const { type, targetId, reviewType, reviewTargetId } = item;
+    const navigateType = type === 4 ? reviewType : type;
+    const navigateId = type === 4 ? reviewTargetId : targetId;
+
+    if (navigateId && TARGETCLICK[navigateType]) {
+      navigate(`/${TARGETCLICK[navigateType]}/${navigateId}`);
+    }
+  };
+
+  // 渲染单个消息项
+  const renderMessageItem = ({ item, index }) => (
+    <MessageItem
+      key={item.id || index}
+      item={item}
+      activeKey={activeKey}
+      onClick={handleItemClick}
+    />
+  );
+
+  // 空状态渲染
+  const renderEmpty = () => (
+    <MyEmpty description="暂无消息通知" />
+  );
 
   return (
-    <div className="pt-3">
-      {data.map(item => {
-        const {
-          id,
-          type,
-          senderId = null,
-          receiverId = null,
-          sendTime = "",
-          isRead = false,
-          review = "",
-          sender = {},
-          messageTarget = {},
-          reviewTarget = {}
-        } = item;
-        const {
-          userId,
-          username = "匿名用户",
-          avatar = "",
-          school = "",
-          grade = "",
-          major = "",
-          online } = sender
-        const { targetId = null, title = "", content = "" } = messageTarget || {}
-        const { reviewTargetId = null, reviewTitle = "", reviewType } = reviewTarget || {}
-        return (
-          <div
-            key={id}
-            className="flex items-center p-3 setting rounded-lg cursor-pointer transition-colors"
-          >
-            {/* 用户头像 + 在线状态 */}
-            <div className="relative mr-4">
-              <Avatar src={avatar} size={56} icon={senderId === -1 ? <SafetyCertificateOutlined /> : null} />
-              {online && (
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-dark rounded-full"></div>
-              )}
-            </div>
-            {/* 消息内容 */}
-            <div className="flex-1">
-              <div className='flex gap-4 items-center text-secondary text-sm'>
-                <div className='cursor-pointer text-main  text-base font-semibold' title={activeKey === 'system' ? "系统通知" : username}>
-                  {activeKey === 'system' ? "系统通知" : username}
-                </div>
-                {[school, major, grade].filter(Boolean).join(" / ")}
-              </div>
-              {/* 消息内容（未读加粗） */}
-              {/* {
-                type === 4 ? <p className="text-secondary truncate line-clamp-2 leading-5">{message}</p>
-              } */}
-              <div className="text-secondary line-clamp-2 leading-5 my-2">
-                {
-                  type === 4 && (
-                    <>
-                      {MyMESSAGE_TYPE[activeKey]}了您在{TARGETTYPE[reviewType]}
-                      <span className='text-muted mx-2' onClick={() => onClick(reviewTargetId, reviewType)}>{reviewTitle}</span>的评论
-                      <span className='text-muted ml-2'>
-                        “{content}”
-                      </span>
-
-                    </>
-                  )
-                }
-                {
-                  activeKey === 'system' && <>{item.content}</>
-                }
-                {type !== 4 && activeKey !== 'system' &&
-                  <>
-                    {MyMESSAGE_TYPE[activeKey]}了您的{TARGETTYPE[type]}
-                    <span className='text-muted ml-2' onClick={() => onClick(targetId, type)}>
-                      {title}
-                    </span>
-                  </>}
-
-                {activeKey === 'review' && <p className='pt-2 text-main'>“{review}”</p>}
-              </div>
-              <div className="text-sm text-secondary mt-1">{sendTime}</div>
-            </div>
-            {!isRead && (
-              <div className="bg-red text-light w-3 h-3 text-center rounded-full ml-6">
-              </div>
-            )}
-          </div>
-        )
-      })}
+    <div className={`pt-3`}>
+      <MyList
+        fetchData={getFn()}
+        activeKey={activeKey}
+        renderItem={renderMessageItem}
+        pageSize={20}
+        emptyText="暂无消息通知"
+        endText="没有更多消息了"
+        renderEmpty={renderEmpty}
+      />
     </div>
   );
+
+  // const navigate = useNavigate();
+  // //转跳
+  // const onClick = (id, type) => {
+  //   navigate(`/${TARGETCLICK[type]}/${id}`)
+  // }
+
+  // // 空状态处理
+  // if (data.length === 0) {
+  //   return <MyEmpty description="暂无消息通知" />
+  // }
+
+  // return (
+  //   <div className="pt-3">
+  //     {data.map(item => {
+  //       const {
+  //         id,
+  //         type,
+  //         senderId = null,
+  //         receiverId = null,
+  //         sendTime = "",
+  //         isRead = false,
+  //         review = "",
+  //         sender = {},
+  //         messageTarget = {},
+  //         reviewTarget = {}
+  //       } = item;
+  //       const {
+  //         userId,
+  //         username = "匿名用户",
+  //         avatar = "",
+  //         school = "",
+  //         grade = "",
+  //         major = "",
+  //         online } = sender
+  //       const { targetId = null, title = "", content = "" } = messageTarget || {}
+  //       const { reviewTargetId = null, reviewTitle = "", reviewType } = reviewTarget || {}
+  //       return (
+  //         <div
+  //           key={id}
+  //           className="flex items-center p-3 setting rounded-lg cursor-pointer transition-colors"
+  //         >
+  //           {/* 用户头像 + 在线状态 */}
+  //           <div className="relative mr-4">
+  //             <Avatar src={avatar} size={56} icon={senderId === -1 ? <SafetyCertificateOutlined /> : null} />
+  //             {online && (
+  //               <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-dark rounded-full"></div>
+  //             )}
+  //           </div>
+  //           {/* 消息内容 */}
+  //           <div className="flex-1">
+  //             <div className='flex gap-4 items-center text-secondary text-sm'>
+  //               <div className='cursor-pointer text-main  text-base font-semibold' title={activeKey === 'system' ? "系统通知" : username}>
+  //                 {activeKey === 'system' ? "系统通知" : username}
+  //               </div>
+  //               {[school, major, grade].filter(Boolean).join(" / ")}
+  //             </div>
+  //             {/* 消息内容（未读加粗） */}
+  //             {/* {
+  //               type === 4 ? <p className="text-secondary truncate line-clamp-2 leading-5">{message}</p>
+  //             } */}
+  //             <div className="text-secondary line-clamp-2 leading-5 my-2">
+  //               {
+  //                 type === 4 && (
+  //                   <>
+  //                     {MyMESSAGE_TYPE[activeKey]}了您在{TARGETTYPE[reviewType]}
+  //                     <span className='text-muted mx-2' onClick={() => onClick(reviewTargetId, reviewType)}>{reviewTitle}</span>的评论
+  //                     <span className='text-muted ml-2'>
+  //                       “{content}”
+  //                     </span>
+
+  //                   </>
+  //                 )
+  //               }
+  //               {
+  //                 activeKey === 'system' && <>{item.content}</>
+  //               }
+  //               {type !== 4 && activeKey !== 'system' &&
+  //                 <>
+  //                   {MyMESSAGE_TYPE[activeKey]}了您的{TARGETTYPE[type]}
+  //                   <span className='text-muted ml-2' onClick={() => onClick(targetId, type)}>
+  //                     {title}
+  //                   </span>
+  //                 </>}
+
+  //               {activeKey === 'review' && <p className='pt-2 text-main'>“{review}”</p>}
+  //             </div>
+  //             <div className="text-sm text-secondary mt-1">{sendTime}</div>
+  //           </div>
+  //           {!isRead && (
+  //             <div className="bg-red text-light w-3 h-3 text-center rounded-full ml-6">
+  //             </div>
+  //           )}
+  //         </div>
+  //       )
+  //     })}
+  //   </div>
+  // );
 };

@@ -1,10 +1,12 @@
 package com.chiran.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chiran.entity.UserChat;
 import com.chiran.entity.UserTag;
 import com.chiran.vo.UserChatVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,5 +20,5 @@ import java.util.List;
  */
 @Mapper
 public interface UserChatMapper extends BaseMapper<UserChat> {
-    List<UserChatVO> getChats(Integer id);
+    Page<UserChatVO> getChats(Page<UserChatVO> page, @Param("userId")Integer id);
 }

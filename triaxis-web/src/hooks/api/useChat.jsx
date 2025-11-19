@@ -1,5 +1,5 @@
 // src/hooks/useChat.js
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { useMessage } from '../../components/AppProvider';
 import { useDispatch, useSelector } from 'react-redux';
 import { setWebsocketStatus } from '../../store/slices/userCenterSlice';
@@ -83,13 +83,15 @@ export const useChat = (isCheck = false) => {
   // ------------------------------
   // 连接状态检查方法
   // ------------------------------
-  const checkConnection = () => {
-    const currentStatus = getStatus();
-    console.log('当前连接状态:', currentStatus, '组件状态:', websocketStatus);
-    if (currentStatus !== websocketStatus) {
-      dispatch(setWebsocketStatus(currentStatus))
-    }
-  };
+  const checkConnection = useCallback(
+    () => {
+      const currentStatus = getStatus();
+      console.log('当前连接状态:', currentStatus, '组件状态:', websocketStatus);
+      if (currentStatus !== websocketStatus) {
+        dispatch(setWebsocketStatus(currentStatus))
+      }
+    }, []
+  )
   // 首次启动连接
   useEffect(() => {
     if (getStatus === 1) return;
@@ -234,8 +236,8 @@ export const useChat = (isCheck = false) => {
     return webSocketService.publish('/app/chats.list', {});
   };
 
-  const getChatDetail = (id) => {
-    return webSocketService.publish('/app/chat.detail', { id });
+  const getChatDetail = (id, page, pageSize) => {
+    return webSocketService.publish('/app/chat.detail', { id, page, pageSize });
   };
 
 

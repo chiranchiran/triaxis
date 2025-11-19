@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import { List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import 'react-virtualized/styles.css';
 
@@ -31,6 +31,40 @@ export const VirtualMessageList = React.forwardRef(({
     scrollToRow: (index) => {
       if (listRef.current) {
         listRef.current.scrollToRow(index);
+      }
+    },
+    scrollToBottom: (immediate = false) => {
+      if (listRef.current && messages.length > 0) {
+        console.log("滚动到底部，消息数量:", messages.length);
+
+        const list = listRef.current;
+
+        // 立即滚动模式
+        if (immediate) {
+          // 使用原生滚动作为最后手段
+          const gridElement = containerRef.current?.querySelector('.ReactVirtualized__Grid');
+          if (gridElement) {
+            gridElement.scrollTop = gridElement.scrollHeight;
+            return;
+          }
+        }
+
+        // 清除缓存并重新计算
+        cache.clearAll();
+        list.recomputeRowHeights();
+
+        // 分阶段滚动确保生效
+        setTimeout(() => {
+          list.scrollToRow(messages.length - 1);
+        }, 0);
+
+        setTimeout(() => {
+          list.scrollToRow(messages.length - 1);
+        }, 50);
+
+        setTimeout(() => {
+          list.scrollToRow(messages.length - 1);
+        }, 150);
       }
     },
     clearCache: () => {
@@ -102,6 +136,11 @@ export const VirtualMessageList = React.forwardRef(({
       clientHeight,
       scrollHeight
     });
+    // if (isInitialUnscrolled && scrollTop > 0) {
+    //   // 只要用户滚动过（scrollTop>0），就标记为“已滚动”
+    //   setIsInitialUnscrolled(false);
+    //   console.log("用户滚动")
+    // }
   }, [onScroll]);
 
   // 渲染加载更多指示器
@@ -140,20 +179,13 @@ export const VirtualMessageList = React.forwardRef(({
 
       {/* 虚拟列表 */}
       <div style={{
-        height: hasMore ? 'calc(100% - 50px)' : '100%',
+        height: '100%',
         position: 'relative'
       }}>
         <AutoSizer>
           {({ height, width }) => (
             <List
-              ref={(node) => {
-                listRef.current = node;
-                if (typeof ref === 'function') {
-                  ref(node);
-                } else if (ref) {
-                  ref.current = node;
-                }
-              }}
+              ref={listRef}
               height={height}
               width={width}
               rowCount={messages.length}

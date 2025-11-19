@@ -9,11 +9,11 @@ export const useGetUserSettings = (options) => useGet(getUserSettings, ['user', 
 export const useGetUserPoints = (options) => useGet(getUserPoints, ['user', 'points'], null, options)
 export const useGetUserVip = (options) => useGet(getUserVip, ['user', 'vip'], null, options)
 
-export const useGetUserMessagesCount = (options) => useGet(getUserMessagesCount, ['user', 'messages', 'count'], null, options)
-export const useGetUserMessagesLike = (options) => useGet(getUserMessagesLike, ['user', 'messages', 'like'], null, options)
-export const useGetUserMessagesCollect = (options) => useGet(getUserMessagesCollect, ['user', 'messages', 'collect'], null, options)
-export const useGetUserMessagesReview = (options) => useGet(getUserMessagesReview, ['user', 'messages', 'review'], null, options)
-export const useGetUserMessagesSystem = (options) => useGet(getUserMessagesSystem, ['user', 'messages', 'system'], null, options)
+export const useGetUserMessagesCount = (params, options) => useGet(getUserMessagesCount, ['user', 'messages', 'count', params.page], params, options)
+export const useGetUserMessagesLike = (params, options) => useGet(getUserMessagesLike, ['user', 'messages', 'like', params.page], params, options)
+export const useGetUserMessagesCollect = (params, options) => useGet(getUserMessagesCollect, ['user', 'messages', 'collect', params.page], params, options)
+export const useGetUserMessagesReview = (params, options) => useGet(getUserMessagesReview, ['user', 'messages', 'review', params.page], params, options)
+export const useGetUserMessagesSystem = (params, options) => useGet(getUserMessagesSystem, ['user', 'messages', 'system', params.page], params, options)
 export const useGetUserChats = (options) => useGet(getUserChats, ['user', 'chats'], null, options)
 export const useGetUserChat = (id, options) => useGet(getUserChat, ['user', 'chat', id], id, options)
 export const useSendChat = (data, options) => useApi(sendChat, {

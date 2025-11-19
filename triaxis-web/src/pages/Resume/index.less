@@ -1,15 +1,30 @@
 .resume-container {
-  background-color: #f5f5f5;
-  color: #333;
-  line-height: 1.5;
+  font-family: 'Quattrocento Sans', 'Noto Sans SC', sans-serif;
+  background: linear-gradient(135deg, #F4F1E8 0%, #E8E2D5 100%);
+  color: #5A6B4F;
+  line-height: 1.6;
   max-width: 210mm;
   min-height: 297mm;
   margin: 20px auto;
   background: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 15px rgba(90, 107, 79, 0.1);
   padding: 30px;
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.resume-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(90, 107, 79, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(200, 90, 53, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* 头部信息 */
@@ -17,205 +32,96 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 2px solid #E8E2D5;
+  position: relative;
+  z-index: 1;
 }
 
-.name-title h1 {
-  font-size: 28px;
-  color: #2c3e50;
+.name-section h1 {
+  font-family: 'Unna', 'Noto Serif SC', serif;
+  font-size: 36px;
+  color: #5A6B4F;
   margin-bottom: 5px;
-  font-weight: 600;
 }
 
-.name-title h2 {
+.job-title {
   font-size: 18px;
-  color: #7f8c8d;
-  font-weight: 400;
-}
-
-.contact-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #555;
-}
-
-.contact-item .icon {
-  margin-right: 8px;
-  font-size: 14px;
-}
-
-/* 主要内容区域 */
-.resume-content {
-  display: flex;
-  flex: 1;
-  gap: 30px;
-}
-
-.left-column {
-  flex: 1;
-}
-
-.right-column {
-  flex: 1.5;
-}
-
-/* 通用部分样式 */
-section {
-  margin-bottom: 25px;
-}
-
-h3 {
-  font-size: 18px;
-  color: #2c3e50;
-  margin-bottom: 15px;
-  padding-bottom: 5px;
-  border-bottom: 1px solid #eaeaea;
-  font-weight: 600;
-}
-
-h4 {
-  font-size: 16px;
-  color: #34495e;
-  margin-bottom: 8px;
+  color: #8B7355;
   font-weight: 500;
 }
 
-/* 教育背景 */
-.education-item h4 {
-  color: #2980b9;
+.photo-section {
+  margin-left: 20px;
 }
 
-.degree {
-  font-size: 15px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.period,
-.gpa {
-  font-size: 14px;
-  color: #7f8c8d;
-  margin-bottom: 5px;
-}
-
-.courses p {
-  font-size: 14px;
-  margin-bottom: 8px;
-  color: #555;
-}
-
-.course-tags {
+.photo-placeholder {
+  width: 120px;
+  height: 150px;
+  background: #F4F1E8;
+  border: 2px dashed #C85A35;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  color: #8B7355;
+  font-size: 14px;
 }
 
-.course-tag {
-  background-color: #f1f8ff;
-  color: #2980b9;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 13px;
+.contact-info {
+  text-align: right;
+  font-size: 14px;
 }
 
-/* 技能部分 */
-.skill-category {
+.contact-info p {
+  margin-bottom: 5px;
+}
+
+.contact-info .icon {
+  margin-right: 5px;
+}
+
+/* 通用部分样式 */
+.section {
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.section-title {
+  font-family: 'Unna', 'Noto Serif SC', serif;
+  font-size: 22px;
+  color: #C85A35;
   margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E8E2D5;
+  position: relative;
 }
 
-.skill-category h4 {
-  font-size: 15px;
-  margin-bottom: 8px;
-  color: #555;
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: #C85A35;
 }
 
-.skill-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.section-content {
+  padding-left: 15px;
 }
 
-.skill-tag {
-  background-color: #f8f9fa;
-  color: #495057;
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 14px;
-  border: 1px solid #e9ecef;
-}
-
-/* 项目经验 */
-.project-item {
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.project-item:last-child {
-  border-bottom: none;
-}
-
-.project-item h4 {
-  color: #2980b9;
-}
-
-.project-item p {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 10px;
-  line-height: 1.6;
-}
-
-.project-tech {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tech-tag {
-  background-color: #e8f4fd;
-  color: #2980b9;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: 13px;
-}
-
-/* 实践经验 */
+/* 个人经历 */
 .experience-item {
   margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
 }
 
-.experience-item:last-child {
-  border-bottom: none;
-}
-
-.exp-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-
-.exp-header h4 {
-  color: #2980b9;
-  margin-bottom: 0;
-}
-
-.exp-period {
-  font-size: 14px;
-  color: #7f8c8d;
-  white-space: nowrap;
+.experience-item h3 {
+  font-size: 18px;
+  color: #5A6B4F;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .experience-item ul {
@@ -223,21 +129,90 @@ h4 {
 }
 
 .experience-item li {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-  line-height: 1.5;
+  margin-bottom: 8px;
+  color: #5A6B4F;
 }
 
-/* 页脚 */
-.resume-footer {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #eaeaea;
-  text-align: center;
-  color: #7f8c8d;
+.education-detail p {
+  margin-bottom: 10px;
+  color: #5A6B4F;
+}
+
+.education-detail ul {
+  padding-left: 20px;
+  margin-top: 10px;
+}
+
+/* 专业技能 */
+.skill-category {
+  margin-bottom: 20px;
+}
+
+.skill-category h3 {
+  font-size: 16px;
+  color: #8B7355;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.skill-category ul {
+  padding-left: 20px;
+}
+
+.skill-category li {
+  margin-bottom: 8px;
+  color: #5A6B4F;
+}
+
+/* 项目经历 */
+.project-item {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #F4F1E8;
+}
+
+.project-item:last-child {
+  border-bottom: none;
+}
+
+.project-item h3 {
+  font-size: 18px;
+  color: #5A6B4F;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.tech-stack {
   font-size: 14px;
-  font-style: italic;
+  color: #8B7355;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: #F4F1E8;
+  border-radius: 4px;
+}
+
+.project-description {
+  margin-bottom: 15px;
+}
+
+.project-description p {
+  color: #5A6B4F;
+}
+
+.project-highlights h4 {
+  font-size: 16px;
+  color: #C85A35;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.project-highlights ul {
+  padding-left: 20px;
+}
+
+.project-highlights li {
+  margin-bottom: 8px;
+  color: #5A6B4F;
 }
 
 /* 打印样式 */
@@ -266,17 +241,12 @@ h4 {
     gap: 15px;
   }
 
-  .resume-content {
-    flex-direction: column;
-    gap: 20px;
+  .photo-section {
+    margin-left: 0;
+    align-self: center;
   }
 
-  .exp-header {
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .exp-period {
-    margin-bottom: 8px;
+  .contact-info {
+    text-align: left;
   }
 }

@@ -60,10 +60,14 @@ public class UserChat {
      */
     @TableField("is_revoke")
     private Boolean isRevoke = false; // 默认未撤回
-
+    @TableField("sender_del")
+    private Boolean senderDel = false; // 默认未撤回
+    @TableField("receiver_del")
+    private Boolean receiverDel = false; // 默认未撤回
 
     @TableLogic
     private Integer deleted;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;

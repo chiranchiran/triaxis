@@ -1,234 +1,120 @@
 import React from 'react';
-
+import './index.less'
 const Resume = () => {
-  const resumeData = {
-    personalInfo: {
-      name: "张明",
-      title: "前端开发实习生",
-      contact: {
-        phone: "138-0000-0000",
-        email: "zhangming@email.com",
-        location: "北京市海淀区",
-        portfolio: "zhangming.dev",
-        github: "github.com/zhangming"
-      }
-    },
-    education: {
-      school: "北京理工大学",
-      degree: "计算机科学与技术 | 本科",
-      period: "2020.09 - 2024.06",
-      gpa: "3.7/4.0",
-      courses: ["数据结构", "算法设计", "Web开发", "人机交互", "计算机网络"],
-      awards: ["校级一等奖学金 (2022)", "优秀学生干部 (2021)"]
-    },
-    technicalSkills: {
-      frontend: ["HTML5 & CSS3", "JavaScript (ES6+)", "React", "Vue.js", "TypeScript"],
-      tools: ["Git", "Webpack", "VS Code", "Figma", "Chrome DevTools"],
-      concepts: ["响应式设计", "组件化开发", "RESTful API", "前端性能优化"]
-    },
-    projects: [
-      {
-        name: "个人博客系统",
-        period: "2023.03 - 2023.06",
-        description: "基于React和Node.js开发的个人博客平台，支持Markdown编辑和响应式设计",
-        details: [
-          "实现文章CRUD功能及标签分类管理",
-          "使用React Hooks进行状态管理，提高代码可维护性",
-          "采用Tailwind CSS实现响应式设计，适配移动端"
-        ],
-        tech: ["React", "Node.js", "MongoDB", "Tailwind CSS"]
-      },
-      {
-        name: "在线学习平台UI重构",
-        period: "2022.09 - 2022.12",
-        description: "参与学校在线学习平台的前端界面重构，提升用户体验",
-        details: [
-          "负责课程列表和详情页面的组件开发",
-          "优化页面加载速度，首屏加载时间减少30%",
-          "使用Vue.js和Vuex实现数据状态管理"
-        ],
-        tech: ["Vue.js", "Vuex", "Element UI", "Sass"]
-      }
-    ],
-    experience: [
-      {
-        company: "校园技术社团",
-        position: "前端开发组成员",
-        period: "2021.09 - 至今",
-        details: [
-          "参与社团网站的前端开发与维护工作",
-          "组织前端技术分享会，向成员介绍React基础概念",
-          "协助设计并实现社团活动在线报名系统"
-        ]
-      },
-      {
-        company: "自由职业项目",
-        position: "网页开发实习生",
-        period: "2021.03 - 2021.08",
-        details: [
-          "为本地小型企业设计并开发响应式官方网站",
-          "使用HTML、CSS和JavaScript实现交互效果和动画",
-          "通过代码优化将网站性能评分从60提升到85"
-        ]
-      }
-    ]
-  };
-
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg p-8 text-gray-800 font-sans">
+    <div className="resume-container">
       {/* 头部信息 */}
-      <header className="border-b-2 border-blue-100 pb-6 mb-6">
-        <div className="text-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-900">{resumeData.personalInfo.name}</h1>
-          <h2 className="text-xl text-blue-600 mt-2">{resumeData.personalInfo.title}</h2>
+      <header className="resume-header">
+        <div className="name-section">
+          <h1>焦玲</h1>
+          <p className="job-title">后端/前端/全栈开发</p>
         </div>
-        <div className="flex flex-wrap justify-center gap-6 text-sm">
-          <div className="flex items-center">
-            <span className="text-blue-500 mr-2">📱</span>
-            <span>{resumeData.personalInfo.contact.phone}</span>
+        <div className="photo-section">
+          <div className="photo-placeholder">
+            <span>照片</span>
           </div>
-          <div className="flex items-center">
-            <span className="text-blue-500 mr-2">📧</span>
-            <span>{resumeData.personalInfo.contact.email}</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-blue-500 mr-2">📍</span>
-            <span>{resumeData.personalInfo.contact.location}</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-blue-500 mr-2">🌐</span>
-            <span>{resumeData.personalInfo.contact.portfolio}</span>
-          </div>
+        </div>
+        <div className="contact-info">
+          <p><span className="icon">👤</span> 性别：女 | 年龄：22岁</p>
+          <p><span className="icon">📱</span> 电话：18219674838</p>
+          <p><span className="icon">📧</span> 邮箱：482020095@qq.com</p>
+          <p><span className="icon">📍</span> 现居城市：厦门</p>
         </div>
       </header>
 
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* 左侧栏 */}
-        <div className="md:w-1/3 space-y-6">
-          {/* 教育背景 */}
-          <section>
-            <h3 className="text-lg font-semibold text-blue-700 mb-3 pb-2 border-b border-blue-100">教育背景</h3>
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-900">{resumeData.education.school}</h4>
-              <p className="text-sm text-gray-700">{resumeData.education.degree}</p>
-              <p className="text-sm text-gray-600">{resumeData.education.period}</p>
-              <p className="text-sm text-gray-600">GPA: {resumeData.education.gpa}</p>
+      {/* 个人经历 */}
+      <section className="section">
+        <h2 className="section-title">个人经历</h2>
+        <div className="section-content">
+          <div className="experience-item">
+            <h3>个人优势</h3>
+            <ul>
+              <li>做事认真细心负责,抗压能力强,为人热情开朗,沟通表达能力较强。</li>
+              <li>熟悉编程语言(Java、Python等)、web前后端开发相关知识，开发文档与RESTful接口文档等。</li>
+            </ul>
+          </div>
 
-              <div className="mt-3">
-                <h5 className="text-sm font-medium text-gray-800 mb-1">主修课程:</h5>
-                <div className="flex flex-wrap gap-1">
-                  {resumeData.education.courses.map((course, index) => (
-                    <span key={index} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
-                      {course}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-3">
-                <h5 className="text-sm font-medium text-gray-800 mb-1">获奖情况:</h5>
-                <ul className="text-xs text-gray-700 list-disc list-inside space-y-1">
-                  {resumeData.education.awards.map((award, index) => (
-                    <li key={index}>{award}</li>
-                  ))}
-                </ul>
-              </div>
+          <div className="experience-item">
+            <h3>教育经历</h3>
+            <div className="education-detail">
+              <p><strong>2023-2025年</strong>，先后担任厦门大学建筑与土木工程学院新媒体中心部长、宣传中心主任。</p>
+              <ul>
+                <li>协调宣传中心各部门工作，管理学院官方公众号</li>
+                <li>担任阳光心理志愿者社团和新部部长、中华文化促进学社活动管理部副部长</li>
+                <li>承办心理剧大赛、525心理月系列活动等多个校级活动</li>
+              </ul>
             </div>
-          </section>
-
-          {/* 技术技能 */}
-          <section>
-            <h3 className="text-lg font-semibold text-blue-700 mb-3 pb-2 border-b border-blue-100">技术技能</h3>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-2">前端技术</h4>
-              <div className="flex flex-wrap gap-1">
-                {resumeData.technicalSkills.frontend.map((skill, index) => (
-                  <span key={index} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-4">
-              <h4 className="text-sm font-medium text-gray-800 mb-2">开发工具</h4>
-              <div className="flex flex-wrap gap-1">
-                {resumeData.technicalSkills.tools.map((tool, index) => (
-                  <span key={index} className="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded">
-                    {tool}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium text-gray-800 mb-2">技术概念</h4>
-              <div className="flex flex-wrap gap-1">
-                {resumeData.technicalSkills.concepts.map((concept, index) => (
-                  <span key={index} className="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
-                    {concept}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
+          </div>
         </div>
+      </section>
 
-        {/* 右侧栏 */}
-        <div className="md:w-2/3 space-y-6">
-          {/* 项目经验 */}
-          <section>
-            <h3 className="text-lg font-semibold text-blue-700 mb-3 pb-2 border-b border-blue-100">项目经验</h3>
-            <div className="space-y-4">
-              {resumeData.projects.map((project, index) => (
-                <div key={index} className="pb-4 border-b border-gray-100 last:border-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-medium text-gray-900">{project.name}</h4>
-                    <span className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">{project.period}</span>
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{project.description}</p>
-                  <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 mb-2">
-                    {project.details.map((detail, idx) => (
-                      <li key={idx}>{detail}</li>
-                    ))}
-                  </ul>
-                  <div className="flex flex-wrap gap-1">
-                    {project.tech.map((tech, idx) => (
-                      <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+      {/* 专业技能 */}
+      <section className="section">
+        <h2 className="section-title">专业技能</h2>
+        <div className="section-content">
+          <div className="skill-category">
+            <h3>技术栈 - 前端开发</h3>
+            <ul>
+              <li>精通HTML5/CSS3，熟悉语义化标签及实现响应式布局，熟悉Ant Design、Bootstrap等组件库</li>
+              <li>掌握JavaScript原型链、闭包、事件循环等核心特性及ES6+新特性</li>
+              <li>熟悉异步编程（Promise/Async）、jQuery简化开发、AJAX、Axios/Fetch发送网络请求、实现请求拦截与响应拦截</li>
+              <li>熟悉React框架及其生态链；函数式组件和类式组件的使用、常用Hook和自定义Hook的使用、React Router路由管理、Redux Toolkit状态管理、React Query/TanStack Query处理API请求和缓存</li>
+              <li>掌握webpack构建工具，熟悉npm包管理</li>
+            </ul>
+          </div>
 
-          {/* 实践经验 */}
-          <section>
-            <h3 className="text-lg font-semibold text-blue-700 mb-3 pb-2 border-b border-blue-100">实践经验</h3>
-            <div className="space-y-4">
-              {resumeData.experience.map((exp, index) => (
-                <div key={index} className="pb-4 border-b border-gray-100 last:border-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{exp.company}</h4>
-                      <p className="text-sm text-gray-700">{exp.position}</p>
-                    </div>
-                    <span className="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">{exp.period}</span>
-                  </div>
-                  <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-                    {exp.details.map((detail, idx) => (
-                      <li key={idx}>{detail}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </section>
+          <div className="skill-category">
+            <h3>技术栈 - 后端开发</h3>
+            <ul>
+              <li>掌握Java面向对象开发，了解Node.js和Express框架</li>
+              <li>熟悉Spring Boot整合SSM快速搭建、Spring MVC开发REST API、Spring Security+JWT实现登录校验和密码加密、Spring AOP实现公共字段填充、日志记录与事务管理、Spring Cache数据缓存、Spring Task任务调度等</li>
+              <li>了解MySQL基础，MyBatis/MyBatis-Plus操作数据库，Redis缓存热点数据，RabbitMQ异步处理任务</li>
+              <li>了解Git工作流，Postman/Swagger接口测试，Linux基础操作</li>
+            </ul>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* 项目经历 */}
+      <section className="section">
+        <h2 className="section-title">项目经历</h2>
+        <div className="section-content">
+          <div className="project-item">
+            <h3>夜景时光——校园点餐系统（全栈）</h3>
+            <div className="tech-stack">
+              <strong>技术栈：</strong>前端(React、React Router、Redux Toolkit、React Query、TanStack Query)，后端（Spring Boot、Redis、RabbitMQ、MyBatis-Plus、MySQL、JWT、Spring AOP、Spring Cache、Spring Task、WebSocket）
+            </div>
+            <div className="project-description">
+              <p><strong>项目描述：</strong>分为商家管理端和用户移动端，管理端包含门店管理、分类管理、菜品管理、套餐管理、订单管理、数据统计、核心功能，用户端包含下单、购物车管理、历史订单管理、地址管理等核心功能，通过模块化架构设计实现前后端解耦。</p>
+            </div>
+            <div className="project-highlights">
+              <h4>项目亮点</h4>
+              <ul>
+                <li>通过API请求接口封装、自定义组件和Hook、路由配置、Spring三层架构与不同功能子工程分离实现前后端解耦</li>
+                <li>前端使用请求拦截器辅助后端Token校验、响应拦截器辅助错误处理；使用Redux Toolkit管理用户和界面UI相关状态信息；React Query和TanStack Query处理API请求状态和数据缓存，实现了错误重传、不同请求状态界面及时切换、利用缓存缓存页面切换卡顿问题、自动刷新缓存等功能，优化用户体验</li>
+                <li>后端使用JWT认证，通过Redis和Spring Cache实现数据缓存，降低数据库压力；基于WebSocket+Spring Task实现实时订单提醒与超时关单；通过AOP+MyBatis-Plus优化公共字段处理与动态SQL，减少冗余代码，RabbitMQ实现流量削峰</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="project-item">
+            <h3>Chronos——个人博客（全栈）</h3>
+            <div className="tech-stack">
+              <strong>技术栈：</strong>前端(React、React Router、Redux Toolkit、React Query、TanStack Query、ByteMD)，后端（Spring Boot、Spring Security、Redis、MyBatis-Plus、MySQL、JWT、Spring AOP）
+            </div>
+            <div className="project-description">
+              <p><strong>项目描述：</strong>采用ByteMD编辑器提供流畅的写作体验，实现文章管理、分类管理、留言功能、收藏功能等。</p>
+            </div>
+            <div className="project-highlights">
+              <h4>项目亮点</h4>
+              <ul>
+                <li>前端采用ByteMD编辑器提供流畅的写作体验，支持Markdown渲染和代码高亮；使用Redux Toolkit管理用户和界面UI相关状态信息；React Query和TanStack Query处理API请求状态和数据缓存</li>
+                <li>后端使用JWT认证，集成Elasticsearch进行全文搜索，使用Redis缓存减少数据库查询次数，提高数据库性能</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

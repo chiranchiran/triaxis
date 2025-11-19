@@ -1,6 +1,7 @@
 package com.chiran.service;
 
 import com.chiran.bo.UserBO;
+import com.chiran.dto.MessageDTO;
 import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -56,7 +57,7 @@ public interface UserService extends IService<User> {
 
     UserMyVipVO getUserVip(Integer id);
 
-    PageResult<UserMessageVO> getUserMessages(Integer id, Integer type);
+    PageResult<UserMessageVO> getUserMessages(MessageDTO dto, Integer type);
 
     UserChatVO getUserChats(Integer id);
 }

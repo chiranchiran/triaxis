@@ -2,6 +2,7 @@ package com.chiran.controller;
 
 import com.chiran.JwtUtil;
 import com.chiran.dto.ChatSendDTO;
+import com.chiran.dto.MessageDTO;
 import com.chiran.entity.UserChat;
 import com.chiran.result.PageResult;
 import com.chiran.result.Result;
@@ -95,71 +96,75 @@ public class UserController {
         UserMyVipVO user = userService.getUserVip(id);
         return Result.success(user);
     }
-    @GetMapping("/messages/count")
-    public Result<UserMessageCountVO>  getUserMessagesCount(HttpServletRequest request) {
-        Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserMessageVO> like = userService.getUserMessages(id, 1);
-        PageResult<UserMessageVO>  collect = userService.getUserMessages(id, 2);
-        PageResult<UserMessageVO>  review = userService.getUserMessages(id, 3);
-        PageResult<UserChat>  system = userChatService.getMessageSystem(id);
-        PageResult<UserChatVO> chats = userChatService.getUserChats(id);
-
-        long likeCount = like.getTotal();
-        long collectCount = collect.getTotal();
-        long reviewCount = review.getTotal();
-        long systemCount = system.getTotal();
-        long chatCount = 0;
-        for (UserChatVO i:chats.getRecords()){
-            chatCount+=i.getUnread();
-        }
-
-        long counts = likeCount + collectCount + reviewCount + systemCount + chatCount;
-
-        UserMessageCountVO user = UserMessageCountVO.builder().like((int)likeCount).collect((int)collectCount).system((int)systemCount).chat((int)chatCount).review((int) reviewCount).total((int)counts).build();
-        return Result.success(user);
-    }
+    // @GetMapping("/messages/count")
+    // public Result<UserMessageCountVO>  getUserMessagesCount(HttpServletRequest request) {
+    //     Integer id = (Integer) request.getAttribute("userId");
+    //     PageResult<UserMessageVO> like = userService.getUserMessages(id, 1);
+    //     PageResult<UserMessageVO>  collect = userService.getUserMessages(id, 2);
+    //     PageResult<UserMessageVO>  review = userService.getUserMessages(id, 3);
+    //     PageResult<UserChat>  system = userChatService.getMessageSystem(id);
+    //     PageResult<UserChatVO> chats = userChatService.getUserChats(id);
+    //
+    //     long likeCount = like.getTotal();
+    //     long collectCount = collect.getTotal();
+    //     long reviewCount = review.getTotal();
+    //     long systemCount = system.getTotal();
+    //     long chatCount = 0;
+    //     for (UserChatVO i:chats.getRecords()){
+    //         chatCount+=i.getUnread();
+    //     }
+    //
+    //     long counts = likeCount + collectCount + reviewCount + systemCount + chatCount;
+    //
+    //     UserMessageCountVO user = UserMessageCountVO.builder().like((int)likeCount).collect((int)collectCount).system((int)systemCount).chat((int)chatCount).review((int) reviewCount).total((int)counts).build();
+    //     return Result.success(user);
+    // }
     @GetMapping("/messages/like")
-    public Result<PageResult>  getUserMessagesLike(HttpServletRequest request) {
+    public Result<PageResult>  getUserMessagesLike(HttpServletRequest request, MessageDTO messageDTO) {
         Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserMessageVO> like = userService.getUserMessages(id, 1);
+        messageDTO.setId(id);
+        PageResult<UserMessageVO> like = userService.getUserMessages(messageDTO, 1);
         return Result.success(like);
     }
 
     @GetMapping("/messages/collect")
-    public Result<PageResult> getUserMessagesCollect(HttpServletRequest request) {
+    public Result<PageResult> getUserMessagesCollect(HttpServletRequest request, MessageDTO messageDTO) {
         Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserMessageVO>  collect = userService.getUserMessages(id, 2);
+        messageDTO.setId(id);
+        PageResult<UserMessageVO>  collect = userService.getUserMessages(messageDTO, 2);
         return Result.success(collect);
     }
 
     @GetMapping("/messages/review")
-    public Result<PageResult>  getUserMessagesReview(HttpServletRequest request) {
+    public Result<PageResult>  getUserMessagesReview(HttpServletRequest request, MessageDTO messageDTO) {
         Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserMessageVO>  review = userService.getUserMessages(id, 3);
+        messageDTO.setId(id);
+        PageResult<UserMessageVO>  review = userService.getUserMessages(messageDTO, 3);
         return Result.success(review);
     }
 
     @GetMapping("/messages/system")
-    public Result<PageResult>  getUserMessagesSystem(HttpServletRequest request) {
+    public Result<PageResult>  getUserMessagesSystem(HttpServletRequest request, MessageDTO messageDTO) {
         Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserChat>  system = userChatService.getMessageSystem(id);
+        messageDTO.setId(id);
+        PageResult<UserChat>  system = userChatService.getMessageSystem(messageDTO);
         return Result.success(system);
     }
 
-    @GetMapping("/chats")
-    public Result<PageResult> getUserChats(HttpServletRequest request) {
-        Integer id = (Integer) request.getAttribute("userId");
-        PageResult<UserChatVO> chats = userChatService.getUserChats(id);
-        return Result.success(chats);
-    }
-
-    @GetMapping("/chat/{id}")
-    public Result<PageResult> getUserChat(HttpServletRequest request,@PathVariable Integer id) {
-        log.debug("查看用户聊天记录",id);
-        Integer userId = (Integer) request.getAttribute("userId");
-        PageResult<UserChat> chat = userChatService.getUserChat(id,userId);
-        return Result.success(chat);
-    }
+    // @GetMapping("/chats")
+    // public Result<PageResult> getUserChats(HttpServletRequest request) {
+    //     Integer id = (Integer) request.getAttribute("userId");
+    //     PageResult<UserChatVO> chats = userChatService.getUserChats(id);
+    //     return Result.success(chats);
+    // }
+    //
+    // @GetMapping("/chat/{id}")
+    // public Result<PageResult> getUserChat(HttpServletRequest request,@PathVariable Integer id) {
+    //     log.debug("查看用户聊天记录",id);
+    //     Integer userId = (Integer) request.getAttribute("userId");
+    //     PageResult<UserChat> chat = userChatService.getUserChat(id,userId);
+    //     return Result.success(chat);
+    // }
     @PostMapping("/chat")
     public Result addUserChat(HttpServletRequest request, @RequestBody ChatSendDTO chatSendDTO) {
         log.debug("增加用户聊天记录");

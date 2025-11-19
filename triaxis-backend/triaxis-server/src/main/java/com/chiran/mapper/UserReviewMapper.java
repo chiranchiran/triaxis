@@ -1,12 +1,14 @@
 package com.chiran.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chiran.dto.ReviewSearchDTO;
 import com.chiran.entity.UserLike;
 import com.chiran.entity.UserReview;
 import com.chiran.vo.ReviewSearchVO;
 import com.chiran.vo.UserMessageVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -24,5 +26,5 @@ public interface UserReviewMapper extends BaseMapper<UserReview> {
 
     List<ReviewSearchVO> getReviewReplies(ReviewSearchDTO reviewSearchDTO);
 
-    List<UserMessageVO> selectResources(Integer id);
+    Page<UserMessageVO> selectResources(Page<UserMessageVO> page, @Param("id")Integer id);
 }

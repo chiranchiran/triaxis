@@ -1,8 +1,10 @@
 package com.chiran.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chiran.bo.CategoryBO;
 import com.chiran.bo.UserBO;
+import com.chiran.dto.MessageDTO;
 import com.chiran.dto.UserUpdateDTO;
 import com.chiran.entity.*;
 import com.chiran.exception.BusinessException;
@@ -201,18 +203,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public PageResult<UserMessageVO> getUserMessages(Integer id, Integer type) {
+    public PageResult<UserMessageVO> getUserMessages(MessageDTO dto, Integer type) {
+        Integer id = dto.getId();
+        Integer pageNum = dto.getPage();
+        Integer pageSize = dto.getPageSize();
+        pageNum = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        pageSize = (pageSize == null || pageSize < 1) ? 20 : pageSize;
+
+        Page<UserMessageVO> page = new Page<>(pageNum, pageSize);
+
         if(type==1){
-            List<UserMessageVO> list  =  userLikeMapper.selectResources(id);
-            return new PageResult<>((long)list.size(),list);
+            Page<UserMessageVO> resultPage = userLikeMapper.selectResources(page, id);
+            return new PageResult<>(resultPage.getTotal(), resultPage.getRecords());
         }
         if(type==2){
-            List<UserMessageVO> list  =  userCollectionMapper.selectResources(id);
-            return new PageResult<>((long)list.size(),list);
+            Page<UserMessageVO> resultPage = userCollectionMapper.selectResources(page, id);
+            return new PageResult<>(resultPage.getTotal(), resultPage.getRecords());
         }
         if(type==3){
-            List<UserMessageVO> list  =  userReviewMapper.selectResources(id);
-            return new PageResult<>((long)list.size(),list);
+            Page<UserMessageVO> resultPage = userReviewMapper.selectResources(page, id);
+            return new PageResult<>(resultPage.getTotal(), resultPage.getRecords());
         }
         return null;
     }
