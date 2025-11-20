@@ -61,7 +61,7 @@ const { Meta } = Card;
 const { Option } = Select;
 
 
-export const Profile = () => {
+const Profile = () => {
 
   /**
    * @description 数据获取
@@ -215,3 +215,4 @@ export const Profile = () => {
     </ItemLayout>
   )
 }
+export default Profile;

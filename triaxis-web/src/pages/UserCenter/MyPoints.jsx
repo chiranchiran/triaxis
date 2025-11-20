@@ -5,7 +5,7 @@ import { POINTS_TYPE } from '../../utils/constant/types';
 import { useGetUserPoints } from '../../hooks/api/user';
 import { isArrayValid } from '../../utils/commonUtil';
 
-export const MyPoints = () => {
+const MyPoints = () => {
   /**
    * @description 数据获取
   */
@@ -160,3 +160,4 @@ export const MyPoints = () => {
     </ItemLayout>
   );
 };
+export default MyPoints;

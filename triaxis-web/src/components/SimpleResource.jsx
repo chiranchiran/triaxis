@@ -13,7 +13,7 @@ import { converBytes } from '../utils/convertUnit';
 import { orderBy } from 'lodash';
 import { MyRESOURCE_ORDER } from '../utils/constant/types';
 import { MyEmpty } from './MyEmpty';
-
+import dayjs from 'dayjs';
 const SimpleResource = ({ type }) => {
   /**
  * @description state管理
@@ -217,7 +217,7 @@ const SimpleResource = ({ type }) => {
                         </span>
                         <span className="flex items-center text-xs">
                           <CloudUploadOutlined className="mr-1" />
-                          {publishTime}
+                          {dayjs(publishTime).format('YYYY.MM.DD')}
                         </span>
                       </div>
 

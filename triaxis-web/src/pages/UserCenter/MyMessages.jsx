@@ -34,7 +34,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setMessageCount } from "../../store/slices/userCenterSlice";
 import { useChat } from "../../hooks/api/useChat";
 
-export const MyMessages = ({ }) => {
+const MyMessages = ({ }) => {
   const { total, chat, like, collect, review, system } = useSelector((state) => state.userCenter.messageCount)
   const dispatch = useDispatch()
   // const { getMessagesCount, SubscriptionTypes, subscribeMessageCount } = useChat()
@@ -184,3 +184,4 @@ export const MyMessages = ({ }) => {
     </div>
   );
 };
+export default MyMessages;

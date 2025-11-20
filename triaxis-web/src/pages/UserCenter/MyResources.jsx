@@ -56,7 +56,7 @@ import { Statis } from '../../components/DetailCard';
 import { useGetUserProfile } from '../../hooks/api/user';
 import SimpleResource from '../../components/SimpleResource';
 
-export const MyResources = () => {
+const MyResources = () => {
   // 资源子标签
   const CustomTabBar = (props) => {
     const { activeKey, onTabClick } = props;
@@ -134,6 +134,7 @@ export const MyResources = () => {
     </div>
   );
 };
+export default MyResources;
 {/* 我的收藏夹 */ }
 //   activeResourceTab === 'collections' && (
 //     <div>

@@ -54,20 +54,14 @@ import {
 import { MyButton } from '../../components/MyButton';
 import { Statis } from '../../components/DetailCard';
 import { useGetUserMessagesCount, useGetUserProfile } from '../../hooks/api/user';
-import { Profile } from './Profile';
 import './index.less'
-import { MySettings } from './MySettings';
-import UserDetail from './UserDetail';
-import { MyPoints } from './MyPoints';
-import { MyVip } from './MyVip';
-import { MyMessages } from './MyMessages';
-import { MyResources } from './MyResources';
 import { useDispatch, useSelector } from 'react-redux';
 import { setMessageCount } from '../../store/slices/userCenterSlice';
 import { store } from '../../store';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getLastPathSegment } from '../../utils/commonUtil';
 import { useChat } from '../../hooks/api/useChat';
+import UserDetail from './UserDetail';
 
 const { Search } = Input;
 const { Meta } = Card;
@@ -349,17 +343,14 @@ const UserCenter = () => {
     );
   };
 
-
   const tabItems = [
     {
       key: 'profile',
       label: <TabIcon icon={<UserOutlined />}>个人信息</TabIcon>,
-      children: <Outlet />
     },
     {
       key: 'settings',
       label: <TabIcon icon={<SettingOutlined />}>我的设置</TabIcon>,
-      children: <Outlet />
     },
     {
       key: 'messages',
@@ -368,27 +359,22 @@ const UserCenter = () => {
           <TabIcon icon={<BellOutlined />}>我的消息</TabIcon>
         </Badge>
       ),
-      children: <Outlet />
     },
     {
       key: 'resources',
       label: <TabIcon icon={<FolderOutlined />}>我的资源</TabIcon>,
-      children: <Outlet />
     },
     {
       key: 'courses',
       label: <TabIcon icon={<BookOutlined />}>我的课程</TabIcon>,
-      children: <Outlet />
     },
     {
       key: 'vip',
       label: <TabIcon icon={<CrownOutlined />}>我的会员</TabIcon>,
-      children: <Outlet />
     },
     {
       key: 'points',
       label: <TabIcon icon={<StarOutlined />}>我的积分</TabIcon>,
-      children: <Outlet />
     },
   ];
   return (
@@ -398,13 +384,18 @@ const UserCenter = () => {
       {/* 主要内容区域 */}
       <Tabs
         tabPosition="left"
-        items={tabItems}
+        // items={tabItems}
         activeKey={getLastPathSegment(pathname)}
         onChange={handleTabChange}
         tabBarGutter={4}
-      />
+      >         {tabItems.map(item => (
+        <Tabs.TabPane key={item.key} tab={item.label}>
+          <Outlet />
+        </Tabs.TabPane>
+      ))}
+      </Tabs>
       {/* 创建收藏夹弹窗 */}
-      <Modal
+      {/* <Modal
         title="新建收藏夹"
         open={createCollectionVisible}
         onCancel={() => setCreateCollectionVisible(false)}
@@ -434,7 +425,7 @@ const UserCenter = () => {
             </Button>
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal> */}
     </section>
   );
 };

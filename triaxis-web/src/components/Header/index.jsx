@@ -55,8 +55,9 @@ const Header = () => {
     if (!key) return
     if (key === 'logout') {
       doLogout()
+    } else {
+      navigate(`/user/${key}`)
     }
-    navigate(`/user/${key}`)
   }
 
   // 用户下拉菜单项

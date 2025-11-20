@@ -6,7 +6,7 @@ import { MyButton } from "../../components/MyButton";
 import { ResetConfirmButton, SubmitConfirmButton } from "../../components/Mymodal";
 import { useGetUserSettings } from "../../hooks/api/user";
 
-export const MySettings = () => {
+const MySettings = () => {
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
   const [form] = Form.useForm();
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
@@ -152,3 +152,4 @@ export const MySettings = () => {
     </ItemLayout>
   );
 };
+export default MySettings;

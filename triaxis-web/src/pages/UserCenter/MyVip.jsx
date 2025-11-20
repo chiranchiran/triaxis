@@ -5,7 +5,7 @@ import { ItemLayout, SecondTitle } from ".";
 import { SubmitConfirmButton } from "../../components/Mymodal";
 import { useGetUserVip } from "../../hooks/api/user";
 
-export const MyVip = () => {
+const MyVip = () => {
   /**
    * @description 数据获取
    */
@@ -135,3 +135,4 @@ export const MyVip = () => {
     </ItemLayout>
   );
 };
+export default MyVip;

@@ -31,7 +31,7 @@ const LoginBase = ({ children, isRegister = false }) => {
 
   //其他登录功能
   return (
-    <div className={`background w-full ${isRegister ? 'py-10' : 'py-28'} `}>
+    <div className={`background w-full ${isRegister ? 'py-20' : 'py-40'} `}>
       <ProConfigProvider hashed={false}>
         <div className="container max-w-100 overflow-hidden rounded-2xl shadow-2xl bg-card">
           <div className="w-full flex flex-col justify-between items-center gap-1 mt-6">

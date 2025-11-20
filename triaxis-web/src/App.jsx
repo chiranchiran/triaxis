@@ -1,5 +1,5 @@
 
-import Element from './routes'
+import MyRoutes from './routes'
 import { ConfigProvider, theme as antdTheme, theme } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import Header from './components/Header/index.jsx'
@@ -48,16 +48,7 @@ function App() {
   }, [checkAutoLogin])
 
   return (
-    <div className="min-h-screen bg-main">
-      <Header />
-      <main className="pt-20 relative">
-        <ReactFlowProvider>
-          <Element />
-        </ReactFlowProvider>
-        <Sidebar />
-      </main>
-      <SiteFooter />
-    </div>
+    <MyRoutes />
   );
 }
 

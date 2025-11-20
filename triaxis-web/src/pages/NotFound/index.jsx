@@ -8,6 +8,7 @@ const NotFound = () => {
 
   return (
     <Empty
+      className='mt-20'
       image={<IllustrationNotFound style={{ width: 400, height: 400 }} />}
       darkModeImage={<IllustrationNotFoundDark style={{ width: 400, height: 400 }} />}
       title="页面404"
