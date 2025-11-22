@@ -1,14 +1,14 @@
 import { usePermissions } from "./usePermissions";
 
-export const checkPermission = (requiredPermissions = [], allowedRoles) => {
+export const checkPermission = (role, permissions, requiredPermissions = [], allowedRoles) => {
   const { hasPermission, isRole } = usePermissions();
   const isRoleAllowed = allowedRoles.length === 0
     ? true
-    : allowedRoles.some(role => isRole(role));
+    : allowedRoles.some(check => isRole(role, check));
 
   const isPermissionAllowed = requiredPermissions.length === 0
     ? true
-    : requiredPermissions.every(perm => hasPermission(perm));
+    : requiredPermissions.every(perm => hasPermission(permissions, perm));
   return {
     hasRole: isRoleAllowed,
     hasPermission: isPermissionAllowed

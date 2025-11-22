@@ -20,42 +20,73 @@ import { Divider, Space, Tabs, theme, } from 'antd';
 import { useState } from 'react';
 import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
-import { useLoginByCount, useLoginByMobile } from '../../hooks/api/login';
+import { useLoginByCount, useLoginByMobile, useRefresh } from '../../hooks/api/login';
 import { getUserData } from '../../utils/localStorage';
 import { useDispatch, useSelector } from 'react-redux';
 import { setAutoLogin } from '../../store/slices/authSlice';
 import Logo from '../../components/Logo';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import LoginBase from '../../components/LoginBase';
 import { useCaptcha } from '../../hooks/api/common';
 
 const Login = () => {
-  const auth = useSelector(state => state.auth)
-  logger.debug("当前的redux用户信息", auth);
+  const [searchParams] = useSearchParams();
+  const [cacheParams, setCacheParams] = useState({
+    ssoState: '',
+    redirectUri: '',
+    originalPath: ''
+  });
+
+  // 组件挂载时立即缓存URL参数（只执行一次，锁定初始参数）
+  useEffect(() => {
+    const ssoState = searchParams.get('state') || '';
+    const redirectUri = searchParams.get('redirectUri') || '';
+    const originalPath = searchParams.get('originalPath') || '';
+    setCacheParams({ ssoState, redirectUri, originalPath });
+    logger.debug("缓存URL参数", { ssoState, redirectUri, originalPath });
+  }, []);
+
+  // 解构缓存的参数（后续所有操作都用这个，不用searchParams）
+  const { ssoState, redirectUri, originalPath } = cacheParams;
+
+  logger.debug("当前缓存的URL参数", cacheParams);
+
+  const { isAuthenticated, username } = useSelector(state => state.auth)
+  logger.debug("当前的redux用户信息", username);
+
   const [form] = useForm()
+  const navigate = useNavigate()
   const { mutate: doCaptcha, isError: isCaptcha, data } = useCaptcha()
   const { mutate: doCountLogin, isSuccess: isCount } = useLoginByCount()
   const { mutate: doPhoneLogin, isSuccess: isPhone } = useLoginByMobile()
+
+
+
   //倒计时
   const [count, setCount] = useState(60);
   const [isTiming, setIsTiming] = useState(false)
   const dispatch = useDispatch()
   //登录方式0：账号密码，1：手机号，
   const [loginType, setLoginType] = useState(0);
-
-  //自动登录失败后只填入用户名
-  useEffect(() => {
-    const { rememberMe, autoLoginExpire, username } = getUserData()
-    if (rememberMe === true && autoLoginExpire) {
-      //检查是否过有效期
-      if (Date.now() < autoLoginExpire) {
-        form.setFieldsValue({
-          username: username,
-          autoLogin: true
-        });
-      }
+  const { rememberMe } = getUserData();
+  console.log(ssoState)
+  const { data: loginData = {}, isFetching } = useRefresh({
+    auto: true,
+    state: ssoState
+  }, {
+    enabled: !!rememberMe && !!ssoState && !isAuthenticated,
+    onSuccess: () => {
+      debugger;
+      console.log("要去拿token了")
+      navigate(`${redirectUri}?state=${ssoState}&originalPath=${originalPath}`)
+    }, onError: () => {
+      form.setFieldsValue({
+        username: username,
+        autoLogin: true
+      });
     }
-  }, [form]);
+  });
+
   // 倒计时定时器
   useEffect(() => {
     let timer;
@@ -85,6 +116,8 @@ const Login = () => {
         isCount,
         autoLogin
       })
+      navigate(`${redirectUri}?state=${ssoState}&originalPath=${originalPath}`)
+
     } else {
       setIsTiming(false);
       setCount(60);
@@ -135,13 +168,13 @@ const Login = () => {
     //账号登录
     if (loginType === 0) {
       const { username, password } = values
-      logger.debug("开始登录", { username, password })
-      doCountLogin({ username, password })
+      logger.debug("开始登录", { username, password, state: ssoState })
+      doCountLogin({ username, password, state: ssoState })
       //手机号登录
     } else {
       const { phone, captcha } = values
-      logger.debug("开始登录", { phone, captcha })
-      doPhoneLogin({ phone, captcha })
+      logger.debug("开始登录", { phone, captcha, state: ssoState })
+      doPhoneLogin({ phone, captcha, state: ssoState })
     }
   }
 

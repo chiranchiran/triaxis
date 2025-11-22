@@ -11,22 +11,29 @@ export const loginMobile = (data) => {
   return service.post('/login/phone', data)
 }
 //自动登录
-export const validate = () => {
-  return service.post('/login/validate')
-}
+// export const validate = () => {
+//   return service.post('/login/validate')
+// }
 //登出
 export const logout = (id) => {
-  return service.post(`/logout{id}`)
+  return service.post(`/user/logout/${id}`)
 }
 //refreshToken获得accessToken
-export const refresh = () => {
-  const { refreshToken } = getLoginData()
-  return service.post('/login/refresh', {},
-    {
-      headers: {
-        'Refresh-Token': refreshToken
-      }
-    })
+export const refresh = (params) => {
+  // const { refreshToken } = getLoginData()
+  return service.get('/login/refresh', { params },
+    // {
+    //   headers: {
+    //     'Refresh-Token': refreshToken
+    //   }
+    // }
+  )
 }
-
-
+// state换accessToken
+export const getToken = (params) => {
+  return service.get(`/login/token`, { params })
+}
+//提交state
+export const goLogin = (data) => {
+  return service.post(`/login/state`, data)
+}

@@ -79,9 +79,9 @@ function handleAuthError(error, showMessage, notification, navigate) {
     if (showMessage) notification.info({ message: "请登录！", description: message })
     store.dispatch(logout())
     // 跳转到登录页
-    setTimeout(() => {
-      navigate('/login')
-    }, 1000);
+    // setTimeout(() => {
+    //   navigate('/login')
+    // }, 1000);
   }
   //11002逻辑
   if (showMessage) notification.warning({ message: "权限错误！", description: error.message })

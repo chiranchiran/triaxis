@@ -6,6 +6,7 @@ const queryClient = new QueryClient({
       staleTime: 60 * 1000,
       cacheTime: 5 * 60 * 1000,
 
+
       retry: false,
       retryDelay: (retryAttempt) => {
         // 指数退指数退避策略：1s, 2s, 4s...（避免过 10s）

@@ -4,9 +4,11 @@ import { usePermissions } from "./usePermissions";
 
 export function AuthProtect({
   children,
+  role,
+  permissions,
   allowedRoles = [],
   requiredPermissions = [],
 }) {
-  const { hasRole, hasPermission } = checkPermission(requiredPermissions, allowedRoles)
+  const { hasRole, hasPermission } = checkPermission(role, permissions, requiredPermissions, allowedRoles)
   return (hasRole && hasPermission) ? children : <Navigate to={"/403"} replace />;
 }

@@ -53,7 +53,6 @@ class WebSocketService {
     }
 
     this.status = 0;
-    this.reconnectAttempts = 0;
 
     console.log('开始建立WebSocket连接...');
 
@@ -88,7 +87,9 @@ class WebSocketService {
       socket.onopen = (event) => {
         console.log('✅ SockJS底层连接成功打开:', event);
       };
-
+      socket.onmessage = (e) => {
+        console.log('🟢 收到 Pong 响应');
+      };
       this.client = new Client({
         webSocketFactory: () => socket,
         connectHeaders: {
@@ -234,16 +235,16 @@ class WebSocketService {
   }
 
   startHeartbeat() {
-    if (this.heartbeatInterval) {
-      clearInterval(this.heartbeatInterval);
-    }
+    // if (this.heartbeatInterval) {
+    //   clearInterval(this.heartbeatInterval);
+    // }
 
-    this.heartbeatInterval = setInterval(() => {
-      if (this.status === 1) {
-        this.sendHeartbeat();
-      }
-    }, 30000);
-    console.log('心跳机制已启动');
+    // this.heartbeatInterval = setInterval(() => {
+    //   if (this.status === 1) {
+    //     this.sendHeartbeat();
+    //   }
+    // }, 30000);
+    // console.log('心跳机制已启动');
   }
 
   /**

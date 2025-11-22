@@ -13,7 +13,9 @@ const userCenterSlice = createSlice({
       'review': 0,
       'system': 0
     },
-    websocketStatus: 2
+    websocketStatus: 2,
+    loginState: "",
+    originURL: ""
   },
   reducers: {
     // setUserActiveKey: (state, action) => {
@@ -38,9 +40,14 @@ const userCenterSlice = createSlice({
     },
     setWebsocketStatus: (state, action) => {
       state.websocketStatus = action.payload
+    },
+    setLoginState: (state, action) => {
+      state.loginState = action.payload
+    },
+    setOriginURL: (state, action) => {
+      state.originURL = action.payload
     }
-
   }
 })
-export const { setMessageCount, setWebsocketStatus } = userCenterSlice.actions
+export const { setMessageCount, setWebsocketStatus, setLoginState, setOriginURL } = userCenterSlice.actions
 export default userCenterSlice.reducer

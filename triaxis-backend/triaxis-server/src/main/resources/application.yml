@@ -83,6 +83,7 @@ jwt:
     enable: true
     access: "access_token:"
     refresh: "refresh_token:"
+    state: "state:"
     captcha:
       code: "captcha:code:"
       interval: "captcha:interval:"

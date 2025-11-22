@@ -40,6 +40,7 @@ const getInitialStateFromStorage = () => {
     autoLoginExpire: userInfo?.autoLoginExpire || null,
     isAuthenticated: (userInfo?.isAuthenticated && accessToken) || false,
     avatar: userInfo?.avatar || "",
+    permission: userInfo?.permission || []
   }
 }
 const initialState = getInitialStateFromStorage()
@@ -49,12 +50,17 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      logger.debug("登录成功，更新redux中auth的状态", action.payload)
-      state.isAuthenticated = true
-      state.username = action.payload.userInfo?.username || ''
-      state.id = action.payload.userInfo?.id || null
-      state.role = action.payload.userInfo?.role || null
-      state.avatar = action.payload.userInfo?.avatar || ""
+      const payload = action.payload;
+      const userInfo = payload?.userInfo || {}; // 防止 userInfo 不存在报错
+      logger.debug("登录成功，部分更新redux中auth的状态", payload);
+
+      // 部分更新：仅更新 payload 中存在的有效字段，保留原有字段
+      state.isAuthenticated = true; // 登录成功必设为true
+      state.username = userInfo.username ?? state.username; // 有新值则更，无则保留原有
+      state.id = userInfo.id ?? state.id;
+      state.role = userInfo.role ?? state.role;
+      state.avatar = userInfo.avatar ?? state.avatar;
+      state.permission = userInfo.permission ?? state.permission;
       setAuthenticated(true)
       setAllData(action.payload)
     },
@@ -73,6 +79,7 @@ const authSlice = createSlice({
       state.autoLoginExpire = null
       state.rememberMe = false
       state.avatar = ""
+      state.permission = []
       removeAllData()
     },
     setAutoLogin: (state, action) => {
@@ -96,6 +103,7 @@ const authSlice = createSlice({
         state.role = action.payload.userInfo?.role || null
         state.isAuthenticated = true
         state.avatar = action.payload.userInfo?.avatar || ""
+        state.permission = action.payload.userInfo?.permission || []
         setAuthenticated(true)
         setAllData(action.payload)
       })
@@ -109,6 +117,7 @@ const authSlice = createSlice({
         state.autoLoginExpire = null
         state.rememberMe = false
         state.avatar = ""
+        state.permission = []
         removeAllData()
       })
   }

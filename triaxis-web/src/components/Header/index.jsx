@@ -3,28 +3,31 @@ import { Input, Button, Tooltip, Dropdown, Avatar, Menu, Divider, Badge, InputNu
 import {
   SearchOutlined, CrownOutlined, GlobalOutlined, UserOutlined, MoonOutlined, SunOutlined, SettingOutlined, BellOutlined, UploadOutlined, FolderOutlined, BookOutlined, StarOutlined, LogoutOutlined
 } from '@ant-design/icons';
-import { Form, NavLink, useNavigate } from 'react-router-dom';
+import { Form, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import './index.less'
-import { useLogout } from '../../hooks/api/login';
+import { useGoLogin, useLogout } from '../../hooks/api/login';
 import Logo from '../Logo';
 import { usePreference } from '../usePreference';
 import { MyButton } from '../MyButton';
 import { useTranslation } from 'react-i18next';
-import { setMessageCount } from '../../store/slices/userCenterSlice';
+import { setLoginState, setMessageCount } from '../../store/slices/userCenterSlice';
 import { useGetUserMessagesCount } from '../../hooks/api/user';
 import { useChat } from '../../hooks/api/useChat';
+import { generateSafeState } from '../../utils/commonUtil';
 
 const Header = () => {
 
   const { t } = useTranslation()
   const { Search } = Input;
   const navigate = useNavigate()
+  const pathname = useLocation().pathname
   const { total } = useSelector((state) => state.userCenter.messageCount)
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
   const { mutateAsync: doLogout } = useLogout()
   const dispatch = useDispatch();
   const { username, isAuthenticated, role, avatar, id: userId } = useSelector(state => state.auth);
+  const { mutateAsync: doGoLogin } = useGoLogin()
   // const { data } = useGetUserMessagesCount({
   //   onSuccess: (data) => dispatch(setMessageCount(data)),
   // });;
@@ -54,10 +57,19 @@ const Header = () => {
   const handleMenuClick = ({ key }) => {
     if (!key) return
     if (key === 'logout') {
-      doLogout()
+      doLogout(userId)
     } else {
       navigate(`/user/${key}`)
     }
+  }
+  // sso登录
+  const handleLogin = async () => {
+    const state = generateSafeState();
+    await doGoLogin({ state })
+
+    // dispatch(setLoginState(state))
+    const redirectUri = '/sso/callback';
+    navigate(`/login?state=${state}&redirectUri=${redirectUri}&originalPath=${pathname}`)
   }
 
   // 用户下拉菜单项
@@ -195,7 +207,7 @@ const Header = () => {
                 >注册</MyButton>
                 <MyButton
                   type="gray"
-                  onClick={() => navigate("/login")}
+                  onClick={handleLogin}
                 >登录</MyButton>
               </div>
             ) : (

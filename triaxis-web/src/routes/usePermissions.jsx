@@ -6,25 +6,21 @@ const PermissionsContext = createContext();
 
 
 export function PermissionsProvider({ children }) {
-  // const [loading, setLoading] = useState(true);
-  const { role = null, permissions = [] } = useSelector(state => state.auth)
-  console.log("当前用户角色为", role)
+
 
   // 权限检查方法：是否拥有某个权限
-  const hasPermission = (permission) => {
+  const hasPermission = (permissions, permission) => {
     return permissions?.includes(permission) || false;
   };
 
   // 角色检查方法：是否为某个角色
-  const isRole = (allowRole) => {
+  const isRole = (role, allowRole) => {
     return role === allowRole;
   };
 
   return (
     <PermissionsContext.Provider
       value={{
-        role,
-        permissions,
         hasPermission,
         isRole,
       }}

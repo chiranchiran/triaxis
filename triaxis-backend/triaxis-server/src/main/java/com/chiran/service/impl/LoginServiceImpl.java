@@ -28,8 +28,8 @@ public class LoginServiceImpl extends ServiceImpl<UserMapper, User> implements L
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-
-    private <T> UserInfoVO baseCheck(SFunction<User,T> fn, T t) {
+@Override
+    public  <T> UserInfoVO baseCheck(SFunction<User,T> fn, T t) {
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(fn, t).select(User::getId, User::getUsername, User::getPassword,
                 User::getRole, User::getStatus,User::getAvatar,User::getVipLevel,User::getVipTime,User::getPoints);

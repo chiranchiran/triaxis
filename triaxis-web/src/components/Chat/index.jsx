@@ -470,6 +470,7 @@ export const ChatMessage = () => {
 
 
 export const MessageList = ({ activeKey, data }) => {
+  if (activeKey === 'chat') return
   const MessageItem = ({ item, activeKey, onClick }) => {
     const {
       id,

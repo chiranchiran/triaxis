@@ -111,6 +111,7 @@ const MyMessages = ({ }) => {
   };
 
   const onChange = (activeKey) => {
+    console.log('切换到tabKey:', activeKey);
     setActiveKey(activeKey)
   }
   const tabItems = [

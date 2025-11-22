@@ -36,6 +36,7 @@ const MyList = ({
 
   // State管理
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [data, setData] = useState([]);
   const [loadType, setLoadType] = useState("scroll");
@@ -64,10 +65,10 @@ const MyList = ({
       // 确保还有剩余数据
       setHasMore(newHasMore);
       setData(pre => [...pre, ...datas.records])
+      setTotal(datas.total)
       console.log("成功了", datas.records, datas)
     }
   })
-  const { records = [], total = 0 } = list || {}
 
 
 

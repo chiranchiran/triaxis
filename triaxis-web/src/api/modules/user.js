@@ -1,8 +1,8 @@
 import service from "../../utils/api/service"
 
 //登出
-export const logout = () => {
-  return service.post('/user/logout')
+export const logout = (id) => {
+  return service.post(`/user/logout/${id}`)
 }
 //获取个人信息
 export const getUserProfile = () => {

@@ -28,6 +28,6 @@ public class UserLoginCountDTO implements Serializable {
      * 密码
      */
     private String password;
-
+private String state;
 
 }

@@ -16,11 +16,16 @@ import { useForm } from 'antd/es/form/Form';
 import { logger } from '../../utils/logger';
 import { useRegisterByCount, useRegisterByMobile } from '../../hooks/api/register';
 import LoginBase from '../../components/LoginBase';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCaptcha } from '../../hooks/api/common';
+import { generateSafeState } from '../../utils/commonUtil';
+import { useGoLogin } from '../../hooks/api/login';
 
 function Register() {
+  const pathname = useLocation().pathname
   const [form] = useForm()
+  const navigate = useNavigate()
+  const { mutateAsync: doGoLogin } = useGoLogin()
   const { mutate: getCaptcha, isError: isCaptcha, data } = useCaptcha()
   const { mutate: countRegister, isSuccess: isCount } = useRegisterByCount()
   const { mutate: phoneRegister, isSuccess: isPhone } = useRegisterByMobile()
@@ -58,6 +63,17 @@ function Register() {
         isPhone,
         isCount
       })
+      // sso登录
+      const fn = async () => {
+        const state = generateSafeState();
+        await doGoLogin({ state })
+
+        // dispatch(setLoginState(state))
+        const redirectUri = '/sso/callback';
+        navigate(`/login?state=${state}&redirectUri=${redirectUri}&originalPath=${pathname}`)
+      }
+      fn()
+
     } else {
       setIsTiming(false);
       setCount(60);

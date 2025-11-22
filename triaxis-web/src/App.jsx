@@ -4,7 +4,6 @@ import { ConfigProvider, theme as antdTheme, theme } from 'antd'
 import React, { useCallback, useEffect, useState } from 'react'
 import Header from './components/Header/index.jsx'
 import { getLoginData, getUserData, removeAllData } from './utils/localStorage'
-import { useAutoLogin } from './hooks/api/login.js'
 import Sidebar from './components/SideBar/index.jsx'
 import SiteFooter from './components/SiteFooter/index.jsx'
 import { useLocation } from 'react-router-dom'
@@ -16,7 +15,6 @@ import { useChat } from './hooks/api/useChat.jsx'
 
 function App() {
   const { defaultAlgorithm, darkAlgorithm, compactAlgorithm } = theme;
-  const { mutate } = useAutoLogin()
   useChat(false);
   //每次刷新页面滚到顶部
   useEffect(() => {
@@ -27,25 +25,6 @@ function App() {
     }, 10);
     return () => clearTimeout(timer);
   }, [])
-
-
-  //检查是否自动登录
-  const checkAutoLogin = useCallback(() => {
-    const { rememberMe, autoLoginExpire } = getUserData()
-    if (rememberMe === true && autoLoginExpire) {
-      if (Date.now() < autoLoginExpire) {
-        logger.debug("检查进行自动登录")
-        mutate()
-      } else {
-        removeAllData()
-      }
-    }
-  }, [mutate])
-
-  // 只在组件挂载时检查自动登录
-  useEffect(() => {
-    checkAutoLogin()
-  }, [checkAutoLogin])
 
   return (
     <MyRoutes />

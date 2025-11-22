@@ -8,6 +8,7 @@ import { getLoginData } from "../localStorage";
 const service = axios.create({
   baseURL: "/api",
   timeout: 5000,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json"
   }

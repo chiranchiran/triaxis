@@ -78,6 +78,7 @@ export const setAutoLoginData = (rememberMe, autoLoginExpire) => {
 
 //设置、查询、删除所有数据
 export const setAllData = data => {
+  if (!data) return
   const { accessToken, refreshToken, userInfo } = data
   setLoginData(accessToken, refreshToken)
   setUserData(userInfo)

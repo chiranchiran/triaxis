@@ -13,10 +13,13 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Principal;
 
 @Slf4j
@@ -60,8 +63,47 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                     if (token != null && token.startsWith("Bearer ")) {
                         try {
-                            String id = jwtUtil.getSubjectFromAccessTokenHeader(token);
-                            log.info("成功解析用户ID: {}", id);
+                            // ========== 关键修复：从WebSocket握手头提取domain ==========
+                            String domain = "localhost";
+                            // 1. 获取WebSocket握手时的HTTP头（Origin/Referer保存在这里）
+                            StompHeaderAccessor handshakeAccessor = (StompHeaderAccessor)accessor.getHeader("stomp.originator");
+                            if (handshakeAccessor != null) {
+                                // 2. 优先从Origin头获取（跨域WebSocket连接必带）
+                                String origin = handshakeAccessor.getFirstNativeHeader("Origin");
+                                if (StringUtils.hasText(origin)) {
+                                    try {
+                                        domain = new URL(origin).getHost(); // 提取域名（如localhost、xxx.com）
+                                    } catch (MalformedURLException e) {
+                                        log.error("解析Origin域名失败: {}", origin, e);
+                                    }
+                                }
+                                // 3. 其次从Referer头获取（非跨域连接）
+                                if (!StringUtils.hasText(domain)) {
+                                    String referer = handshakeAccessor.getFirstNativeHeader("Referer");
+                                    if (StringUtils.hasText(referer)) {
+                                        try {
+                                            domain = new URL(referer).getHost();
+                                        } catch (MalformedURLException e) {
+                                            log.error("解析Referer域名失败: {}", referer, e);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 4. SSO关键：统一domain（避免127.0.0.1和localhost混用）
+                            if ("127.0.0.1".equals(domain)) {
+                                domain = "localhost";
+                            }
+
+                            log.info("WebSocket连接提取的domain: {}", domain);
+                            if (!StringUtils.hasText(domain)) {
+                                log.error("WebSocket连接未获取到有效domain，拒绝CONNECT");
+                                throw new RuntimeException("WebSocket连接域名缺失，token校验失败");
+                            }
+
+                            // 5. 调用jwtUtil校验token（传递提取的domain）
+                            String id = jwtUtil.getSubjectFromAccessTokenHeader(token, domain);
+                            log.info("WebSocket token校验成功，用户id: {}", id);
 
                             // 创建Principal并设置到accessor中
                             Principal principal = new Principal() {

@@ -17,9 +17,9 @@ const onAutoError = (error, dispatch, navigate) => {
 const onCaptcha = (data, dispatch, navigate) => {
   authconfig.captcha.success.description = data
 }
-const onRegister = (data, dispatch, navigate) => {
-  navigate('/login')
-}
+// const onRegister = (data, dispatch, navigate) => {
+//   navigate('/login')
+// }
 const onLogout = (error, dispatch, navigate) => {
   dispatch(logout())
 }
@@ -76,7 +76,6 @@ const authconfig = {
       showMessage: true,
       message: "注册成功",
       description: "请使用注册的账户登录",
-      handler: onRegister,
 
     },
     error: {

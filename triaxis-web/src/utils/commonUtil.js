@@ -140,3 +140,13 @@ export const debounce = (func, wait) => {
     timeout = setTimeout(later, wait);
   };
 };
+/**
+ * 1. 生成安全的state（随机+标识+时间戳）
+ */
+export const generateSafeState = () => {
+  const domain = window.location.hostname; // 子系统域名（防跨系统复用）
+  const random = crypto.randomUUID(); // 不可猜测的随机值
+  const timestamp = Date.now(); // 时间戳（有效期校验）
+  const nonce = crypto.getRandomValues(new Uint32Array(1))[0].toString(); // 额外随机值
+  return `${domain}_${random}_${timestamp}_${nonce}`;
+};
