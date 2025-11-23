@@ -5,10 +5,9 @@ import { getLoginData } from "../../utils/localStorage"
 import { useApi } from "../common/useApi"
 
 //登出
-export const useLogout = (params, options = {}) => {
+export const useLogout = (options = {}) => {
   return useApi(logout, {
-    config: apiConfigs.auth.logout,
-    params,
+    // config: apiConfigs.auth.logout,
     isMutation: true,
     ...options
   })
@@ -18,7 +17,7 @@ export const useLogout = (params, options = {}) => {
 //账户登录
 export const useLoginByCount = (options = {}) => {
   return useApi(loginCount, {
-    config: apiConfigs.auth.login,
+    // config: apiConfigs.auth.login,
     isMutation: true,
     ...options
   })
@@ -27,7 +26,7 @@ export const useLoginByCount = (options = {}) => {
 //手机号登录
 export const useLoginByMobile = (options = {}) => {
   return useApi(loginMobile, {
-    config: apiConfigs.auth.login,
+    // config: apiConfigs.auth.login,
     isMutation: true,
     ...options
   })
@@ -45,7 +44,7 @@ export const useLoginByMobile = (options = {}) => {
 export const useGetToken = (params, options = {}) => {
   return useApi(getToken, {
     params,
-    config: apiConfigs.auth.login,
+    // config: apiConfigs.auth.login,
     isMutation: false,
     ...options
   })
@@ -61,6 +60,10 @@ export const useGoLogin = (params, options = {}) => {
 }
 //刷新token
 export const useRefresh = (params, options = {}) => {
+  console.log('🔧 useRefresh 被调用', {
+    params,
+    options
+  });
   return useApi(refresh, {
     queryKey: ['refresh', params.state],
     params,

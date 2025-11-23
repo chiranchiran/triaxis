@@ -62,6 +62,7 @@ service.interceptors.response.use(
       return res.data.data
 
     }
+    // 包装业务错误
     const error = ErrorFactory.business(res.data, res)
     logger.error(res.data?.message || error.message, error)
     return Promise.reject(error)
@@ -72,15 +73,16 @@ service.interceptors.response.use(
     //处理无响应
     if (!error.response) {
       logger.debug("处理无响应错误", error)
-      return handleNetworkError(error, originalRequest)
+      return handleNetworkError(error)
     }
     //处理http错误
     logger.debug("处理http错误", error)
-    return handleHttpError(error, originalRequest)
+    return handleHttpError(error)
   }
 )
 //处理无响应错误
-const handleNetworkError = (error, originalRequest) => {
+const handleNetworkError = (error) => {
+  const originalRequest = error.config;
   const errorInfo = {
     url: originalRequest?.url,
     method: originalRequest?.method,
@@ -134,7 +136,8 @@ const handleNetworkError = (error, originalRequest) => {
 };
 
 //处理HTTP错误
-const handleHttpError = (error, originalRequest) => {
+const handleHttpError = (error) => {
+  const originalRequest = error.config;
   const { status, data } = error.response;
   const errorInfo = {
     url: originalRequest?.url,
@@ -190,11 +193,11 @@ const handleAuthError = async (config, errorInfo) => {
   }
   logger.warn('401请求错误，尝试刷新token', errorInfo);
   //检查是否有refreshToken
-  const { refreshToken } = getLoginData()
-  if (!refreshToken) {
-    logger.warn("refreshtoken不存在，无法刷新token")
-    return Promise.reject(ErrorFactory.business({ code: 11001 }))
-  }
+  // const { refreshToken } = getLoginData()
+  // if (!refreshToken) {
+  //   logger.warn("refreshtoken不存在，无法刷新token")
+  //   return Promise.reject(ErrorFactory.business({ code: 11001 }))
+  // }
 
   config._retry = true
   try {

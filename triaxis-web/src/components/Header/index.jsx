@@ -15,6 +15,7 @@ import { setLoginState, setMessageCount } from '../../store/slices/userCenterSli
 import { useGetUserMessagesCount } from '../../hooks/api/user';
 import { useChat } from '../../hooks/api/useChat';
 import { generateSafeState } from '../../utils/commonUtil';
+import { useLogin } from '../../hooks/message/useLogin';
 
 const Header = () => {
 
@@ -24,10 +25,11 @@ const Header = () => {
   const pathname = useLocation().pathname
   const { total } = useSelector((state) => state.userCenter.messageCount)
   const { isDark, isEnglish, changeLanguage, changeTheme } = usePreference()
-  const { mutateAsync: doLogout } = useLogout()
+  const { mutate: doLogout } = useLogout()
   const dispatch = useDispatch();
   const { username, isAuthenticated, role, avatar, id: userId } = useSelector(state => state.auth);
   const { mutateAsync: doGoLogin } = useGoLogin()
+  const { handleLogout } = useLogin();
   // const { data } = useGetUserMessagesCount({
   //   onSuccess: (data) => dispatch(setMessageCount(data)),
   // });;
@@ -57,7 +59,10 @@ const Header = () => {
   const handleMenuClick = ({ key }) => {
     if (!key) return
     if (key === 'logout') {
-      doLogout(userId)
+      doLogout({ id: userId }, {
+        onSuccess: () => handleLogout(),
+        onError: () => handleLogout()
+      })
     } else {
       navigate(`/user/${key}`)
     }

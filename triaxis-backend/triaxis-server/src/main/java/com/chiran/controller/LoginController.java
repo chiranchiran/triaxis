@@ -168,7 +168,9 @@ public class LoginController {
         cookie.setHttpOnly(true); // 防 XSS
         cookie.setSecure(false); // 本地开发关闭 HTTPS 要求
         // 复用你 JwtProperties 中的过期时间（毫秒转秒）
-        cookie.setMaxAge((int) (jwtUtil.getJwtProperties().getRefreshToken().getExpiration() / 1000));
+        int age =(int)  jwtUtil.getJwtProperties().getRefreshToken().getExpiration() / 1000;
+log.debug("setRefreshTokenCookie age:{}", age);
+        cookie.setMaxAge(age);
         response.addCookie(cookie);
     }
 

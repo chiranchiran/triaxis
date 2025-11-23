@@ -35,56 +35,87 @@ export const handleGlobalError = () => {
     };
   }
 }
+// //处理数据层Promise错误
+// export function handlePromiseError(error, showMessage, notification, messageApi, navigate) {
+//   logger.debug("捕获到primise错误", error)
+//   if (!error) return
+//   const { type, level = 'error', message, details } = error
+//   //区分不同类型处理
+//   switch (type) {
+//     case 'REDIRECT':
+//       return
+//     case 'CLIENT_ERROR':
+//     case 'SYSTEM_ERROR':
+//       if (showMessage) notification[level]({ message: "请求错误", description: message })
+//       break
+//     case 'SERVER_ERROR':
+//       if (showMessage) notification[level]({ message: "服务器错误", description: message })
+//       break
+//     case 'NETWORK_ERROR':
+//       if (showMessage) notification[level]({ message: "网络错误", description: message })
+//       break;
+//     case 'AUTH_ERROR':
+//       handleAuthError(error, showMessage, notification, navigate);
+//       break;
+//     case 'USER_ERROR':
+//       if (showMessage) notification[level]({ message: "登录错误", description: message })
+//       break;
+//     case 'VALIDATION_ERROR':
+//     case 'BUSINESS_ERROR':
+//     case 'ORDER_ERROR':
+//       if (showMessage) messageApi[level](message, navigate)
+//       break;
+//     case 'PAYMENT_ERROR':
+//       if (showMessage) notification[level]({ message: "支付失败", description: message })
+//       break
+//     default:
+//       logger.error(error)
+//       if (showMessage) notification[level]({ message: "未知错误", description: "请重试！" })
+//   }
+// }
+// function handleAuthError(error, showMessage, notification, navigate) {
+//   const { code, message } = error;
+//   if (code === 11000 || 11001) {
+//     if (showMessage) notification.info({ message: "请登录！", description: message })
+//     store.dispatch(logout())
+//     // 跳转到登录页
+//     // setTimeout(() => {
+//     //   navigate('/login')
+//     // }, 1000);
+//   }
+//   //11002逻辑
+//   if (showMessage) notification.warning({ message: "权限错误！", description: error.message })
+//   //11003逻辑
+//   if (showMessage) notification.error({ message: "未知错误！", description: error.message })
+// }
+
 //处理数据层Promise错误
-export function handlePromiseError(error, showMessage, notification, messageApi, navigate) {
+export function handlePromiseError(error, notification) {
   logger.debug("捕获到primise错误", error)
   if (!error) return
   const { type, level = 'error', message, details } = error
   //区分不同类型处理
   switch (type) {
-    case 'REDIRECT':
-      return
-    case 'CLIENT_ERROR':
-    case 'SYSTEM_ERROR':
-      if (showMessage) notification[level]({ message: "请求错误", description: message })
-      break
-    case 'SERVER_ERROR':
-      if (showMessage) notification[level]({ message: "服务器错误", description: message })
-      break
-    case 'NETWORK_ERROR':
-      if (showMessage) notification[level]({ message: "网络错误", description: message })
-      break;
     case 'AUTH_ERROR':
-      handleAuthError(error, showMessage, notification, navigate);
+      handleAuthError(error, notification);
       break;
-    case 'USER_ERROR':
-      if (showMessage) notification[level]({ message: "登录错误", description: message })
-      break;
-    case 'VALIDATION_ERROR':
-    case 'BUSINESS_ERROR':
-    case 'ORDER_ERROR':
-      if (showMessage) messageApi[level](message, navigate)
-      break;
-    case 'PAYMENT_ERROR':
-      if (showMessage) notification[level]({ message: "支付失败", description: message })
-      break
-    default:
-      logger.error(error)
-      if (showMessage) notification[level]({ message: "未知错误", description: "请重试！" })
+    // default:
+    //   logger.error(error)
+    //   notification[level]({ message: "未知错误", description: "请重试！" })
   }
 }
-function handleAuthError(error, showMessage, notification, navigate) {
+function handleAuthError(error, notification) {
   const { code, message } = error;
   if (code === 11000 || 11001) {
-    if (showMessage) notification.info({ message: "请登录！", description: message })
+    notification.info({ message: "请登录！", description: message })
     store.dispatch(logout())
     // 跳转到登录页
     // setTimeout(() => {
     //   navigate('/login')
     // }, 1000);
   }
-  //11002逻辑
-  if (showMessage) notification.warning({ message: "权限错误！", description: error.message })
-  //11003逻辑
-  if (showMessage) notification.error({ message: "未知错误！", description: error.message })
+  // //11002逻辑
+  // if (showMessage) notification.warning({ message: "权限错误！", description: error.message })
+  // //11003逻辑
+  // if (showMessage) notification.error({ message: "未知错误！", description: error.message })
 }

@@ -2,6 +2,8 @@ import service from "../../utils/api/service"
 
 //登出
 export const logout = (id) => {
+
+  console.log(id)
   return service.post(`/user/logout/${id}`)
 }
 //获取个人信息

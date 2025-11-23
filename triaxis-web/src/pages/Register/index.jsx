@@ -20,6 +20,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCaptcha } from '../../hooks/api/common';
 import { generateSafeState } from '../../utils/commonUtil';
 import { useGoLogin } from '../../hooks/api/login';
+import { useLogin } from '../../hooks/message/useLogin';
 
 function Register() {
   const pathname = useLocation().pathname
@@ -32,7 +33,7 @@ function Register() {
   //倒计时
   const [count, setCount] = useState(60);
   const [isTiming, setIsTiming] = useState(false)
-
+  const { handleCaptchaSuccess, handleCaptchaError, handleRegisterError, handleRegisterSuccess } = useLogin();
   //注册方式0：账号密码，1：手机号，
   const [registerType, setRegisterType] = useState(0);
 
@@ -56,29 +57,29 @@ function Register() {
     return () => clearInterval(timer);
   }, [isTiming])
 
-  // 监听登录状态变化
-  useEffect(() => {
-    if (isPhone || isCount) {
-      logger.debug("注册成功", {
-        isPhone,
-        isCount
-      })
-      // sso登录
-      const fn = async () => {
-        const state = generateSafeState();
-        await doGoLogin({ state })
+  // // 监听登录状态变化
+  // useEffect(() => {
+  //   if (isPhone || isCount) {
+  //     logger.debug("注册成功", {
+  //       isPhone,
+  //       isCount
+  //     })
+  //     // sso登录
+  //     const fn = async () => {
+  //       const state = generateSafeState();
+  //       await doGoLogin({ state })
 
-        // dispatch(setLoginState(state))
-        const redirectUri = '/sso/callback';
-        navigate(`/login?state=${state}&redirectUri=${redirectUri}&originalPath=${pathname}`)
-      }
-      fn()
+  //       // dispatch(setLoginState(state))
+  //       const redirectUri = '/sso/callback';
+  //       navigate(`/login?state=${state}&redirectUri=${redirectUri}&originalPath=${pathname}`)
+  //     }
+  //     fn()
 
-    } else {
-      setIsTiming(false);
-      setCount(60);
-    }
-  }, [isPhone, isCount])
+  //   } else {
+  //     setIsTiming(false);
+  //     setCount(60);
+  //   }
+  // }, [isPhone, isCount])
 
   //tab栏切换清空
   const changeTab = (activeKey) => {
@@ -99,7 +100,9 @@ function Register() {
     setCount(60);
     setIsTiming(true);
     getCaptcha({ phone }, {
+      onSuccess: data => handleCaptchaSuccess(data),
       onError: () => {
+        handleCaptchaError(error)
         setIsTiming(false)
         setCount(60);
       }
@@ -112,12 +115,28 @@ function Register() {
     if (registerType === 0) {
       const { username, password } = values
       logger.debug("开始注册", { username, password })
-      countRegister({ username, password })
+      countRegister({ username, password }, {
+        onSuccess: data => handleRegisterSuccess(data),
+        onError: error => {
+          debugger
+          setIsTiming(false);
+          setCount(60);
+          handleRegisterError(error)
+        }
+      })
       //手机号注册
     } else {
       const { phone, captcha, password } = values
       logger.debug("开始注册", { phone, captcha, password })
-      phoneRegister({ phone, captcha, password })
+      phoneRegister({ phone, captcha, password }, {
+        onSuccess: data => handleRegisterSuccess(data),
+        onError: error => {
+
+          setIsTiming(false);
+          setCount(60);
+          handleRegisterError(error)
+        }
+      })
     }
   }
 

@@ -42,16 +42,11 @@ public class UserController {
      * 用户用id登出
      */
     @PostMapping("/logout/{id}")
-    public Result loginAuto(@PathVariable String id, @RequestHeader("Authorization") String token, @RequestHeader("Refresh-Token") String refresh, HttpServletRequest request) {
+    public Result loginAuto(@PathVariable String id, @RequestHeader("Authorization") String token, HttpServletRequest request) {
         String userId = request.getAttribute("userId").toString();
         log.info("用户登出，id是{}", userId);
         if (token != null) {
             String tokenId = jwtUtil.parseAccessToken(token).get("tokenId", String.class);
-            jwtUtil.removeAllTokens(userId, tokenId);
-            return Result.success();
-        }
-        if (refresh != null) {
-            String tokenId = jwtUtil.parseRefreshToken(refresh).get("tokenId", String.class);
             jwtUtil.removeAllTokens(userId, tokenId);
             return Result.success();
         }

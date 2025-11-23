@@ -15,12 +15,14 @@ import { refresh } from "../../api/modules/login";
 export const refreshTokens = createAsyncThunk('auth/refresh',
   async (_, { rejectWithValue }) => {
     try {
-      const { refreshToken } = getLoginData()
-      if (!refreshToken) {
-        logger.warn("没有refreshToken")
-        return rejectWithValue('没有刷新令牌')
-      }
-      const res = await refresh()
+      // const { refreshToken } = getLoginData()
+      // if (!refreshToken) {
+      //   logger.warn("没有refreshToken")
+      //   return rejectWithValue('没有刷新令牌')
+      // }
+      const res = await refresh({
+        auto: false,
+      })
       return res
     } catch (error) {
       return rejectWithValue(error.message || '登录失败')

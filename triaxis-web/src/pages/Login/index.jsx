@@ -28,6 +28,7 @@ import Logo from '../../components/Logo';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import LoginBase from '../../components/LoginBase';
 import { useCaptcha } from '../../hooks/api/common';
+import { useLogin } from '../../hooks/message/useLogin';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -37,31 +38,6 @@ const Login = () => {
     originalPath: ''
   });
 
-  // 组件挂载时立即缓存URL参数（只执行一次，锁定初始参数）
-  useEffect(() => {
-    const ssoState = searchParams.get('state') || '';
-    const redirectUri = searchParams.get('redirectUri') || '';
-    const originalPath = searchParams.get('originalPath') || '';
-    setCacheParams({ ssoState, redirectUri, originalPath });
-    logger.debug("缓存URL参数", { ssoState, redirectUri, originalPath });
-  }, []);
-
-  // 解构缓存的参数（后续所有操作都用这个，不用searchParams）
-  const { ssoState, redirectUri, originalPath } = cacheParams;
-
-  logger.debug("当前缓存的URL参数", cacheParams);
-
-  const { isAuthenticated, username } = useSelector(state => state.auth)
-  logger.debug("当前的redux用户信息", username);
-
-  const [form] = useForm()
-  const navigate = useNavigate()
-  const { mutate: doCaptcha, isError: isCaptcha, data } = useCaptcha()
-  const { mutate: doCountLogin, isSuccess: isCount } = useLoginByCount()
-  const { mutate: doPhoneLogin, isSuccess: isPhone } = useLoginByMobile()
-
-
-
   //倒计时
   const [count, setCount] = useState(60);
   const [isTiming, setIsTiming] = useState(false)
@@ -69,17 +45,52 @@ const Login = () => {
   //登录方式0：账号密码，1：手机号，
   const [loginType, setLoginType] = useState(0);
   const { rememberMe } = getUserData();
-  console.log(ssoState)
+
+  // 解构缓存的参数（后续所有操作都用这个，不用searchParams）
+  const { ssoState, redirectUri, originalPath } = cacheParams;
+
+  const { isAuthenticated, username } = useSelector(state => state.auth)
+  logger.debug("当前的redux用户信息", username);
+
+  const [form] = useForm()
+  const navigate = useNavigate()
+  const { handleCaptchaSuccess, handleCaptchaError, handleLoginSuccess, handleLoginError, handleAutoLoginError } = useLogin();
+  // 组件挂载时立即缓存URL参数（只执行一次，锁定初始参数）
+  useEffect(() => {
+    const ssoState = searchParams.get('state') || '';
+    const redirectUri = searchParams.get('redirectUri') || '';
+    const originalPath = searchParams.get('originalPath') || '';
+    setCacheParams({ ssoState, redirectUri, originalPath });
+  }, []);
+
+
+  const { mutate: doCaptcha, isError: isCaptcha, data } = useCaptcha({
+    onSuccess: data => handleCaptchaSuccess(data),
+    onError: error => handleCaptchaError(error)
+  })
+  const { mutate: doCountLogin, isSuccess: isCount } = useLoginByCount({
+    onSuccess: data => handleLoginSuccess(data),
+    onError: error => handleLoginError(error)
+  })
+  const { mutate: doPhoneLogin, isSuccess: isPhone } = useLoginByMobile({
+    onSuccess: data => handleLoginSuccess(data),
+    onError: error => handleLoginError(error)
+  })
+
+
+  console.log(!!rememberMe, !!ssoState, !isAuthenticated)
   const { data: loginData = {}, isFetching } = useRefresh({
     auto: true,
     state: ssoState
   }, {
     enabled: !!rememberMe && !!ssoState && !isAuthenticated,
     onSuccess: () => {
-      debugger;
       console.log("要去拿token了")
       navigate(`${redirectUri}?state=${ssoState}&originalPath=${originalPath}`)
-    }, onError: () => {
+    },
+    onError: (error) => {
+      console.log('❌ useRefresh 内部错误处理', error);
+      handleAutoLoginError(error)
       form.setFieldsValue({
         username: username,
         autoLogin: true

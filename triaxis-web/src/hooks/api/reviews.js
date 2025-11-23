@@ -6,7 +6,7 @@ import { useUpload } from "../common/useData"
 export const useGetReviews = (params = {}, options = {}) => {
   return useApi(getReviews, {
     queryKey: ['reviews', params.targetType, params.targetId, params.orderBy],
-    config: apiConfigs.common.getView,
+    // config: apiConfigs.common.getView,
     params,
     isMutation: false,
     ...options
@@ -15,7 +15,7 @@ export const useGetReviews = (params = {}, options = {}) => {
 export const useGetReviewReplies = (params = {}, options = {}) => {
   return useApi(getReviewReplies, {
     queryKey: ['reviews', 'replies', params.targetType, params.targetId, params.rootId],
-    config: apiConfigs.common.getView,
+    // config: apiConfigs.common.getView,
     params,
     isMutation: false,
     ...options

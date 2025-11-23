@@ -15,8 +15,8 @@ export const loginMobile = (data) => {
 //   return service.post('/login/validate')
 // }
 //登出
-export const logout = (id) => {
-  return service.post(`/user/logout/${id}`)
+export const logout = (data) => {
+  return service.post(`/user/logout/${data.id}`)
 }
 //refreshToken获得accessToken
 export const refresh = (params) => {

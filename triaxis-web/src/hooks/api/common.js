@@ -15,10 +15,9 @@ export const useDownload = (params, options) => {
   return useUpload(uploadResource, ['Resources', 'types'], params, options)
 }
 //获取验证码
-export const useCaptcha = (params, options = {}) => {
+export const useCaptcha = (options = {}) => {
   return useApi(getCaptcha, {
-    config: apiConfigs.auth.captcha,
-    params,
+    // config: apiConfigs.auth.captcha,
     isMutation: true,
     ...options
   })
