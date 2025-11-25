@@ -14,7 +14,7 @@ const Element = React.memo(() => {
 
   const filteredRoutes = useMemo(() => {
     console.log("只有 role/permissions 变化时，才重新计算路由表");
-    return filterRoutes(routesConfig, role, permissions);
+    return filterRoutes(routesConfig);
   }, [role, JSON.stringify(permissions)]);
 
   return useRoutes(filteredRoutes);

@@ -1,12 +1,12 @@
 import { AuthProtect } from "./AuthProtect";
 
 // 动态路由生成函数（根据当前 role 过滤）
-export const filterRoutes = (routes, role, permissions, parentAllowedRoles = []) => {
+export const filterRoutes = (routes, parentAllowedRoles = []) => {
   return routes.map(route => {
     const allowedRoles = route.allowedRoles || parentAllowedRoles;
     // 处理子路由（递归）
     const children = route.children
-      ? { children: filterRoutes(route.children, role, permissions, allowedRoles) }
+      ? { children: filterRoutes(route.children, allowedRoles) }
       : {};
     // 公开路由直接返回
     if (route.public) return { ...route, ...children };
@@ -22,8 +22,6 @@ export const filterRoutes = (routes, role, permissions, parentAllowedRoles = [])
       element: (
         <AuthProtect
           allowedRoles={allowedRoles || []}
-          role={role}
-          permissions={permissions}
           requiredPermissions={route.requiredPermissions || []}
         >
           {route.element}

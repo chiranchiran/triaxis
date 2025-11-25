@@ -61,24 +61,119 @@ html[data-theme='light'] {
 }
 
 html[data-theme='dark'] {
-  --primary: #93c8ff;
-  --primary-light: #1e3a5f;
-  --primary-dark: #7bb2f5;
-  --accent-green: #7adfb8;
-  --accent-green-light: #064e3b;
-  --accent-orange: #ffd470;
-  --accent-orange-light: #78350f;
-  --bg: #0f172a;
-  --bg-elevated: #1e293b;
-  --bg-gray: #1e293b;
-  --text: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --border: #334155;
+  /* 小清新主色系（暗调适配：降低明度、提高饱和度，突出层次） */
+  --primary: #4a89dc;
+  /* 主色：浅蓝→深蓝，暗背景中突出 */
+  --primary-50: rgba(74, 137, 220, 0.4);
+  /* 半透明主色，保持通透感 */
+  --primary-light: #6fa1e9;
+  /* 浅主色：比主色亮10%，用于hover/边框 */
+  --primary-dark: #2c5aa0;
+  /* 深主色：比主色暗15%，用于active/强调 */
+  --primary-border: #5b92e5;
+  /* 主色边框：略浅于主色，暗背景中可见 */
 
-  --border-light: #1e293b;
+  /* 绿色辅助系（保持生机感，暗调不沉闷） */
+  --accent-green-ribbon: #3da57c;
+  /* 丝带色：浅绿→深绿 */
+  --accent-green-border: #2e8b57;
+  /* 边框色：亮绿→深绿，提高对比度 */
+  --accent-green-dark: #1f6d3f;
+  /* 深色：更深的绿，用于强调 */
+  --accent-green: #4fc3a1;
+  /* 主绿色：浅绿→中绿，保持识别度 */
+  --accent-green-50: rgba(79, 195, 161, 0.4);
+  /* 半透明绿 */
+  --accent-green-light: #63e6be9f;
+  /* 浅绿：暗背景中更通透 */
+
+  /* 橙色辅助系（暖调平衡暗背景，不刺眼） */
+  --accent-orange-border: #e67e22;
+  /* 边框色：浅橙→深橙 */
+  --accent-orange-dark: #c0392b;
+  /* 深色：深橙→暗红橙，强调 */
+  --accent-orange-vip: #f39c12;
+  /* VIP色：保持亮橙，突出特权 */
+  --accent-orange-ribbon: #e67e22;
+  /* 丝带色：浅橙→深橙 */
+  --accent-orange: #f1948a;
+  /* 主橙色：浅橙→暖橙，避免灰暗 */
+  --accent-orange-50: rgba(241, 148, 138, 0.4);
+  /* 半透明橙 */
+  --accent-orange-btn: #f39c12;
+  /* 按钮色：浅橙→亮橙，提高点击欲 */
+  --accent-orange-light: #f8c471;
+  /* 浅橙：暗背景中更明亮 */
+
+  /* 背景色（暗调层级：近黑→深灰→中灰，避免纯黑刺眼） */
+  --bg: #121212;
+  /* 全局背景：近黑，不刺眼 */
+  --bg-light: #1e1e1e;
+  /* 浅背景：比全局背景亮10%，用于区块分隔 */
+  --bg-elevated: #1e293b;
+  /* 悬浮层背景：深灰蓝，卡片/弹窗使用，提高层级 */
+  --bg-gray: #2d3748;
+  /* 灰色背景：中深灰，用于次要区块 */
+  --bg-gray-light: #374151;
+  /* 浅灰背景：比灰色背景亮10% */
+  --bg-dark: #65686d;
+  /* 深色背景：更深的灰蓝，用于底部栏/侧边栏 */
+  --bg-dark-hover: #0f172a;
+  /* 深色hover：与深色背景一致，hover时加边框 */
+  --bg-hover: #374151;
+  /* 通用hover：中灰，反馈清晰 */
+  --bg-blue-light: #1a365d;
+  /* 蓝色浅背景：深灰蓝，与主色呼应 */
+  --bg-btn: #2d3748;
+  /* 按钮背景：中深灰，避免与全局背景融合 */
+  --bg-selected: #3b82f6;
+  /* 选中背景：亮蓝，突出选中状态 */
+
+  /* 文字色（近白→浅灰→中灰，确保可读性） */
+  --text: #f8fafc;
+  /* 主文字：近白，不刺眼 */
+  --text-secondary: #cbd5e1;
+  /* 次要文字：浅灰，比主文字暗20% */
+  --text-muted: #94a3b8;
+  /* 弱化文字：中灰，用于说明/提示 */
+  --text-light: #ffffff;
+  /* 亮色文字：纯白，用于强调/按钮 */
+  --text-green: #4ade80;
+  /* 绿色文字：亮绿，保持识别度 */
+  --border: #334155;
+  /* 通用边框：深灰蓝，暗背景中可见 */
+  --border-light: #475569;
+  /* 浅边框：比通用边框亮10% */
+  --border-active: #64748b;
+  /* 激活边框：更亮的灰，突出状态 */
+
+  /* 阴影（暗背景中降低透明度，避免突兀） */
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3);
-  --black: #e2e8f0;
-  --blue: #60a5fa;
+  /* 普通阴影：加深透明度 */
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+  /* 大阴影：更高透明度，增强层次感 */
+  --black: #0a0a0a;
+  /* 纯黑：用于特殊强调，极少使用 */
+  --blue: #3b82f6;
+  /* 蓝色：亮蓝，保持识别度 */
+
+  /* 功能色（保持原有语义，暗调适配） */
+  --bg-like: #3b1e1e;
+  /* 点赞背景：深红底→深暗红，避免刺眼 */
+  --bg-hot: #421f1f;
+  /* 热门背景：浅红底→深暗红 */
+  --bg-red: #dc2626;
+  /* 红色：亮红，保持警示性 */
+  --text-like: #ef4444;
+  /* 点赞文字：亮红，突出互动 */
+  --border-hot: #991b1b;
+  /* 热门边框：深红，暗背景中可见 */
+  --border-like: #991b1b;
+  /* 点赞边框：深红，与背景区分 */
+  --bg-score: #3b321e;
+  /* 评分背景：浅黄底→深黄褐 */
+  --text-score: #facc15;
+  /* 评分文字：亮黄，保持醒目 */
+  --text-rate: #facc15;
+  /* 星级文字：亮黄，突出评分 */
 }

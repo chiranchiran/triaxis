@@ -6,9 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import UrbanPlanningKnowledgeGraph from './KnowledgeGraph';
 import Logo from '../../components/Logo';
 import { MyButton } from '../../components/MyButton';
+import { useTranslation } from 'react-i18next';
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation()
   return (
     <section className="min-h-[41rem] items-center bg-light py-8 px-15 flex flex-col justify-center">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-24 items-center max-w-8xl mx-auto">
@@ -18,7 +20,7 @@ const HeroSection = () => {
           <div className="left space-y-3">
             <Logo size="xl" title="三轴线" />
             <p className="text-xl text-main dark:text-gray-300 leading-relaxed w-full">
-              服务于高校的城乡规划专业共享平台   ，汇聚最新资源、课程和行业动态。
+              {t("platformSlogan")}    {t("platformDescription")}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 mt-4">
@@ -27,7 +29,8 @@ const HeroSection = () => {
               onClick={() => navigate('/courses')}
               type="black"
             >
-              课程学习
+              {t("courseLearning")}
+
             </MyButton>
             <MyButton
               size='large'
@@ -35,7 +38,8 @@ const HeroSection = () => {
               type="white"
               icon={<ArrowRightOutlined />}
             >
-              查找资源
+              {t("findResources")}
+
             </MyButton>
           </div>
         </div>

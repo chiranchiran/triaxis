@@ -78,25 +78,25 @@ const Login = () => {
   })
 
 
-  console.log(!!rememberMe, !!ssoState, !isAuthenticated)
-  const { data: loginData = {}, isFetching } = useRefresh({
-    auto: true,
-    state: ssoState
-  }, {
-    enabled: !!rememberMe && !!ssoState && !isAuthenticated,
-    onSuccess: () => {
-      console.log("要去拿token了")
-      navigate(`${redirectUri}?state=${ssoState}&originalPath=${originalPath}`)
-    },
-    onError: (error) => {
-      console.log('❌ useRefresh 内部错误处理', error);
-      handleAutoLoginError(error)
-      form.setFieldsValue({
-        username: username,
-        autoLogin: true
-      });
-    }
-  });
+  // console.log(!!rememberMe, !!ssoState, !isAuthenticated)
+  // const { data: loginData = {}, isFetching } = useRefresh({
+  //   auto: true,
+  //   state: ssoState
+  // }, {
+  //   enabled: !!rememberMe && !!ssoState && !isAuthenticated,
+  //   onSuccess: () => {
+  //     console.log("要去拿token了")
+  //     navigate(`${redirectUri}?state=${ssoState}&originalPath=${originalPath}`)
+  //   },
+  //   onError: (error) => {
+  //     console.log('❌ useRefresh 内部错误处理', error);
+  //     handleAutoLoginError(error)
+  //     form.setFieldsValue({
+  //       username: username,
+  //       autoLogin: true
+  //     });
+  //   }
+  // });
 
   // 倒计时定时器
   useEffect(() => {

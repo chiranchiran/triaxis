@@ -124,7 +124,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
                         } catch (Exception e) {
                             log.error("Token验证失败: {}", e.getMessage());
-                            throw new RuntimeException("Invalid token: " + e.getMessage());
+                            throw new RuntimeException("401" + e.getMessage());
                         }
                     } else {
                         log.warn("未找到有效的Authorization头");

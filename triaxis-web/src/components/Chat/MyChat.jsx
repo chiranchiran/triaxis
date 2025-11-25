@@ -91,11 +91,25 @@ export const MyChat = ({ user, onBack }) => {
 
     // 订阅消息
     const id = subscribeChat('chat', {
-      [SubscriptionTypes.CHAT_DETAIL]: handleChatDetail,
-      [SubscriptionTypes.CHAT_NEW_MESSAGE]: handleNewMessage,
-      [SubscriptionTypes.CHAT_MESSAGE_SENT]: handleMessageSent,
-      [SubscriptionTypes.CHAT_DELETE]: handleDel,
-      [SubscriptionTypes.CHAT_REVOKE]: handleRevoke
+      [SubscriptionTypes.CHAT_DETAIL]: {
+        onSuccess: handleChatDetail,
+        onError: handleChatDetailError,
+      },
+      [SubscriptionTypes.CHAT_NEW_MESSAGE]: {
+        onSuccess: handleNewMessage,
+      },
+      [SubscriptionTypes.CHAT_MESSAGE_SENT]: {
+        onSuccess: handleMessageSent,
+        onError: handleMessageSentError,
+      },
+      [SubscriptionTypes.CHAT_DELETE]: {
+        onSuccess: handleDel,
+        onError: () => messageApi.error("删除失败"),
+      },
+      [SubscriptionTypes.CHAT_REVOKE]: {
+        onSuccess: handleRevoke,
+        onError: () => messageApi.error("撤回失败"),
+      },
     });
 
     setIsLoading(true);
@@ -199,7 +213,12 @@ export const MyChat = ({ user, onBack }) => {
       setIsLoadingMore(false);
     }
   }, [transformRecordsToChats, pageSize]);
-
+  const handleChatDetailError = useCallback((chatData) => {
+    console.error('获取聊天详情错误:', chatData);
+    messageApi.error('获取聊天记录失败，请重试');
+    setIsLoading(false);
+    setIsLoadingMore(false);
+  }, [transformRecordsToChats, pageSize]);
   // 加载更多历史消息 - 使用 ref 获取最新值
   const loadMoreMessages = useCallback(async () => {
     console.log("加载下一页检查 - 已加载页面:", loadedPagesRef.current);
@@ -306,7 +325,24 @@ export const MyChat = ({ user, onBack }) => {
       messageApi.error("发送失败");
     }
   }, [messageApi, transformRecordsToChats, messages.length]);
+  const handleMessageSentError = useCallback((message) => {
 
+    // 发送失败处理
+    setMessages(prev => {
+      const updatedList = [...prev];
+      const loadingIndex = updatedList.findIndex(msg => msg.id === 'loading' || msg.status === 'loading');
+      if (loadingIndex >= 0) {
+        updatedList[loadingIndex] = {
+          ...updatedList[loadingIndex],
+          id: 'error',
+          status: 'error',
+          content: '发送失败'
+        };
+      }
+      return updatedList;
+    });
+    messageApi.error("发送失败");
+  }, [messageApi, transformRecordsToChats, messages.length]);
   const handleDel = useCallback((messageId) => {
     console.log('消息删除确认:', messageId);
     if (messageId) {
@@ -344,7 +380,7 @@ export const MyChat = ({ user, onBack }) => {
         }
         return updatedList;
       });
-      清除缓存
+      // 清除缓存
       if (virtualListRef.current) {
         virtualListRef.current.clearCache();
       }

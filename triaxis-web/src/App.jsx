@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom'
 import { logger } from './utils/logger.js'
 import { ReactFlowProvider } from 'reactflow'
 import { useChat } from './hooks/api/useChat.jsx'
-
+import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools'
 
 
 function App() {
@@ -27,7 +27,11 @@ function App() {
   }, [])
 
   return (
-    <MyRoutes />
+    <>
+      <MyRoutes />
+
+    </>
+
   );
 }
 

@@ -145,7 +145,7 @@ const routesConfig = [
         allowedRoles: [USER, ADMIN],
       },
       {
-        path: '/feedback',
+        path: '/user/feedback',
         element: <FeedbackDisplay />,
         allowedRoles: [USER, ADMIN],
 

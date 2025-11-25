@@ -68,7 +68,7 @@ jwt:
   issuer: "triaxis-server"
   access-token:
     header: "Authorization"
-    expiration: 900000  # 过期时间15分钟
+    expiration: 9000000  # 过期时间15分钟,注意这里多了1个0
     privatePath: "E:/study/my_works/triaxis/config/secret/access-private.key"
     publicPath: "E:/study/my_works/triaxis/config/secret/access-public.key"
   refresh-token:

@@ -40,7 +40,10 @@ export const ChatMessage = () => {
     if (!userId) return;
     console.log('初始化聊天列表，用户ID:', userId);
     const id = subscribeChats('chats', {
-      [SubscriptionTypes.CHAT_LISTS]: handleChats,
+      [SubscriptionTypes.CHAT_LISTS]: {
+        onSuccess: handleChats,
+        onError: () => messageApi.errorr("当前网络不稳定，找不到聊天记录！")
+      },
     })
     getChats(userId)
   }, [userId]);

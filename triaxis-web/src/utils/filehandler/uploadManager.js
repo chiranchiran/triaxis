@@ -7,7 +7,7 @@ import { requestPool } from './requestPool.js';
 export class UploadManager {
   constructor() {
     this.config = {
-      smallFileThreshold: 600 * 1024 * 1024, // 100MB
+      smallFileThreshold: 100 * 1024 * 1024, // 100MB
       maxRetries: 3,
       chunkSize: 10 * 1024 * 1024,
     };
@@ -73,6 +73,7 @@ export class UploadManager {
       fileHash: '',
       fileName: file.name,
       fileSize: file.size,
+      chunks: [],
       totalChunks: totalChunks,
       uploadedChunks: [],
       status: 'pending',

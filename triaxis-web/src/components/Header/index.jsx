@@ -16,6 +16,7 @@ import { useGetUserMessagesCount } from '../../hooks/api/user';
 import { useChat } from '../../hooks/api/useChat';
 import { generateSafeState } from '../../utils/commonUtil';
 import { useLogin } from '../../hooks/message/useLogin';
+import { UploadButton } from '../MyButton/permissionButton';
 
 const Header = () => {
 
@@ -38,7 +39,9 @@ const Header = () => {
     if (!userId) return;
     console.log('初始化聊天列表，用户ID:', userId);
     const id = subscribeMessageCount('chats', {
-      [SubscriptionTypes.MESSAGE_COUNT]: handleChats,
+      [SubscriptionTypes.MESSAGE_COUNT]: {
+        onSuccess: handleChats,
+      }
     })
     getMessagesCount(userId)
   }, [userId]);
@@ -149,7 +152,7 @@ const Header = () => {
                   key={item.key}
                   to={item.path}
                   className={({ isActive }) => [
-                    "py-7 px-5 transition-all duration-300 text-title",
+                    "py-7 px-4 min-w-20 transition-all duration-300 text-title text-center",
                     isActive ? "bg-dark text-light" : "text-main"
                   ].join(' ')}
                 >
@@ -159,7 +162,7 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* 搜索框 */}
+          {/* 搜索框
           <div className="flex-1 max-w-lg lg:mx-10 xl:mx-10 2xl:mx-25">
             <Search
               placeholder="搜索资源、课程、帖子..."
@@ -167,22 +170,17 @@ const Header = () => {
               size="middle"
               className="min-x-10 rounded-lg"
             />
-          </div>
+          </div> */}
 
           {/* 右侧操作区 */}
           <div className="flex items-center space-x-3">
-            <MyButton
-              type="blue"
-              icon={<UploadOutlined />}
-              styles="text-main"
-              onClick={() => navigate("/upload")}
-            >上传</MyButton>
+            <UploadButton />
             <MyButton
               type="orange"
               icon={<CrownOutlined />}
               styles="text-main"
               onClick={() => navigate('/user/vip')}
-            >    会员</MyButton>
+            > {t("membership")}   </MyButton>
 
             <Tooltip title={isEnglish ? '切换中文' : '切换英文'}>
               <Button
@@ -209,11 +207,11 @@ const Header = () => {
                 <MyButton
                   type="gray"
                   onClick={() => navigate("/register")}
-                >注册</MyButton>
+                >{t("register")} </MyButton>
                 <MyButton
                   type="gray"
                   onClick={handleLogin}
-                >登录</MyButton>
+                >{t("login")} </MyButton>
               </div>
             ) : (
               <Dropdown

@@ -42,39 +42,101 @@ class Logger {
     this.addContext[key] = value
   }
   //记录日志
+  getCallerInfo() {
+    // 生产环境直接返回空（避免暴露路径）
+    if (!import.meta.env.DEV || typeof window === "undefined") {
+      return { file: "", line: "", column: "" };
+    }
+
+    try {
+      // 创建临时 Error，获取调用栈
+      const error = new Error();
+      if (!error.stack) return { file: "", line: "", column: "" };
+
+      // 分割栈帧（每一行是一个调用栈）
+      const stackFrames = error.stack.split("\n").filter(frame => frame.trim());
+
+      // 过滤无效栈帧：
+      // 1. 排除 Error 构造函数本身的栈帧（第一行）
+      // 2. 排除 Logger 类内部的调用（含当前文件路径、log/debug/info 等方法）
+      // 3. 排除 node_modules 依赖的调用
+      const targetFrame = stackFrames.find(frame => {
+        return !frame.includes("Logger.") && // 排除 Logger 内部方法
+          !frame.includes("node_modules") && // 排除依赖
+          !frame.includes("Error") && // 排除 Error 构造函数
+          frame.includes("http"); // 只保留用户代码（Vite 开发环境路径是 http 开头）
+      });
+
+      if (!targetFrame) return { file: "", line: "", column: "" };
+
+      // 正则解析栈帧：匹配 "at 函数名 (http://xxx/文件名:行号:列号)" 或 "at http://xxx/文件名:行号:列号"
+      const regex = /\((http.*?):(\d+):(\d+)\)$/;
+      const match = targetFrame.match(regex);
+
+      if (!match) return { file: "", line: "", column: "" };
+
+      // 提取文件名（从完整路径中截取最后一段，避免路径过长）
+      const fullPath = match[1];
+      const fileName = fullPath.split("/").pop(); // 取文件名（如 "RootApp.jsx"）
+
+      return {
+        file: fileName,
+        line: match[2], // 行号
+        column: match[3] // 列号
+      };
+    } catch (e) {
+      // 解析失败时返回空，避免影响日志核心逻辑
+      return { file: "", line: "", column: "" };
+    }
+  }
+
+  // 记录日志（核心修改：整合调用位置信息）
   log(level, message, data) {
     if (level < currentLogLevel) {
-      return
+      return;
     }
-    //具体日志结构
+
+    // 获取调用位置信息（文件名、行号、列号）
+    const { file, line, column } = this.getCallerInfo();
+
+    // 具体日志结构（新增 file、line、column 字段）
     const logEntry = {
-      //UTC时间
-      time: new Date().toISOString(),
+      time: new Date().toISOString(), // UTC时间
       level: Object.keys(LogLevel).find(key => LogLevel[key] === level),
       message,
       data,
-      url: window.location.href,
-      userAgent: navigator.userAgent,
+      url: typeof window !== "undefined" ? window.location.href : "",
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+      file, // 新增：文件名
+      line, // 新增：行号
+      column, // 新增：列号
       ...this.userContext,
       ...this.addContext
-    }
-    //开发环境直接输出控制台
-    if (import.meta.env.DEV) {
-      const method = level
-        === LogLevel.ERROR ? 'error' :
-        level === LogLevel.WARN ? 'warn' :
-          level === LogLevel.INFO ? 'info' : 'log'
+    };
 
-      console[method](`[${logEntry.level}] ${message}`, data)
+    // 开发环境直接输出控制台（显示文件位置）
+    if (import.meta.env.DEV) {
+      const method = level === LogLevel.ERROR ? "error" :
+        level === LogLevel.WARN ? "warn" :
+          level === LogLevel.INFO ? "info" : "log";
+
+      // 拼接文件位置：[文件名:行号:列号]
+      const locationStr = file ? `[${file}:${line}:${column}] ` : "";
+      console[method](`[${logEntry.level}] ${locationStr}${message}`, data);
     } else {
-      //生产环境添加到队列
-      this.queue.push(logEntry)
-      //队列满了立马发送
+      // 生产环境添加到队列（可选是否保留 file/line/column，这里注释掉避免暴露）
+      delete logEntry.file;
+      delete logEntry.line;
+      delete logEntry.column;
+      this.queue.push(logEntry);
+
+      // 队列满了立马发送
       if (this.queue.length >= this.maxLength) {
-        this.flush()
+        this.flush();
       }
     }
   }
+
   //发送日志
   async flush() {
     if (this.isSending || this.queue.length === 0) {

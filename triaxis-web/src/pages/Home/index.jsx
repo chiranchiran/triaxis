@@ -77,7 +77,7 @@ function Home() {
       <section className="max-w-7xl mx-auto py-20">
         {/* 功能模块 */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">核心功能</h2>
+          <h2 className="text-3xl font-bold  mb-4">核心功能</h2>
           <p className="text-xl text-secondary max-w-2xl mx-auto">为您提供全方位的专业支持</p>
         </div>
         <div className='flex flex-col gap-20'>
@@ -86,7 +86,7 @@ function Home() {
         </div>
         {/* 热点资讯 */}
         <div className="text-center mb-12 mt-20 news">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          <h2 className="text-3xl font-bold mb-4">
             <FireOutlined className="text-orange mr-3" />热点资讯</h2>
           <p className="text-xl text-secondary max-w-2xl mx-auto">了解行业内最新动态</p>
           <MyButton

@@ -17,11 +17,9 @@ function MyCarousel({ imgList, textList = null, path, description }) {
     left: '100px'
   };
 
-  const colorStyle = {
-    color: '#1a1b1cff'
-  };
+
   const Introduce = () => {
-    return <div className="w-full w-2/5 md:w-2/5 h-[500px] flex flex-col justify-center items-center p-8 md:p-12 bg-gray-50">
+    return <div className="w-full w-2/5 md:w-2/5 h-[500px] flex flex-col justify-center items-center p-8 md:p-12">
       <h3 className="text-2xl font-semibold text-secodary ">{description.title}</h3>
       <Divider className="bg-gray" />
       <p className="text-secondary mb-15 mt-1  leading-relaxed text-center">{description.introduce}</p>
@@ -43,10 +41,10 @@ function MyCarousel({ imgList, textList = null, path, description }) {
               <div key={index} style={{ backgroundSize: 'cover', backgroundImage: `url('${src}')` }}>
                 {textList &&
                   <Space vertical align='start' spacing='medium' style={titleStyle}>
-                    <Title heading={2} style={colorStyle}>{textList[index][0]}</Title>
+                    <Title heading={2} >{textList[index][0]}</Title>
                     <Space vertical align='start'>
-                      <Paragraph style={colorStyle}>{textList[index][1]}</Paragraph>
-                      <Paragraph style={colorStyle}>{textList[index][2]}</Paragraph>
+                      <Paragraph >{textList[index][1]}</Paragraph>
+                      <Paragraph >{textList[index][2]}</Paragraph>
                     </Space>
                   </Space>}
               </div>

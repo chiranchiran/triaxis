@@ -1,6 +1,12 @@
 // src/services/websocketService.js
 import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
+// @ts-ignore （仅消除编辑器警告，不影响 JS 运行）
+import SockJS from 'sockjs-client/dist/sockjs.min.js';
+// import SockJS from 'sockjs-client';
+import { ErrorFactory } from '../error/errorType';
+import { logger } from '../logger';
+import { store } from '../../store';
+import { refreshTokens } from '../../store/slices/authSlice';
 [
   '/user/queue/chat.new',
   '/user/queue/chat.sent',
@@ -17,6 +23,7 @@ class WebSocketService {
   constructor() {
     this.client = null;
     this.socket = null;
+    this.refreshing = null;
     // 当前连接状态，0 conneting，1open，2 closed
     this.status = 2;
     // 时间上的配置，定时器
@@ -135,8 +142,20 @@ class WebSocketService {
     onConnect && onConnect();
   }
   // stomp协议错误
-  handleStompError(frame, onError) {
+  async handleStompError(frame, onError) {
     console.error('STOMP协议错误:', frame.headers['message']);
+    this.status = 2;
+    onError && onError(new Error(frame.headers['message']));
+    if (errorMessage.includes('401') || errorMessage.includes('INVALID_TOKEN') || errorMessage.includes('token')) {
+      console.log('🔐 Token验证失败，需要重新登录');
+      // 可以在这里直接处理token错误
+      if (!this.refreshing) {
+        this.refreshing = store.dispatch(refreshTokens()).unwrap()
+      }
+      await refreshing
+      const { accessToken } = getLoginData();
+      this.scheduleReconnect();
+    }
     this.status = 2;
     onError && onError(new Error(frame.headers['message']));
   }
@@ -289,9 +308,22 @@ class WebSocketService {
           try {
             const parsedMessage = JSON.parse(message.body);
             console.log(`[${componentId}] 收到消息 [${path}]:`, parsedMessage);
-            callback(parsedMessage.data);
+            //处理业务错误，正确code为0
+            if (parsedMessage.code === 0) {
+              //成功
+              logger.debug("无业务错误")
+              callback?.onSuccess(parsedMessage.data);
+
+            } else {
+              const error = ErrorFactory.business(parsedMessage)
+              logger.error(parsedMessage?.message, error)
+              throw error
+            }
+
           } catch (error) {
             console.error(`[${componentId}] 解析消息错误:`, error, message.body);
+            callback?.onError(parsedMessage.data);
+
           }
         });
 

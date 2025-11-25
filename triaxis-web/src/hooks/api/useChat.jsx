@@ -60,7 +60,7 @@ export const useChat = (isCheck = false) => {
       console.error('聊天组件：WebSocket连接失败:', error);
       onError?.(error);
       dispatch(setWebsocketStatus(2))
-      messageApi.error('连接服务器失败，请检查网络');
+      // messageApi.error('连接服务器失败，请检查网络');
     };
 
     webSocketService.connect(successCallback, errorCallback);

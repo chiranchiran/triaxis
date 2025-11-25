@@ -4,6 +4,7 @@ import { logger } from '../logger.js';
 import { HashCalculator } from './hash-calculator.js';
 import { ChunkUploader } from './chunkUploader.js';
 import { NetworkMonitor } from './networkMonitor.js';
+import { converBytes } from '../convertUnit.js';
 /**
  * 单个文件上传任务管理器：处理文件上传全流程（哈希计算、秒传检查、分片上传、状态管理等）
  */
@@ -111,18 +112,20 @@ export class UploadTaskManager {
         this.emit('success', this.task);
         return;
       }
-      // 断点续传恢复
-      await this.restoreUploadedChunks(checkResult.uploadedChunks || []);
 
-      // 创建切片
-      this.createChunks();
-
+      logger.debug(`任务[${this.taskId}]文件大小是：${converBytes(this.task.file.size)}`);
       // 文件大小判断选择上传方式
       if (this.task.file.size <= this.smallFileThreshold) {
         // 小文件上传
         await this.uploadSmallFile();
       } else {
         // 分片上传
+        // 断点续传恢复
+        await this.restoreUploadedChunks(checkResult.uploadedChunks || []);
+        // 创建切片
+        if (this.task.chunks.length === 0) {
+          this.createChunks();
+        }
         await this.uploadLargeFile();
       }
 
@@ -155,10 +158,10 @@ export class UploadTaskManager {
 
   // 恢复上传，修改文件状态、更新数据库，重新判断文件大小开启上传任务，触发回调函数
   async resume() {
-    if (this.task.status !== 'paused') {
-      logger.warn(`任务[${this.taskId}]状态为${this.task.status}，无法恢复`);
-      return;
-    }
+    // if (this.task.status !== 'paused') {
+    //   logger.warn(`任务[${this.taskId}]状态为${this.task.status}，无法恢复`);
+    //   return;
+    // }
 
     this.isPaused = false;
     this.isCancelled = false;
@@ -198,7 +201,7 @@ export class UploadTaskManager {
       logger.warn(`任务[${this.taskId}]状态为${this.task.status}，无需取消`);
       return;
     }
-    this.cancelAllRequests();
+    // this.cancelAllRequests();
 
     this.isCancelled = true;
     this.isPaused = false;
@@ -235,12 +238,13 @@ export class UploadTaskManager {
   // 断点续传
   async restoreUploadedChunks(serverUploadedChunks) {
     // 优先从本地数据库恢复（更全），本地没有则用后端返回的
-    const localRecord = await db.getUploadRecord(this.taskId);
+    const localRecord = await db.getUploadedChunksById(this.taskId);
     if (localRecord && localRecord.uploadedChunks?.length) {
-      this.task.uploadedChunks = localRecord.uploadedChunks;
+      this.task.uploadedChunks = localRecord.uploadedChunks || [];
+      this.task.chunks = localRecord.chunks || [];
       logger.debug(`任务[${this.taskId}]从本地恢复已上传分片：${this.task.uploadedChunks.length}个`);
     } else {
-      this.task.uploadedChunks = serverUploadedChunks;
+      this.task.uploadedChunks = serverUploadedChunks || [];
       logger.debug(`任务[${this.taskId}]从后端恢复已上传分片：${this.task.uploadedChunks.length}个`);
     }
     await this.updateDatabase(); // 同步到数据库

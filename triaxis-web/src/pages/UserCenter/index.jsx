@@ -144,7 +144,9 @@ const UserCenter = () => {
     if (!userId) return;
     console.log('初始化聊天列表，用户ID:', userId);
     const id = subscribeMessageCount('messages', {
-      [SubscriptionTypes.MESSAGE_COUNT]: handleChats,
+      [SubscriptionTypes.MESSAGE_COUNT]: {
+        onSuccess: handleChats,
+      }
     })
     getMessagesCount(userId)
   }, [userId]);

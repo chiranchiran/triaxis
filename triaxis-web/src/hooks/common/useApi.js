@@ -140,55 +140,55 @@ export function useApi(apiFunc, {
 
   let isDuplicate = false;
   // 封装 API 调用，集成请求池
-  const wrappedApiFunc = async (variables) => {
-    const requestId = generateRequestId(variables); // 传入 variables
-    // 创建控制器
-    const controller = new AbortController();
+  // const wrappedApiFunc = async (variables) => {
+  //   const requestId = generateRequestId(variables); // 传入 variables
+  //   // 创建控制器
+  //   const controller = new AbortController();
 
-    // 添加到请求池：关键修正2：requestKey → requestId（之前拼写错误）
-    if (enableRequestPool) {
-      const added = httpPool.addRequest(requestId, controller);
-      isDuplicate = !added;
-    }
-    if (isDuplicate) {
-      const error = new Error('重复请求已取消');
-      error.isCanceled = true;
-      error.type = 'duplicate';
-      throw error;
-    }
-    try {
-      let result;
+  //   // 添加到请求池：关键修正2：requestKey → requestId（之前拼写错误）
+  //   if (enableRequestPool) {
+  //     const added = httpPool.addRequest(requestId, controller);
+  //     isDuplicate = !added;
+  //   }
+  //   if (isDuplicate) {
+  //     const error = new Error('重复请求已取消');
+  //     error.isCanceled = true;
+  //     error.type = 'duplicate';
+  //     throw error;
+  //   }
+  //   try {
+  //     let result;
 
-      if (isMutation) {
-        // Mutation: 调用 API 函数并传入变量
-        result = await apiFunc({
-          ...variables,
-          signal: controller.signal
-        });
-      } else {
-        // Query: 调用 API 函数并传入参数
-        result = await apiFunc({
-          ...params,
-          signal: controller.signal
-        });
-      }
+  //     if (isMutation) {
+  //       // Mutation: 调用 API 函数并传入变量
+  //       result = await apiFunc({
+  //         ...variables,
+  //         signal: controller.signal
+  //       });
+  //     } else {
+  //       // Query: 调用 API 函数并传入参数
+  //       result = await apiFunc({
+  //         ...params,
+  //         signal: controller.signal
+  //       });
+  //     }
 
-      return result;
-    } catch (error) {
-      // 捕获 AbortError（取消请求的错误），标记 isCanceled
-      if (error.name === 'AbortError' || error.isCanceled) {
-        error.isCanceled = true;
-        error.type = 'cancel';
-      }
-      error.requestId = requestId;
-      return Promise.reject(error) // 抛给 React Query 处理
-    } finally {
-      // 请求完成，从池中移除
-      if (enableRequestPool) {
-        httpPool.completeRequest(requestId);
-      }
-    }
-  };
+  //     return result;
+  //   } catch (error) {
+  //     // 捕获 AbortError（取消请求的错误），标记 isCanceled
+  //     if (error.name === 'AbortError' || error.isCanceled) {
+  //       error.isCanceled = true;
+  //       error.type = 'cancel';
+  //     }
+  //     error.requestId = requestId;
+  //     return Promise.reject(error) // 抛给 React Query 处理
+  //   } finally {
+  //     // 请求完成，从池中移除
+  //     if (enableRequestPool) {
+  //       httpPool.completeRequest(requestId);
+  //     }
+  //   }
+  // };
 
   // 处理成功回调
   const handleSuccess = (data, variables, context) => {
@@ -230,14 +230,14 @@ export function useApi(apiFunc, {
 
   // Mutation 配置
   const mutationConfig = {
-    mutationFn: wrappedApiFunc,
+    mutationFn: apiFunc,
     onSuccess: handleSuccess,
     onError: handleError
   };
   // Query 配置
   const queryConfig = {
     queryKey,
-    queryFn: wrappedApiFunc,
+    queryFn: apiFunc,
     enabled,
   };
 
@@ -259,17 +259,17 @@ export function useApi(apiFunc, {
       handleSuccess(requestResult.data);
     }
   }, [requestResult.isSuccess, requestResult.data]);
-  //卸载取消请求
-  useEffect(() => {
-    return () => {
-      // 从 requestResult 中拿 variables，生成对应的 requestId
-      const vars = isMutation ? requestResult.variables : params;
-      const requestId = generateRequestId(vars);
-      if (enableRequestPool && requestId) {
-        httpPool.cancelRequest(requestId);
-      }
-    };
-  }, [requestResult.variables, enableRequestPool, isMutation, params]);
+  // //卸载取消请求
+  // useEffect(() => {
+  //   return () => {
+  //     // 从 requestResult 中拿 variables，生成对应的 requestId
+  //     const vars = isMutation ? requestResult.variables : params;
+  //     const requestId = generateRequestId(vars);
+  //     if (enableRequestPool && requestId) {
+  //       httpPool.cancelRequest(requestId);
+  //     }
+  //   };
+  // }, [requestResult.variables, enableRequestPool, isMutation, params]);
   // 监听状态变化
   useEffect(() => {
     console.log('📊 Query 状态变化', {

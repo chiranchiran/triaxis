@@ -70,6 +70,9 @@ service.interceptors.response.use(
   async (error) => {
     logger.debug("请求错误进入响应拦截器", error)
     const originalRequest = error.config
+    // if (error.code === "ERR_CANCELED") {
+    //   return Promise.resolve();
+    // }
     //处理无响应
     if (!error.response) {
       logger.debug("处理无响应错误", error)
